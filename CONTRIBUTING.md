@@ -28,6 +28,8 @@ python3 scripts/make_models.py hardware/kaidi.3dshapes
 $KPY scripts/make_pcb.py hardware/kaidi-desk.kicad_sch hardware/kaidi-desk.kicad_pcb
 $KPY scripts/route_pcb.py hardware/kaidi-desk.kicad_pcb freerouting-2.5.0.jar "$(brew --prefix openjdk)/bin/java"
 python3 scripts/render_schematic.py
+uv run --no-project --python 3.12 --with build123d python scripts/make_enclosure.py hardware
+$KPY scripts/render_enclosure.py hardware docs
 ```
 
 ## Mandatory Pre-submission Checks

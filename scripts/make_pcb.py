@@ -66,7 +66,7 @@ def place(lib, name, ref, x, y, angle=0, value=None):
         fp.Reference().SetPosition(pcbnew.VECTOR2I(int(mid.x), int(mid.y)))
         fp.Reference().SetTextSize(mm(0.8, 0.8))
         fp.Reference().SetTextThickness(pcbnew.FromMM(0.12))
-    if ref.startswith("J"):
+    if ref.startswith("J") or ref == "C1":
         fp.Reference().SetVisible(False)
     if not ref:
         fp.SetBoardOnly(True)
@@ -132,27 +132,70 @@ for ref, x in (("J1", 103.5), ("J2", 120.0)):
 silk("KEYPAD", 109.2, bottom - 19.2, 1.4, bold=True)
 silk("DESK", 125.7, bottom - 19.2, 1.4, bold=True)
 
-fp = place(jack_lib, "ESP32-C3_SuperMini_Socket", "U1", X0 + W - 6.9, 104.0, angle=-90)
+U1_X, U1_Y = X0 + W - 6.9, 104.0
+fp = place(jack_lib, "ESP32-C3_SuperMini_Flush", "U1", U1_X, U1_Y, angle=-90)
 fp.Reference().SetVisible(False)
 model(fp, f"{models}/ESP32-C3_SuperMini.wrl")
 silk("USB-C", X0 + W - 4.0, 123.4, 1.0)
 
 dip = FP / "Package_DIP.pretty"
 place(dip, "DIP-14_W7.62mm_Socket", "U2", 139.0, 105.5, angle=-90)
-place(FP / "Capacitor_THT.pretty", "C_Disc_D3.0mm_W1.6mm_P2.50mm", "C1", 143.0, 109.5, angle=-90)
+cap = place(FP / "Capacitor_THT.pretty", "C_Disc_D3.0mm_W1.6mm_P2.50mm", "C1", 137.5, 116.0)
+for cap_pad in cap.Pads():
+    cap_pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
 
 res = FP / "Resistor_THT.pretty"
 axial = "R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
 for ref, x, y, a in (("R1", 103.5, 121.0, 0), ("R2", 120.0, 121.0, 0),
                      ("R3", 110.0, 103.5, 0), ("R4", 110.0, 107.0, 0), ("R5", 110.0, 110.5, 0), ("R6", 110.0, 114.0, 0),
-                     ("R7", 140.0, 123.5, -90), ("R8", 144.0, 123.5, -90), ("R9", 148.0, 123.5, -90), ("R10", 152.0, 123.5, -90)):
+                     ("R7", 140.0, 127.0, -90), ("R8", 144.0, 127.0, -90), ("R9", 148.0, 127.0, -90), ("R10", 152.0, 127.0, -90)):
     place(res, axial, ref, x, y, a)
 
 for x, y in ((X0 + 3.6, Y0 + 3.6), (X0 + W - 3.6, Y0 + H - 3.6)):
     place(FP / "MountingHole.pretty", "MountingHole_3.2mm_M3", "", x, y, value="M3")
 
-silk("esphome-kaidi-desk", 140.0, 136.0, 1.6, bold=True, left=True)
-silk("Kaidi KDDY094 dongle  rev 5", 140.0, 138.5, 1.0, left=True)
+silk("esphome-kaidi-desk", 140.0, 137.8, 1.6, bold=True, left=True)
+silk("Kaidi KDDY094 dongle  rev 5", 140.0, 140.3, 1.0, left=True)
+
+def u1_point(lx, ly):
+    return U1_X - ly, U1_Y + lx
+
+
+def polygon(zone, points):
+    outline = zone.Outline()
+    outline.NewOutline()
+    for x, y in points:
+        outline.Append(pcbnew.FromMM(x), pcbnew.FromMM(y))
+
+
+ANTENNA = (-3.4, 13.9, 18.64, 23.0)
+SLOT = (1.9, 13.6, 13.34, 21.0)
+ax1, ay1, ax2, ay2 = ANTENNA
+keepout = pcbnew.ZONE(board)
+keepout.SetIsRuleArea(True)
+layers = pcbnew.LSET()
+layers.AddLayer(pcbnew.F_Cu)
+layers.AddLayer(pcbnew.B_Cu)
+keepout.SetLayerSet(layers)
+keepout.SetDoNotAllowTracks(True)
+keepout.SetDoNotAllowVias(True)
+keepout.SetDoNotAllowZoneFills(True)
+keepout.SetDoNotAllowPads(False)
+keepout.SetDoNotAllowFootprints(False)
+keepout.SetZoneName("ANTENNA_KEEPOUT")
+polygon(keepout, [u1_point(x, y) for x, y in ((ax1, ay1), (ax2, ay1), (ax2, ay2), (ax1, ay2))])
+board.Add(keepout)
+sx1, sy1, sx2, sy2 = SLOT
+corners = [u1_point(x, y) for x, y in ((sx1, sy1), (sx2, sy1), (sx2, sy2), (sx1, sy2))]
+for (cx1, cy1), (cx2, cy2) in zip(corners, corners[1:] + corners[:1]):
+    s = pcbnew.PCB_SHAPE(board)
+    s.SetShape(pcbnew.SHAPE_T_SEGMENT)
+    s.SetStart(mm(cx1, cy1))
+    s.SetEnd(mm(cx2, cy2))
+    s.SetLayer(pcbnew.Edge_Cuts)
+    s.SetWidth(pcbnew.FromMM(0.1))
+    board.Add(s)
+silk("antenna keep-out", (corners[0][0] + corners[2][0]) / 2, 122.0, 0.9)
 
 for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
     z = pcbnew.ZONE(board)
@@ -172,4 +215,14 @@ missing = sorted({f"{r}.{p}" for (r, p) in pad_net} - {f"{fp.GetReference()}.{pa
 assert not missing, f"netlist pads with no footprint pad: {missing}"
 pcbnew.ZONE_FILLER(board).Fill(board.Zones())
 board.Save(str(OUT))
+
+geometry = {
+    "board": {"x": X0, "y": Y0, "w": W, "h": H, "radius": RADIUS, "thickness": 1.6},
+    "mounting_holes": [[X0 + 3.6, Y0 + 3.6], [X0 + W - 3.6, Y0 + H - 3.6]],
+    "jacks": [{"ref": ref, "x1": x - 1.935, "x2": x + 13.365, "front_y": Y0 + H, "height": 13.0} for ref, x in (("J1", 103.5), ("J2", 120.0))],
+    "usb": {"edge_x": X0 + W, "center_y": U1_Y + 7.62, "z": 0.2 + 1.0 + 1.6, "width": 9.0, "height": 3.2},
+    "antenna": [list(u1_point(x, y)) for x, y in ((ax1, ay1), (ax2, ay2))],
+    "tallest": 13.0,
+}
+(OUT.parent / "board.json").write_text(__import__("json").dumps(geometry, indent=2) + "\n")
 print("placed", len(board.GetFootprints()), "footprints,", len(nets), "nets")

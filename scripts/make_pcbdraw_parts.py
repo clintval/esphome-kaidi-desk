@@ -63,8 +63,6 @@ defs = (lin("pcb", [(0, "#2a5bd7"), (0.5, "#1c45b0"), (1, "#122f7a")], 1, 1) + G
         + lin("socket", [(0, "#2d2f33"), (1, "#0f1012")], 1, 0))
 mx1, mx2, my1, my2 = -1.4, 16.64, -3.6, 18.9
 body = ""
-for x in (0.0, 15.24):
-    body += rect(x - 1.27, -1.27, 2.54, 20.32, "url(#socket)", 0.3, "#000", 0.1)
 body += rect(mx1 + 0.8, my1 + 0.9, mx2 - mx1, my2 - my1, "#000", 1.0, extra=SHADOW)
 body += rect(mx1, my1, mx2 - mx1, my2 - my1, "url(#pcb)", 1.0, "#0b1d4d", 0.15)
 for i in range(8):
@@ -92,7 +90,7 @@ body += text(10.44, 3.9, "RST", 0.7, "#e8eef8")
 for x, y in ((11.2, 6.0), (11.2, 7.4), (3.2, 11.2), (11.6, 11.6)):
     body += rect(x, y, 1.0, 0.55, "#c9a36a", 0.1)
 body += rect(3.2, 6.2, 0.9, 0.6, "#ff4d4d", 0.15)
-svg(OUT / "kaidi/ESP32-C3_SuperMini_Socket.svg", (mx1 - 0.5, -7.4, mx2 - mx1 + 1.8, my2 + 9.2), defs, body)
+svg(OUT / "kaidi/ESP32-C3_SuperMini_Flush.svg", (mx1 - 0.5, -7.4, mx2 - mx1 + 1.8, my2 + 9.2), defs, body)
 
 # 74AHCT125 in a DIP-14 socket, pin 1 at the origin, pins down the -x side.
 defs = (lin("sock", [(0, "#2b2d31"), (1, "#121315")], 1, 0) + lin("ic", [(0, "#45474c"), (0.15, "#2a2b2f"), (1, "#141517")], 1, 1)

@@ -67,10 +67,11 @@ for i in range(8):
 w0, w1 = -1.38, 15.24 + 1.38
 h0, h1 = -4.3, 7 * 2.54 + 1.4
 body = (text("Reference", "U**", 7.62, h1 + 2, "F.SilkS") + text("Value", "ESP32-C3_SuperMini", 7.62, 8.9, "F.Fab")
-        + pins + rect(w0, h0, w1, h1, "F.SilkS", 0.12) + rect(w0, h0, w1, h1, "F.Fab", 0.1)
+        + pins + line(w0, h0, w1, h0, "F.SilkS", 0.12) + line(w0, h0, w0, 12.0, "F.SilkS", 0.12)
+        + line(w1, h0, w1, 12.0, "F.SilkS", 0.12) + rect(w0, h0, w1, h1, "F.Fab", 0.1)
         + line(4.12, h0, 4.12, h0 - 1.6, "F.SilkS", 0.12) + line(11.12, h0, 11.12, h0 - 1.6, "F.SilkS", 0.12)
         + rect(w0 - 0.5, h0 - 0.5, w1 + 0.5, h1 + 0.5, "F.CrtYd", 0.05))
-open(f"{LIB}/ESP32-C3_SuperMini_Socket.kicad_mod", "w").write(
-    footprint("ESP32-C3_SuperMini_Socket",
-              "Two 1x08 2.54 mm female headers 15.24 mm apart for an ESP32-C3 SuperMini, USB-C toward -Y; pins 1-8 5V GND 3V3 4 3 2 1 0, pins 9-16 GPIO5 6 7 8 9 10 20 21",
+open(f"{LIB}/ESP32-C3_SuperMini_Flush.kicad_mod", "w").write(
+    footprint("ESP32-C3_SuperMini_Flush",
+              "ESP32-C3 SuperMini soldered flat to the board on header pins with the plastic spacers removed, component side up, USB-C toward -Y; pins 1-8 5V GND 3V3 4 3 2 1 0, pins 9-16 GPIO5 6 7 8 9 10 20 21",
               body))
