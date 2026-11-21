@@ -4,6 +4,7 @@ from esphome.components import number
 from esphome.const import (
     CONF_MAX_VALUE,
     CONF_MIN_VALUE,
+    CONF_MODE,
     CONF_STEP,
     CONF_UNIT_OF_MEASUREMENT,
 )
@@ -27,6 +28,8 @@ def _defaults(config):
     config.setdefault(CONF_MIN_VALUE, 0.0)
     config.setdefault(CONF_MAX_VALUE, DEFAULT_MAX[unit])
     config.setdefault(CONF_STEP, 0.1)
+    if str(config.get(CONF_MODE, "AUTO")).upper() == "AUTO":
+        config[CONF_MODE] = cv.enum(number.NUMBER_MODES, upper=True)("SLIDER")
     return config
 
 
