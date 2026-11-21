@@ -99,7 +99,8 @@ A 74AHCT125 drives the box only while the ESP is sending, so the keypad keeps wo
 | 10 | Wake, keypad to box | Keypad through 1 kΩ; gate B drives the box side high when GPIO10 is high |
 
 The board is an 84 × 40 mm, two-layer, all through-hole KiCad design in [`hardware/`](hardware).
-Solder the ESP32-C3 SuperMini flat on its header pins with the plastic spacers removed, and power it from its own USB-C port; the desk's 5 V can't supply its Wi-Fi current.
+The ESP32-C3 SuperMini plugs into two round-pin socket strips, so it can be pulled out, and runs from its own USB-C port; the desk's 5 V can't supply its Wi-Fi current.
+To solder the C3 flat instead, set `C3_BOTTOM = 0.2` in [`scripts/dimensions.py`](scripts/dimensions.py) and run `pixi run hardware` so the box's USB-C opening drops to match.
 
 ## Enclosure
 
@@ -122,7 +123,9 @@ Print it in MJF nylon or, at home, PETG; resin tends to crack around the inserts
 | 2 | Amphenol/FCI 54602-910LF, 10P10C right-angle jack (J1, J2) | [DigiKey](https://www.digikey.com/en/products/detail/amphenol-cs-fci/54602-910LF/1001361) |
 | 1 | SN74AHCT125N quad buffer, DIP-14 (U2) | [DigiKey](https://www.digikey.com/en/products/result?keywords=SN74AHCT125N) |
 | 1 | DIP-14 socket, 0.3 in (optional) | [DigiKey](https://www.digikey.com/en/products/result?keywords=DIP-14%20socket%200.3) |
-| 1 | ESP32-C3 SuperMini with header pins (U1) | [Amazon](https://www.amazon.com/s?k=ESP32-C3+SuperMini) or [AliExpress](https://www.aliexpress.us/w/wholesale-esp32-c3-supermini.html) |
+| 1 | ESP32-C3 SuperMini (U1) | [Amazon](https://www.amazon.com/s?k=ESP32-C3+SuperMini) or [AliExpress](https://www.aliexpress.us/w/wholesale-esp32-c3-supermini.html) |
+| 2 | Mill-Max 310-43-108-41-001000, 8-pin round socket strip (U1) | [DigiKey ED6264-08-ND](https://www.digikey.com/en/products/result?keywords=310-43-108-41-001000) |
+| 2 | Mill-Max 350-10-108-00-006000, 8-pin round male strip, soldered to the C3 (U1) | [DigiKey ED6864-08-ND](https://www.digikey.com/en/products/result?keywords=350-10-108-00-006000) |
 | 2 | 1 kΩ, 1/4 W (R1, R2) | [DigiKey CF14JT1K00](https://www.digikey.com/en/products/result?keywords=CF14JT1K00) |
 | 4 | 10 kΩ, 1/4 W (R3, R4, R7, R9) | [DigiKey CF14JT10K0](https://www.digikey.com/en/products/result?keywords=CF14JT10K0) |
 | 2 | 100 kΩ, 1/4 W (R5, R6) | [DigiKey CF14JT100K](https://www.digikey.com/en/products/result?keywords=CF14JT100K) |

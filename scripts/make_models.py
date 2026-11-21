@@ -7,6 +7,8 @@ KiCad's VRML units (2.54 mm, y flipped). Run with: python3 scripts/make_models.p
 import sys
 from pathlib import Path
 
+from dimensions import C3_BOTTOM, C3_THICKNESS, SOCKET_STRIP
+
 OUT = Path(sys.argv[1])
 OUT.mkdir(parents=True, exist_ok=True)
 U = 2.54
@@ -39,17 +41,27 @@ for n in range(10):
     jack.append(box(x - 0.2, 10.5, 8.6, x + 0.2, 13.9, 9.4, GOLD, 0.6))
 write("RJ50_Amphenol_54602-910_Horizontal.wrl", jack)
 
-z0 = 0.2
+z0, z1 = C3_BOTTOM, C3_BOTTOM + C3_THICKNESS
 blue = (0.05, 0.12, 0.28)
-module = [box(-1.38, -3.6, z0, 16.62, 18.92, z0 + 1.0, blue, 0.3)]
-module.append(box(3.12, -6.9, z0 + 1.0, 12.12, 0.4, z0 + 4.2, SILVER, 0.8))
-module.append(box(5.12, 6.0, z0 + 1.0, 10.12, 11.0, z0 + 1.9, BLACK, 0.3))
-module.append(box(4.62, 14.4, z0 + 1.0, 10.62, 17.4, z0 + 2.2, (0.92, 0.9, 0.86), 0.2))
+module = [box(-1.38, -3.6, z0, 16.62, 18.92, z1, blue, 0.3)]
+module.append(box(3.12, -6.9, z1, 12.12, 0.4, z1 + 3.2, SILVER, 0.8))
+module.append(box(5.12, 6.0, z1, 10.12, 11.0, z1 + 0.9, BLACK, 0.3))
+module.append(box(4.62, 14.4, z1, 10.62, 17.4, z1 + 1.2, (0.92, 0.9, 0.86), 0.2))
 for x in (1.2, 12.4):
-    module.append(box(x, 1.4, z0 + 1.0, x + 2.6, 4.2, z0 + 2.4, (0.7, 0.7, 0.7), 0.4))
-    module.append(box(x + 0.6, 2.0, z0 + 2.4, x + 2.0, 3.6, z0 + 2.9, BLACK, 0.2))
+    module.append(box(x, 1.4, z1, x + 2.6, 4.2, z1 + 1.4, (0.7, 0.7, 0.7), 0.4))
+    module.append(box(x + 0.6, 2.0, z1 + 1.4, x + 2.0, 3.6, z1 + 1.9, BLACK, 0.2))
+socketed = C3_BOTTOM > SOCKET_STRIP
 for x in (0.0, 15.24):
+    if socketed:
+        module.append(box(x - 1.27, -1.27, 0.0, x + 1.27, 19.05, SOCKET_STRIP, BLACK, 0.15))
+        module.append(box(x - 1.2, -1.2, SOCKET_STRIP, x + 1.2, 18.98, z0, BLACK, 0.15))
     for i in range(8):
-        module.append(box(x - 0.32, i * 2.54 - 0.32, 0.0, x + 0.32, i * 2.54 + 0.32, z0 + 1.8, GOLD, 0.6))
-        module.append(box(x - 0.75, i * 2.54 - 0.75, z0 + 1.0, x + 0.75, i * 2.54 + 0.75, z0 + 1.25, GOLD, 0.7))
+        if socketed:
+            module.append(
+                box(x - 0.45, i * 2.54 - 0.45, SOCKET_STRIP, x + 0.45, i * 2.54 + 0.45, SOCKET_STRIP + 0.01, GOLD, 0.6)
+            )
+        module.append(
+            box(x - 0.25, i * 2.54 - 0.25, z0 if socketed else 0.0, x + 0.25, i * 2.54 + 0.25, z1 + 0.8, GOLD, 0.6)
+        )
+        module.append(box(x - 0.75, i * 2.54 - 0.75, z1, x + 0.75, i * 2.54 + 0.75, z1 + 0.25, GOLD, 0.7))
 write("ESP32-C3_SuperMini.wrl", module)

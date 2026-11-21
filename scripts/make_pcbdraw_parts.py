@@ -101,7 +101,7 @@ body += text(10.44, 3.9, "RST", 0.7, "#e8eef8")
 for x, y in ((11.2, 6.0), (11.2, 7.4), (3.2, 11.2), (11.6, 11.6)):
     body += rect(x, y, 1.0, 0.55, "#c9a36a", 0.1)
 body += rect(3.2, 6.2, 0.9, 0.6, "#ff4d4d", 0.15)
-svg(OUT / "kaidi/ESP32-C3_SuperMini_Flush.svg", (mx1 - 0.5, -7.4, mx2 - mx1 + 1.8, my2 + 9.2), defs, body)
+svg(OUT / "kaidi/ESP32-C3_SuperMini.svg", (mx1 - 0.5, -7.4, mx2 - mx1 + 1.8, my2 + 9.2), defs, body)
 
 # 74AHCT125 in a DIP-14 socket, pin 1 at the origin, pins down the -x side.
 defs = (

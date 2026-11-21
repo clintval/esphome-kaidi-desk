@@ -103,10 +103,10 @@ body = (
     + line(11.12, h0, 11.12, h0 - 1.6, "F.SilkS", 0.12)
     + rect(w0 - 0.5, h0 - 0.5, w1 + 0.5, h1 + 0.5, "F.CrtYd", 0.05)
 )
-Path(f"{LIB}/ESP32-C3_SuperMini_Flush.kicad_mod").write_text(
+Path(f"{LIB}/ESP32-C3_SuperMini.kicad_mod").write_text(
     footprint(
-        "ESP32-C3_SuperMini_Flush",
-        "ESP32-C3 SuperMini soldered flat to the board on header pins with the plastic spacers removed, component side up, USB-C toward -Y; pins 1-8 5V GND 3V3 4 3 2 1 0, pins 9-16 GPIO5 6 7 8 9 10 20 21",
+        "ESP32-C3_SuperMini",
+        "ESP32-C3 SuperMini plugged into two 1x8 round-pin socket strips, component side up, USB-C toward -Y; pins 1-8 5V GND 3V3 4 3 2 1 0, pins 9-16 GPIO5 6 7 8 9 10 20 21",
         body,
     )
 )

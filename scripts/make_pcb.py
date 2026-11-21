@@ -14,6 +14,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pcbnew
+from dimensions import C3_BOTTOM, C3_THICKNESS
 
 FP = Path(os.environ.get("KICAD_SHARE", "/Applications/KiCad/KiCad.app/Contents/SharedSupport")) / "footprints"
 CLI = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli")
@@ -146,7 +147,7 @@ silk("KEYPAD", X0 + 8.9, YC - 9.6, 1.4, bold=True)
 silk("DESK", X0 + W - 8.9, YC - 9.6, 1.4, bold=True)
 
 U1_X, U1_Y = X0 + W / 2 - 7.62, Y0 + 6.9
-fp = place(jack_lib, "ESP32-C3_SuperMini_Flush", "U1", U1_X, U1_Y, angle=0)
+fp = place(jack_lib, "ESP32-C3_SuperMini", "U1", U1_X, U1_Y, angle=0)
 fp.Reference().SetVisible(False)
 model(fp, f"{models}/ESP32-C3_SuperMini.wrl")
 
@@ -271,7 +272,7 @@ geometry = {
     "jacks": [
         {"ref": ref, "side": side, "y1": YC - 7.65, "y2": YC + 7.65, "height": 13.0} for ref, _, _, _, side in JACKS
     ],
-    "usb": {"side": "top", "center_x": U1_X + 7.62, "z": 0.2 + 1.0 + 1.6, "width": 9.0, "height": 3.2},
+    "usb": {"side": "top", "center_x": U1_X + 7.62, "z": C3_BOTTOM + C3_THICKNESS + 1.6, "width": 9.0, "height": 3.2},
     "antenna": [list(u1_point(x, y)) for x, y in ((ax1, ay1), (ax2, ay2))],
     "tallest": 13.0,
 }

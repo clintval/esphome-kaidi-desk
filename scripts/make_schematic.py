@@ -95,7 +95,7 @@ FOOTPRINTS = {
     "R": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal",
     "C": "Capacitor_THT:C_Disc_D3.0mm_W1.6mm_P2.50mm",
     "U2": "Package_DIP:DIP-14_W7.62mm_Socket",
-    "U1": "kaidi:ESP32-C3_SuperMini_Flush",
+    "U1": "kaidi:ESP32-C3_SuperMini",
     "J": "kaidi:RJ50_Amphenol_54602-910_Horizontal",
 }
 
