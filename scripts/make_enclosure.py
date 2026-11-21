@@ -2,10 +2,10 @@
 
 The base holds the board on four posts (two with M3 heat-set inserts) and has openings for the keypad
 jack on one end, the desk jack on the other and the USB-C port on the top side. The lid screws down
-through two bosses that clamp the board, and two chevrons engraved in it point from the keypad end to
-the desk end. Nothing metal sits near the C3's antenna: the screws are at the far corners. Models are
-written in KiCad's 3D frame (origin at the board's top-left, Y up, Z = 0 on the board's top face) so
-they drop straight into KiCad renders.
+through two bosses that clamp the board and is engraved KEYPAD and DESK at the matching ends, with
+chevrons between them. Nothing metal sits near the C3's antenna: the screws are at the far corners.
+Models are written in KiCad's 3D frame (origin at the board's top-left, Y up, Z = 0 on the board's
+top face) so they drop straight into KiCad renders.
 
 Run with: python scripts/make_enclosure.py hardware
 """
@@ -20,12 +20,14 @@ from build123d import (
     BuildPart,
     BuildSketch,
     Cylinder,
+    FontStyle,
     Location,
     Locations,
     Mode,
     Plane,
     Polygon,
     RectangleRounded,
+    Text,
     export_step,
     export_stl,
     extrude,
@@ -41,7 +43,8 @@ INSERT_HOLE, INSERT_LENGTH = 4.0, 5.7
 SCREW_CLEARANCE, HEAD_DIAMETER, HEAD_HEIGHT, SCREW_LENGTH = 3.4, 5.5, 3.0, 20.0
 BOSS = 3.8
 TOP = geo["tallest"] + 1.0
-CHEVRON_INSET = 12.0
+CHEVRONS = (W / 2 - 9.0, W / 2 + 9.0)
+LABEL_INSET, LABEL_SIZE = 12.0, 5.5
 Z_FLOOR = -(T + STANDOFF + FLOOR)
 IW, IH = W + 2 * GAP, H + 2 * GAP
 OW, OH = IW + 2 * WALL, IH + 2 * WALL
@@ -102,8 +105,13 @@ with BuildPart() as lid:
                 align=(Align.CENTER, Align.CENTER, Align.MAX),
                 mode=Mode.SUBTRACT,
             )
-    with BuildSketch(Plane.XY.offset(TOP + LID - 1.0)), Locations((CHEVRON_INSET, CY), (W - CHEVRON_INSET, CY)):
-        Polygon((-6.0, 8.0), (-1.0, 8.0), (7.0, 0.0), (-1.0, -8.0), (-6.0, -8.0), (2.0, 0.0))
+    with BuildSketch(Plane.XY.offset(TOP + LID - 1.0)):
+        with Locations(*[(x, CY) for x in CHEVRONS]):
+            Polygon((-6.0, 8.0), (-1.0, 8.0), (7.0, 0.0), (-1.0, -8.0), (-6.0, -8.0), (2.0, 0.0))
+        with Locations((LABEL_INSET, CY)):
+            Text("KEYPAD", LABEL_SIZE, font_style=FontStyle.BOLD)
+        with Locations((W - LABEL_INSET, CY)):
+            Text("DESK", LABEL_SIZE, font_style=FontStyle.BOLD)
     extrude(amount=1.0, mode=Mode.SUBTRACT)
 
 out = HW / "enclosure"
