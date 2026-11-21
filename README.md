@@ -6,7 +6,9 @@
 
 Control a Kaidi standing desk from Home Assistant with an ESP32 and ESPHome.
 
-![Illustration of the dongle PCB](docs/board.svg)
+<p align="center">
+  <img src="docs/board.svg" width="100%" alt="Illustration of the dongle PCB">
+</p>
 
 ## Introduction
 
@@ -74,7 +76,9 @@ Dividers bring the box's 5 V height stream and the keypad's command line down to
   <img src="docs/board.svg" width="49%" alt="The fully assembled dongle PCB">
 </p>
 
-![Schematic](docs/schematic.svg)
+<p align="center">
+  <img src="docs/schematic.svg" width="100%" alt="Schematic">
+</p>
 
 | RJ50 contact | Signal | Path |
 | --- | --- | --- |
@@ -88,14 +92,18 @@ The board is a 72 × 46 mm two-layer KiCad design in [`hardware/`](hardware), wi
 Upload [`hardware/kaidi-desk-gerbers.zip`](hardware/kaidi-desk-gerbers.zip) to a board house such as JLCPCB to order it.
 The jack footprint follows FCI drawing C-BMJ-0101 rev F; confirm pin 1 against your jacks before ordering.
 
-![3D render of the dongle PCB](docs/board-3d.png)
+<p align="center">
+  <img src="docs/board-3d.png" width="100%" alt="3D render of the dongle PCB">
+</p>
 
 ## Build Without a PCB
 
 Rev 4 is the same inline, fail-safe circuit hand-built on a 1.5 × 2 in EPLZON solderable breadboard, with a Bipom BRK10P10CSJ breakout for the keypad and a cut 10P10C cable to the desk.
 Every part, jumper and wire has a named hole, and [`scripts/protoboard.py`](scripts/protoboard.py) checks the layout's connections against the circuit.
 
-![Rev 4 protoboard build guide](docs/protoboard.svg)
+<p align="center">
+  <img src="docs/protoboard.svg" width="100%" alt="Rev 4 protoboard build guide">
+</p>
 
 On this build, configure `tx_enable_pin: GPIO6`, `wake_pin: GPIO0` and `rx_pin: GPIO3`, and leave out `keypad_sense_pin`.
 
