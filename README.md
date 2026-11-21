@@ -111,7 +111,7 @@ A two-part, 89 × 45 × 24 mm box is in [`hardware/enclosure/`](hardware/enclosu
   <img src="docs/enclosure-usb.png" width="49%" alt="The closed box from the USB-C side">
 </p>
 
-Press the two heat-set inserts into the base with a soldering iron at about 220 °C, set the board on its posts, and screw the lid down with two M3 × 20 mm button heads.
+Press the two heat-set inserts into the base with a soldering iron at about 220 °C, set the board on its posts, and screw the lid down with two M3 × 20 mm socket-head cap screws, which sit flush in the lid.
 Print it in MJF nylon or, at home, PETG; resin tends to crack around the inserts.
 
 ## Bill of Materials
@@ -132,7 +132,7 @@ Print it in MJF nylon or, at home, PETG; resin tends to crack around the inserts
 | 2 | 15 kΩ, 1/4 W (R8, R10) | [DigiKey CF14JT15K0](https://www.digikey.com/en/products/result?keywords=CF14JT15K0) |
 | 1 | 100 nF ceramic, 2.5 mm lead pitch (C1) | [DigiKey](https://www.digikey.com/en/products/result?keywords=100nF%2050V%20ceramic%20radial%202.5mm) |
 | 1 | RJ50 (10P10C) cable, about 1 ft, wired straight through, dongle to control box | [Winford CBM10R1TS-1](https://www.winford.com/products/cbm10.php) (US) or [Delock 80185](https://www.delock.com/produkt/80185/merkmale.html) (EU) |
-| 2 | M3 × 20 mm button-head screw, ISO 7380 | [Amazon](https://www.amazon.com/s?k=M3x20+button+head+screw+ISO+7380) |
+| 2 | M3 × 20 mm socket-head cap screw, ISO 4762 | [Amazon](https://www.amazon.com/s?k=M3x20+socket+head+cap+screw+ISO+4762+stainless) |
 | 2 | M3 heat-set insert, 5.7 mm long, 4.0 mm hole (ruthex M3) | [Amazon](https://www.amazon.com/s?k=ruthex+M3+heat+set+inserts) |
 
 The cable must be wired straight through; flat telephone-style 10P10C cables are often reversed.

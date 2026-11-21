@@ -38,7 +38,8 @@ X0, Y0, W, H, R, T = b["x"], b["y"], b["w"], b["h"], b["radius"], b["thickness"]
 
 GAP, WALL, FLOOR, STANDOFF, LID = 0.5, 2.2, 2.0, 4.0, 2.0
 INSERT_HOLE, INSERT_LENGTH = 4.0, 5.7
-SCREW_CLEARANCE, HEAD_DIAMETER, HEAD_HEIGHT, SCREW_LENGTH = 3.4, 5.7, 1.65, 20.0
+SCREW_CLEARANCE, HEAD_DIAMETER, HEAD_HEIGHT, SCREW_LENGTH = 3.4, 5.5, 3.0, 20.0
+BOSS = 3.8
 TOP = geo["tallest"] + 1.0
 CHEVRON_INSET = 12.0
 Z_FLOOR = -(T + STANDOFF + FLOOR)
@@ -98,7 +99,7 @@ with BuildPart() as lid:
     extrude(amount=LID)
     for x, y in holes:
         with Locations(Location((x, y, TOP))):
-            Cylinder(3.25, TOP - 0.2, align=(Align.CENTER, Align.CENTER, Align.MAX))
+            Cylinder(BOSS, TOP - 0.2, align=(Align.CENTER, Align.CENTER, Align.MAX))
         with Locations(Location((x, y, TOP + LID))):
             Cylinder(SCREW_CLEARANCE / 2, TOP + LID, align=(Align.CENTER, Align.CENTER, Align.MAX), mode=Mode.SUBTRACT)
             Cylinder(
@@ -121,6 +122,6 @@ tip = seat - SCREW_LENGTH
 engagement = -T - tip
 assert INSERT_LENGTH <= STANDOFF + FLOOR, "the insert must fit inside its post"
 assert 3.0 <= engagement <= INSERT_LENGTH, f"an M3 x {SCREW_LENGTH:g} screw engages {engagement:.1f} mm of the insert"
-print(f"M3 x {SCREW_LENGTH:g} mm button-head screws engage {engagement:.1f} mm of the {INSERT_LENGTH} mm inserts")
+print(f"M3 x {SCREW_LENGTH:g} mm socket-head cap screws engage {engagement:.1f} mm of the {INSERT_LENGTH} mm inserts")
 size = base.part.bounding_box().size
 print(f"base {size.X:.1f} x {size.Y:.1f} x {size.Z + LID:.1f} mm overall, inner height above the board {TOP:.1f} mm")
