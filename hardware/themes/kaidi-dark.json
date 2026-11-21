@@ -1,0 +1,33 @@
+{
+  "meta": {"name": "kaidi-dark", "version": 5},
+  "schematic": {
+    "background": "rgb(13, 17, 23)",
+    "worksheet": "rgb(48, 54, 61)",
+    "wire": "rgb(46, 204, 113)",
+    "bus": "rgb(88, 166, 255)",
+    "junction": "rgb(46, 204, 113)",
+    "no_connect": "rgb(110, 118, 129)",
+    "component_outline": "rgb(88, 166, 255)",
+    "component_body": "rgb(22, 27, 34)",
+    "pin": "rgb(255, 166, 87)",
+    "pin_name": "rgb(201, 209, 217)",
+    "pin_number": "rgb(139, 148, 158)",
+    "reference": "rgb(210, 168, 255)",
+    "value": "rgb(139, 148, 158)",
+    "fields": "rgb(139, 148, 158)",
+    "label_local": "rgb(121, 192, 255)",
+    "label_global": "rgb(121, 192, 255)",
+    "label_hier": "rgb(121, 192, 255)",
+    "netclass_flag": "rgb(121, 192, 255)",
+    "note": "rgb(240, 246, 252)",
+    "note_background": "rgba(0, 0, 0, 0.000)",
+    "power": "rgb(255, 123, 114)",
+    "hidden": "rgb(72, 79, 88)",
+    "shadow": "rgba(88, 166, 255, 0.300)",
+    "sheet": "rgb(88, 166, 255)",
+    "sheet_background": "rgb(22, 27, 34)",
+    "grid": "rgb(33, 38, 45)",
+    "anchor": "rgb(88, 166, 255)",
+    "brightened": "rgb(255, 255, 255)"
+  }
+}
