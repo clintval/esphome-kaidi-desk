@@ -69,6 +69,11 @@ The keypad's command and wake lines reach the box through 1 kΩ resistors, and a
 Its two spare gates hold the driving gates off unless the ESP raises GPIO6 or GPIO10, so the keypad keeps working when the ESP is unplugged, rebooting or dead.
 Dividers bring the box's 5 V height stream and the keypad's command line down to about 3.1 V for GPIO4 and GPIO3, so a keypad press hands the desk straight back to you.
 
+<p align="center">
+  <img src="docs/board-resistors.svg" width="49%" alt="The dongle PCB with only its resistors fitted">
+  <img src="docs/board.svg" width="49%" alt="The fully assembled dongle PCB">
+</p>
+
 ![Schematic](docs/schematic.svg)
 
 | RJ50 contact | Signal | Path |
