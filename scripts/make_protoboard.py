@@ -7,6 +7,8 @@ below the center gap and F-J above it. Run with KiCad's Python:
         scripts/make_protoboard.py hardware/proto
 """
 
+import itertools
+import os
 import sys
 import uuid
 from pathlib import Path
@@ -21,7 +23,7 @@ LIB = OUT / "proto.pretty"
 ART = OUT / "art/proto"
 LIB.mkdir(parents=True, exist_ok=True)
 ART.mkdir(parents=True, exist_ok=True)
-KICAD_FP = Path("/Applications/KiCad/KiCad.app/Contents/SharedSupport/footprints")
+KICAD_FP = Path(os.environ.get("KICAD_SHARE", "/Applications/KiCad/KiCad.app/Contents/SharedSupport")) / "footprints"
 P = 2.54
 BX, BY, BW, BH = 100.0, 100.0, 50.8, 38.1
 
@@ -33,8 +35,11 @@ def hole(name):
     return round(x, 3), round(y, 3)
 
 
+IDS = itertools.count()
+
+
 def u():
-    return str(uuid.uuid4())
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"kaidi-desk/protoboard/{next(IDS)}"))
 
 
 def pad(num, x, y, size=1.6, drill=0.9, shape="circle"):

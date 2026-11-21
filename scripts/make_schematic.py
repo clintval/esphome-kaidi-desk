@@ -3,17 +3,22 @@
 Run with: python3 scripts/make_schematic.py hardware/kaidi-desk.kicad_sch
 """
 
+import itertools
+import os
 import re
 import sys
 import uuid
 
-LIBS = "/Applications/KiCad/KiCad.app/Contents/SharedSupport/symbols"
+LIBS = os.environ.get("KICAD_SHARE", "/Applications/KiCad/KiCad.app/Contents/SharedSupport") + "/symbols"
 GRID = 2.54
 STUB = 2 * GRID
 
 
+IDS = itertools.count()
+
+
 def uid():
-    return str(uuid.uuid4())
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"kaidi-desk/schematic/{next(IDS)}"))
 
 
 def lib_block(lib, name):

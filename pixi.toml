@@ -1,0 +1,44 @@
+[workspace]
+name = "esphome-kaidi-desk"
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64"]
+
+[dependencies]
+python = "3.12.*"
+openjdk = ">=25"
+
+[pypi-dependencies]
+build123d = "==0.13.0"
+esphome = "==2026.9.1"
+
+[activation.env]
+KICAD_SITE = "$PIXI_PROJECT_ROOT/.pixi/kicad-site"
+FREEROUTING = "$PIXI_PROJECT_ROOT/.pixi/tools/freerouting-2.5.0.jar"
+
+[target.osx-arm64.activation.env]
+KICAD_CLI = "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"
+KICAD_PYTHON = "/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3"
+KICAD_SHARE = "/Applications/KiCad/KiCad.app/Contents/SharedSupport"
+KICAD_CONFIG = "$HOME/Library/Preferences/kicad/10.0"
+
+[target.linux-64.activation.env]
+KICAD_CLI = "/usr/bin/kicad-cli"
+KICAD_PYTHON = "/usr/bin/python3"
+KICAD_SHARE = "/usr/share/kicad"
+KICAD_CONFIG = "$HOME/.config/kicad/10.0"
+
+[tasks]
+kicad-tools = { cmd = "test -f $KICAD_SITE/pcbdraw/__init__.py || $KICAD_PYTHON -m pip install --quiet --disable-pip-version-check --target $KICAD_SITE pcbdraw==1.3.0", description = "Install PcbDraw for KiCad's Python" }
+freerouting = { cmd = "python scripts/fetch_freerouting.py $FREEROUTING", description = "Download the pinned Freerouting autorouter" }
+
+schematic = { cmd = "python scripts/make_schematic.py hardware/kaidi-desk.kicad_sch && python scripts/render_schematic.py", description = "Write the schematic and render it" }
+footprints = { cmd = "python scripts/make_footprints.py hardware/kaidi.pretty && python scripts/make_models.py hardware/kaidi.3dshapes && python scripts/make_pcbdraw_parts.py hardware/pcbdraw", description = "Write custom footprints, 3D models and part drawings" }
+pcb = { cmd = "$KICAD_PYTHON scripts/make_pcb.py hardware/kaidi-desk.kicad_sch hardware/kaidi-desk.kicad_pcb && $KICAD_PYTHON scripts/route_pcb.py hardware/kaidi-desk.kicad_pcb $FREEROUTING $JAVA_HOME/bin/java", depends-on = ["schematic", "footprints", "freerouting"], description = "Place and autoroute the PCB" }
+fab = { cmd = "python scripts/export_fab.py", depends-on = ["pcb"], description = "Export the Gerber zip" }
+art = { cmd = "python scripts/render_art.py", depends-on = ["pcb", "kicad-tools"], description = "Draw and render the PCB" }
+enclosure = { cmd = "python scripts/make_enclosure.py hardware && $KICAD_PYTHON scripts/render_enclosure.py hardware docs", depends-on = ["pcb"], description = "Build and render the 3D-printable box" }
+protoboard = { cmd = "python scripts/protoboard.py && python scripts/render_protoboard.py", depends-on = ["kicad-tools"], description = "Check and draw the rev 4 protoboard build" }
+hardware = { depends-on = ["fab", "art", "enclosure", "protoboard"], description = "Regenerate the whole hardware design" }
+check = { cmd = "python scripts/check_hardware.py", description = "Run ERC, DRC, parity, netlist and protoboard checks" }
+
+compile = { cmd = "mkdir -p .build && printf 'wifi_ssid: \"ssid\"\\nwifi_password: \"password1\"\\n' > .build/secrets.yaml && sed 's#source: github://clintval/esphome-kaidi-desk@main#source: {type: local, path: ../components}#' example/kaidi-desk.yaml > .build/kaidi-desk.yaml && esphome compile .build/kaidi-desk.yaml", description = "Compile the example firmware" }

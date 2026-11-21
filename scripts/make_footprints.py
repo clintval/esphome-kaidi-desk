@@ -7,14 +7,18 @@ front row, even pins 2.54 mm behind, locating pegs 6.35 mm toward the opening.
 Run with: python3 scripts/make_footprints.py hardware/kaidi.pretty
 """
 
+import itertools
 import sys
 import uuid
 
 LIB = sys.argv[1]
 
 
+IDS = itertools.count()
+
+
 def u():
-    return str(uuid.uuid4())
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"kaidi-desk/footprints/{next(IDS)}"))
 
 
 def line(x1, y1, x2, y2, layer, width):

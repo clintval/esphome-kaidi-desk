@@ -5,6 +5,7 @@ Run with KiCad's Python:
         scripts/make_pcb.py hardware/kaidi-desk.kicad_sch hardware/kaidi-desk.kicad_pcb
 """
 
+import os
 import subprocess
 import sys
 import tempfile
@@ -13,9 +14,8 @@ from pathlib import Path
 
 import pcbnew
 
-KICAD = Path("/Applications/KiCad/KiCad.app/Contents")
-FP = KICAD / "SharedSupport/footprints"
-CLI = KICAD / "MacOS/kicad-cli"
+FP = Path(os.environ.get("KICAD_SHARE", "/Applications/KiCad/KiCad.app/Contents/SharedSupport")) / "footprints"
+CLI = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli")
 ROOT = Path(__file__).resolve().parent.parent
 SCH, OUT = Path(sys.argv[1]), Path(sys.argv[2])
 

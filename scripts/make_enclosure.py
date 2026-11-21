@@ -6,7 +6,7 @@ metal sits near the C3's antenna: the screws are at the far corners. Models are 
 3D frame (origin at the board's top-left, Y up, Z = 0 on the board's top face) so they drop straight
 into KiCad renders.
 
-Run with: uv run --no-project --python 3.12 --with build123d python scripts/make_enclosure.py hardware
+Run with: python scripts/make_enclosure.py hardware
 """
 
 import json

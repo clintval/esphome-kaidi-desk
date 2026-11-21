@@ -7,3 +7,4 @@ hardware/fab/
 hardware/*-backups/
 *.kicad_prl
 fp-info-cache
+.pixi/
