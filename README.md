@@ -131,7 +131,7 @@ Print it in MJF nylon or, at home, PETG; resin tends to crack around the inserts
 | 2 | 100 kΩ, 1/4 W (R5, R6) | [DigiKey CF14JT100K](https://www.digikey.com/en/products/result?keywords=CF14JT100K) |
 | 2 | 15 kΩ, 1/4 W (R8, R10) | [DigiKey CF14JT15K0](https://www.digikey.com/en/products/result?keywords=CF14JT15K0) |
 | 1 | 100 nF ceramic, 2.5 mm lead pitch (C1) | [DigiKey](https://www.digikey.com/en/products/result?keywords=100nF%2050V%20ceramic%20radial%202.5mm) |
-| 1 | RJ50 (10P10C) cable, 0.25 m, wired straight through, dongle to control box | [Delock 80185](https://www.delock.com/produkt/80185/merkmale.html) |
+| 1 | RJ50 (10P10C) cable, about 1 ft, wired straight through, dongle to control box | [Winford CBM10R1TS-1](https://www.winford.com/products/cbm10.php) (US) or [Delock 80185](https://www.delock.com/produkt/80185/merkmale.html) (EU) |
 | 2 | M3 × 20 mm button-head screw, ISO 7380 | [Amazon](https://www.amazon.com/s?k=M3x20+button+head+screw+ISO+7380) |
 | 2 | M3 heat-set insert, 5.7 mm long, 4.0 mm hole (ruthex M3) | [Amazon](https://www.amazon.com/s?k=ruthex+M3+heat+set+inserts) |
 
