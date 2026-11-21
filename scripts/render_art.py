@@ -42,7 +42,7 @@ pcbdraw(ROOT / "docs/board-resistors.svg", "--filter", RESISTORS)
 pcbdraw(ROOT / "docs/board-back.svg", "--side", "back")
 
 
-def render(out, side, rotate, *lights):
+def render(out, side, rotate, zoom, *lights):
     subprocess.run(
         [
             os.environ["KICAD_CLI"],
@@ -60,7 +60,7 @@ def render(out, side, rotate, *lights):
             "--rotate",
             rotate,
             "--zoom",
-            "1.05",
+            zoom,
             "--background",
             "transparent",
             *lights,
@@ -73,11 +73,12 @@ def render(out, side, rotate, *lights):
     )
 
 
-render(ROOT / "docs/board-3d.png", "top", "-40,0,25", "--floor")
+render(ROOT / "docs/board-3d.png", "top", "-40,0,25", "1.05", "--floor")
 render(
     ROOT / "docs/board-3d-bottom.png",
     "bottom",
-    "-40,0,-25",
+    "-12,0,-6",
+    "1.3",
     "--light-camera",
     "0.9",
     "--light-bottom",

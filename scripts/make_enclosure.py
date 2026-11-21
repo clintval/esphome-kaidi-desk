@@ -1,10 +1,11 @@
 """Build a two-part 3D-printable box around the dongle PCB from hardware/board.json.
 
 The base holds the board on four posts (two with M3 heat-set inserts) and has openings for the keypad
-jack on one end, the desk jack on the other and the USB-C port on the top side. The lid screws down through two bosses that clamp the board. Nothing
-metal sits near the C3's antenna: the screws are at the far corners. Models are written in KiCad's
-3D frame (origin at the board's top-left, Y up, Z = 0 on the board's top face) so they drop straight
-into KiCad renders.
+jack on one end, the desk jack on the other and the USB-C port on the top side. The lid screws down
+through two bosses that clamp the board, and two chevrons engraved in it point from the keypad end to
+the desk end. Nothing metal sits near the C3's antenna: the screws are at the far corners. Models are
+written in KiCad's 3D frame (origin at the board's top-left, Y up, Z = 0 on the board's top face) so
+they drop straight into KiCad renders.
 
 Run with: python scripts/make_enclosure.py hardware
 """
@@ -23,8 +24,8 @@ from build123d import (
     Locations,
     Mode,
     Plane,
+    Polygon,
     RectangleRounded,
-    Text,
     export_step,
     export_stl,
     extrude,
@@ -39,6 +40,7 @@ GAP, WALL, FLOOR, STANDOFF, LID = 0.5, 2.2, 2.0, 4.0, 2.0
 INSERT_HOLE, INSERT_LENGTH = 4.0, 5.7
 SCREW_CLEARANCE, HEAD_DIAMETER, HEAD_HEIGHT, SCREW_LENGTH = 3.4, 5.7, 1.65, 20.0
 TOP = geo["tallest"] + 1.0
+CHEVRON_INSET = 12.0
 Z_FLOOR = -(T + STANDOFF + FLOOR)
 IW, IH = W + 2 * GAP, H + 2 * GAP
 OW, OH = IW + 2 * WALL, IH + 2 * WALL
@@ -105,18 +107,9 @@ with BuildPart() as lid:
                 align=(Align.CENTER, Align.CENTER, Align.MAX),
                 mode=Mode.SUBTRACT,
             )
-    with BuildSketch(Plane.XY.offset(TOP + LID - 0.5)):
-        with Locations((CX, CY - 2.0)):
-            Text("esphome-kaidi-desk", 5.0)
-        with Locations((CX, CY - 9.0)):
-            Text("Kaidi standing desk", 3.0)
-        with Locations((5.5, CY)):
-            Text("KEYPAD", 2.8, rotation=90)
-        with Locations((W - 5.5, CY)):
-            Text("DESK", 2.8, rotation=-90)
-        with Locations((kx(usb["center_x"]), -4.0)):
-            Text("USB-C", 2.6)
-    extrude(amount=0.5, mode=Mode.SUBTRACT)
+    with BuildSketch(Plane.XY.offset(TOP + LID - 1.0)), Locations((CHEVRON_INSET, CY), (W - CHEVRON_INSET, CY)):
+        Polygon((-6.0, 8.0), (-1.0, 8.0), (7.0, 0.0), (-1.0, -8.0), (-6.0, -8.0), (2.0, 0.0))
+    extrude(amount=1.0, mode=Mode.SUBTRACT)
 
 out = HW / "enclosure"
 out.mkdir(exist_ok=True)
