@@ -86,12 +86,6 @@ with BuildPart() as base:
         RectangleRounded(12.6, 7.0, 3.0)
     extrude(amount=WALL + 2, mode=Mode.SUBTRACT)
 
-    for ex in (14.0, W - 14.0):
-        ey = -(H + GAP + WALL + 5.0)
-        with Locations(Location((ex, ey, Z_FLOOR))):
-            Box(14.0, 12.0, 3.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
-        with Locations(Location((ex, ey - 1.0, Z_FLOOR))):
-            Cylinder(2.3, 10, mode=Mode.SUBTRACT)
 
 with BuildPart() as lid:
     with BuildSketch(Plane.XY.offset(TOP)), Locations((CX, CY)):

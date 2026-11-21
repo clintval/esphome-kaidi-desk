@@ -104,7 +104,7 @@ To solder the C3 flat instead, set `C3_BOTTOM = 0.2` in [`scripts/dimensions.py`
 
 ## Enclosure
 
-A two-part, 89 × 45 × 24 mm box is in [`hardware/enclosure/`](hardware/enclosure) as STEP and STL, with ears for screwing it under the desk.
+A two-part, 89 × 45 × 24 mm box is in [`hardware/enclosure/`](hardware/enclosure) as STEP and STL, sized to sit in the desk's cable tray beside the control box.
 
 <p align="center">
   <img src="docs/enclosure-open.png" width="49%" alt="The dongle in its box with the lid lifted">
