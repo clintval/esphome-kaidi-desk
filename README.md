@@ -78,6 +78,11 @@ Dividers bring the box's 5 V height stream and the keypad's command line down to
 </p>
 
 <p align="center">
+  <img src="docs/board-back.svg" width="49%" alt="The underside of the dongle PCB with its bottom-layer traces">
+  <img src="docs/board-3d-bottom.png" width="49%" alt="3D render of the underside of the dongle PCB">
+</p>
+
+<p align="center">
   <img src="docs/schematic.svg" width="100%" alt="Schematic">
 </p>
 

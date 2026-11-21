@@ -1,4 +1,4 @@
-"""Draw the PCB with PcbDraw (fully assembled and resistors only) and raytrace it with KiCad.
+"""Draw the PCB with PcbDraw (resistors only, assembled and underside) and raytrace both sides with KiCad.
 
 Run with: python scripts/render_art.py
 """
@@ -39,30 +39,50 @@ def pcbdraw(out, *extra):
 
 pcbdraw(ROOT / "docs/board.svg")
 pcbdraw(ROOT / "docs/board-resistors.svg", "--filter", RESISTORS)
-subprocess.run(
-    [
-        os.environ["KICAD_CLI"],
-        "pcb",
-        "render",
-        "-w",
-        "1800",
-        "-h",
-        "1100",
-        "--quality",
-        "high",
-        "--perspective",
-        "--floor",
-        "--rotate",
-        "-40,0,25",
-        "--zoom",
-        "1.05",
-        "--background",
-        "transparent",
-        "-o",
-        str(ROOT / "docs/board-3d.png"),
-        str(PCB),
-    ],
-    check=True,
-    capture_output=True,
+pcbdraw(ROOT / "docs/board-back.svg", "--side", "back")
+
+
+def render(out, side, rotate, *lights):
+    subprocess.run(
+        [
+            os.environ["KICAD_CLI"],
+            "pcb",
+            "render",
+            "-w",
+            "1800",
+            "-h",
+            "1100",
+            "--quality",
+            "high",
+            "--perspective",
+            "--side",
+            side,
+            "--rotate",
+            rotate,
+            "--zoom",
+            "1.05",
+            "--background",
+            "transparent",
+            *lights,
+            "-o",
+            str(out),
+            str(PCB),
+        ],
+        check=True,
+        capture_output=True,
+    )
+
+
+render(ROOT / "docs/board-3d.png", "top", "-40,0,25", "--floor")
+render(
+    ROOT / "docs/board-3d-bottom.png",
+    "bottom",
+    "-40,0,-25",
+    "--light-camera",
+    "0.9",
+    "--light-bottom",
+    "0.6",
+    "--light-side",
+    "0.5",
 )
-print("rendered docs/board.svg, docs/board-resistors.svg and docs/board-3d.png")
+print("rendered the board art, its underside and both 3D renders into docs/")
