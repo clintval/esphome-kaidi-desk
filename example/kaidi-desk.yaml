@@ -41,12 +41,9 @@ uart:
   baud_rate: 9600
 
 kaidi_desk:
-  tx_enable_pin:
-    number: GPIO6
-    inverted: true
-  wake_pin:
-    number: GPIO10
-    inverted: true
+  tx_enable_pin: GPIO6
+  wake_pin: GPIO10
+  keypad_sense_pin: GPIO3
 
 sensor:
   - platform: kaidi_desk

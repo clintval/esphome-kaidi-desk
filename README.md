@@ -6,7 +6,7 @@
 
 Control a Kaidi standing desk from Home Assistant with an ESP32 and ESPHome.
 
-![Circuit board illustration of the dongle](docs/board.svg)
+![3D render of the dongle PCB](docs/board-3d.png)
 
 ## Introduction
 
@@ -30,12 +30,9 @@ uart:
   baud_rate: 9600
 
 kaidi_desk:
-  tx_enable_pin:
-    number: GPIO6
-    inverted: true
-  wake_pin:
-    number: GPIO10
-    inverted: true
+  tx_enable_pin: GPIO6
+  wake_pin: GPIO10
+  keypad_sense_pin: GPIO3
 
 sensor:
   - platform: kaidi_desk
@@ -66,20 +63,27 @@ Once flashed, the board appears in Home Assistant through the ESPHome integratio
 
 ## Hardware
 
-The dongle plugs into the control box's free RJ50 port with a straight-through 10P10C cable and a 10-position breakout.
-A 74AHCT125 buffer lifts the ESP's 3.3 V signals to the box's 5 V, and its enable pins release the shared lines whenever the ESP is not sending.
-A resistor divider brings the box's 5 V height stream down to about 3.1 V for the ESP.
+The dongle sits inline between the keypad and the control box: the keypad plugs into one RJ50 jack and a straight-through 10P10C cable runs from the other to the box.
+Power, ground and the height stream pass straight through.
+The keypad's command and wake lines reach the box through 1 kΩ resistors, and a 74AHCT125, powered from the desk's 5 V, drives the box side only while the ESP is sending.
+Its two spare gates hold the driving gates off unless the ESP raises GPIO6 or GPIO10, so the keypad keeps working when the ESP is unplugged, rebooting or dead.
+Dividers bring the box's 5 V height stream and the keypad's command line down to about 3.1 V for GPIO4 and GPIO3, so a keypad press hands the desk straight back to you.
 
-| RJ50 contact | Signal | Connection |
+![Schematic](docs/schematic.svg)
+
+| RJ50 contact | Signal | Path |
 | --- | --- | --- |
-| 2 | +5 V | Unconnected; the ESP runs on USB-C |
-| 3 | Ground | Common ground |
-| 7 | Command, keypad to box | 74AHCT125 gate 1 through 1 kΩ, input GPIO7, enable GPIO6 |
-| 8 | Height, box to keypad | 10 kΩ over 10 kΩ + 4.7 kΩ to GPIO4 |
-| 10 | Wake, keypad to box | 74AHCT125 gate 2 through 1 kΩ, input tied high, enable GPIO10 |
+| 2 | +5 V | Straight through; also powers the 74AHCT125 |
+| 3 | Ground | Straight through |
+| 7 | Command, keypad to box | Keypad through 1 kΩ; gate A drives the box side from GPIO7 when GPIO6 is high |
+| 8 | Height, box to keypad | Straight through; 10 kΩ over 15 kΩ to GPIO4 |
+| 10 | Wake, keypad to box | Keypad through 1 kΩ; gate B drives the box side high when GPIO10 is high |
 
-The [schematic](docs/wiring.svg) and [breadboard layout](docs/breadboard.svg) list every part and hole.
-While the keypad is plugged into the other port, it holds the command and wake lines and the ESP cannot move the desk; an inline revision that merges both senders is in progress.
+The board is a 72 × 46 mm two-layer KiCad design in [`hardware/`](hardware), with all parts through-hole: two Amphenol/FCI 54602-910LF right-angle jacks, a 74AHCT125 in a DIP-14 socket, 1/4 W resistors, a 100 nF capacitor and two 1×8 female headers for an ESP32-C3 SuperMini with its headers on the underside.
+Upload [`hardware/kaidi-desk-gerbers.zip`](hardware/kaidi-desk-gerbers.zip) to a board house such as JLCPCB to order it.
+The jack footprint follows FCI drawing C-BMJ-0101 rev F; confirm pin 1 against your jacks before ordering.
+
+![Top view of the dongle PCB](docs/board-top.png)
 
 ## Protocol
 

@@ -3,3 +3,7 @@
 secrets.yaml
 __pycache__/
 .DS_Store
+hardware/fab/
+hardware/*-backups/
+*.kicad_prl
+fp-info-cache

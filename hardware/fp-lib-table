@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "kaidi") (type "KiCad") (uri "${KIPRJMOD}/kaidi.pretty") (options "") (descr "Custom footprints for the Kaidi desk dongle"))
+)
