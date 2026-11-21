@@ -4,7 +4,7 @@
 [![ESPHome](https://img.shields.io/badge/ESPHome-external%20component-000000.svg)](https://esphome.io/components/external_components.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Control a Kaidi standing desk from Home Assistant with an ESP32 and ESPHome.
+Control a Kaidi standing desk, such as the ApexDesk K Series, from Home Assistant with an ESP32 and ESPHome.
 
 <p align="center">
   <img src="docs/enclosure-closed.png" width="49%" alt="The dongle in its closed box, desk jack and USB-C side">
@@ -13,8 +13,18 @@ Control a Kaidi standing desk from Home Assistant with an ESP32 and ESPHome.
 
 ## Introduction
 
-Many budget standing desks run on a Kaidi control box, such as the `KDDY094`, which talks to its keypad over 9600 baud serial on a 10-pin RJ50 cable.
+Many budget electric standing desks, sit-stand desks and desk frames run on a control box from Kaidi (Changzhou Kaidi Electrical), such as the `KDDY094`, which talks to its keypad over 9600 baud serial on a 10-pin RJ50 cable.
 This component reads the desk's height and moves it the way the keypad does, including the reset that clears E04.
+
+To check your desk, look for a `KAIDI` label and a `KDDY` model number on the control box under the desktop.
+
+| Desk | Control box | Status |
+| --- | --- | --- |
+| ApexDesk K Series 3-stage dual-motor desk base | `KDDY094` | Tested |
+| Desks with a `KDDY094` box (variants S440, S500, S650 and S663) | `KDDY094` | Expected to work |
+| Desks with a `KDDY041` box and `KD1869A` keypad | `KDDY041` | Same protocol, but an 8-pin cable, so the dongle won't fit |
+
+If your desk works, please open an issue or pull request to add it.
 
 ## Quick Start
 
