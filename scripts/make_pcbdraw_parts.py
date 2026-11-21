@@ -47,15 +47,15 @@ SHADOW = 'opacity="0.35"'
 
 # Amphenol/FCI 54602-910 right-angle RJ50 jack, opening toward +y (board edge).
 cx, x1, x2, y1, y2 = 5.715, -1.935, 13.365, -3.77, 13.97
-defs = lin("body", [(0, "#4a4f57"), (0.12, "#2b2f35"), (1, "#15171a")]) + lin("lip", [(0, "#0c0d0f"), (1, "#26292e")])
+defs = lin("body", [(0, "#9aa1ab"), (0.12, "#7a828c"), (1, "#5a6068")]) + lin("lip", [(0, "#3a3e44"), (1, "#5a6068")])
 body = rect(x1 + 0.6, y1 + 0.6, x2 - x1, y2 - y1, "#000", 0.6, extra=SHADOW)
-body += rect(x1, y1, x2 - x1, y2 - y1, "url(#body)", 0.6, "#0b0c0e", 0.15)
+body += rect(x1, y1, x2 - x1, y2 - y1, "url(#body)", 0.6, "#3a3e44", 0.15)
 for i in range(6):
-    body += rect(x1 + 1.2, y1 + 1.4 + i * 1.1, x2 - x1 - 2.4, 0.35, "#3d424a", 0.17)
+    body += rect(x1 + 1.2, y1 + 1.4 + i * 1.1, x2 - x1 - 2.4, 0.35, "#6a717a", 0.17)
 body += rect(x1 + 0.5, y2 - 2.6, x2 - x1 - 1.0, 2.6, "url(#lip)", 0.4)
-body += rect(cx - 3.4, y2 - 2.1, 6.8, 1.6, "#050506", 0.3)
+body += rect(cx - 3.4, y2 - 2.1, 6.8, 1.6, "#202327", 0.3)
 body += rect(x1 + 0.25, y1 + 0.25, x2 - x1 - 0.5, 0.5, "#ffffff", 0.25, extra='opacity="0.12"')
-body += text(cx, 6.2, "10P10C", 1.5, "#9aa3ad")
+body += text(cx, 6.2, "10P10C", 1.5, "#e4e8ed")
 svg(
     OUT / "kaidi/RJ50_Amphenol_54602-910_Horizontal.svg",
     (x1 - 0.5, y1 - 0.5, x2 - x1 + 1.6, y2 - y1 + 1.6),

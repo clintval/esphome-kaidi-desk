@@ -27,12 +27,13 @@ def write(name, parts):
     (OUT / name).write_text("#VRML V2.0 utf8\n" + "".join(parts))
 
 
-BLACK, DARK, GOLD, SILVER = (0.06, 0.06, 0.07), (0.02, 0.02, 0.025), (0.85, 0.65, 0.2), (0.78, 0.8, 0.82)
+BLACK, GOLD, SILVER = (0.06, 0.06, 0.07), (0.85, 0.65, 0.2), (0.78, 0.8, 0.82)
+JACK, OPENING = (0.42, 0.44, 0.47), (0.12, 0.13, 0.14)
 pitch = 1.27
 cx = 9 * pitch / 2
-jack = [box(cx - 7.65, -3.77, 0, cx + 7.65, 13.97, 12.7, BLACK, 0.1)]
-jack.append(box(cx - 6.03, 12.0, 3.2, cx + 6.03, 14.02, 10.05, DARK, 0.05))
-jack.append(box(cx - 1.6, 12.0, 1.5, cx + 1.6, 14.03, 3.2, DARK, 0.05))
+jack = [box(cx - 7.65, -3.77, 0, cx + 7.65, 13.97, 12.7, JACK, 0.15)]
+jack.append(box(cx - 6.03, 12.0, 3.2, cx + 6.03, 14.02, 10.05, OPENING, 0.05))
+jack.append(box(cx - 1.6, 12.0, 1.5, cx + 1.6, 14.03, 3.2, OPENING, 0.05))
 for n in range(10):
     x = cx - 6.03 + 0.9 + n * 1.02
     jack.append(box(x - 0.2, 10.5, 8.6, x + 0.2, 13.9, 9.4, GOLD, 0.6))
