@@ -6,7 +6,7 @@
 
 Control a Kaidi standing desk from Home Assistant with an ESP32 and ESPHome.
 
-![3D render of the dongle PCB](docs/board-3d.png)
+![Illustration of the dongle PCB](docs/board.svg)
 
 ## Introduction
 
@@ -83,7 +83,7 @@ The board is a 72 × 46 mm two-layer KiCad design in [`hardware/`](hardware), wi
 Upload [`hardware/kaidi-desk-gerbers.zip`](hardware/kaidi-desk-gerbers.zip) to a board house such as JLCPCB to order it.
 The jack footprint follows FCI drawing C-BMJ-0101 rev F; confirm pin 1 against your jacks before ordering.
 
-![Top view of the dongle PCB](docs/board-top.png)
+![3D render of the dongle PCB](docs/board-3d.png)
 
 ## Protocol
 

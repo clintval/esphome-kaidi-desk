@@ -45,8 +45,9 @@ module.append(box(4.62, 14.4, z0 + 1.0, 10.62, 17.4, z0 + 2.2, (0.92, 0.9, 0.86)
 for x in (1.2, 12.4):
     module.append(box(x, 1.4, z0 + 1.0, x + 2.6, 4.2, z0 + 2.4, (0.7, 0.7, 0.7), 0.4))
     module.append(box(x + 0.6, 2.0, z0 + 2.4, x + 2.0, 3.6, z0 + 2.9, BLACK, 0.2))
-for i in range(8):
-    for x in (0.0, 15.24):
-        module.append(box(x - 0.32, i * 2.54 - 0.32, 8.5, x + 0.32, i * 2.54 + 0.32, z0 + 1.2, GOLD, 0.6))
-        module.append(box(x - 1.27, i * 2.54 - 1.27, 8.5, x + 1.27, i * 2.54 + 1.27, z0, BLACK, 0.1))
+for x in (0.0, 15.24):
+    module.append(box(x - 1.27, -1.27, 0, x + 1.27, 7 * 2.54 + 1.27, 8.5, BLACK, 0.1))
+    module.append(box(x - 1.0, -1.0, 8.5, x + 1.0, 7 * 2.54 + 1.0, z0, BLACK, 0.1))
+    for i in range(8):
+        module.append(box(x - 0.32, i * 2.54 - 0.32, 8.0, x + 0.32, i * 2.54 + 0.32, z0 + 1.2, GOLD, 0.6))
 write("ESP32-C3_SuperMini.wrl", module)
