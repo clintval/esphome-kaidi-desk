@@ -1,0 +1,13 @@
+{
+    "copper": "#1f9a63",
+    "board": "#13834f",
+    "silk": "#f4f8f5",
+    "pads": "#d8a845",
+    "clad": "#9c6b28",
+    "outline": "#0a4d2e",
+    "vcut": "#bf2600",
+    "highlight-on-top": false,
+    "highlight-style": "stroke:none;fill:#ff0000;opacity:0.5;",
+    "highlight-padding": 1.5,
+    "highlight-offset": 0
+}

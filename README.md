@@ -85,6 +85,15 @@ The jack footprint follows FCI drawing C-BMJ-0101 rev F; confirm pin 1 against y
 
 ![3D render of the dongle PCB](docs/board-3d.png)
 
+## Build Without a PCB
+
+Rev 4 is the same inline, fail-safe circuit hand-built on a 1.5 × 2 in EPLZON solderable breadboard, with a Bipom BRK10P10CSJ breakout for the keypad and a cut 10P10C cable to the desk.
+Every part, jumper and wire has a named hole, and [`scripts/protoboard.py`](scripts/protoboard.py) checks the layout's connections against the circuit.
+
+![Rev 4 protoboard build guide](docs/protoboard.svg)
+
+On this build, configure `tx_enable_pin: GPIO6`, `wake_pin: GPIO0` and `rx_pin: GPIO3`, and leave out `keypad_sense_pin`.
+
 ## Protocol
 
 Each frame is 7 bytes, `0x68 0x01 <mode> <hi> <lo> <checksum> 0x16`, where the checksum is the low byte of `0x01 + mode + hi + lo`.
