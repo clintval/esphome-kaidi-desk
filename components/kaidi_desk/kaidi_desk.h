@@ -40,6 +40,7 @@ class KaidiDesk : public Component, public uart::UARTDevice {
 
   void set_tx_enable_pin(GPIOPin *pin) { this->tx_enable_pin_ = pin; }
   void set_wake_pin(GPIOPin *pin) { this->wake_pin_ = pin; }
+  void set_keypad_sense_pin(InternalGPIOPin *pin) { this->keypad_sense_pin_ = pin; }
   void set_height_sensor(sensor::Sensor *sensor) { this->height_sensor_ = sensor; }
   void set_status_sensor(text_sensor::TextSensor *sensor) { this->status_sensor_ = sensor; }
   void set_target_number(number::Number *number, float units_per_cm) {
@@ -74,9 +75,14 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   void sync_target_();
   bool box_awake_(uint32_t now) const;
   void apply_wake_pin_();
+  void abort_for_keypad_();
+  static void keypad_isr_(KaidiDesk *desk);
 
   GPIOPin *tx_enable_pin_{nullptr};
   GPIOPin *wake_pin_{nullptr};
+  InternalGPIOPin *keypad_sense_pin_{nullptr};
+  volatile bool transmitting_{false};
+  volatile bool keypad_edge_{false};
   sensor::Sensor *height_sensor_{nullptr};
   text_sensor::TextSensor *status_sensor_{nullptr};
   number::Number *target_number_{nullptr};

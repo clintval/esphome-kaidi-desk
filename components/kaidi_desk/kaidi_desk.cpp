@@ -27,12 +27,22 @@ void KaidiDesk::setup() {
     this->wake_pin_->setup();
     this->wake_pin_->digital_write(false);
   }
+  if (this->keypad_sense_pin_ != nullptr) {
+    this->keypad_sense_pin_->setup();
+    this->keypad_sense_pin_->attach_interrupt(&KaidiDesk::keypad_isr_, this, gpio::INTERRUPT_FALLING_EDGE);
+  }
+}
+
+void IRAM_ATTR KaidiDesk::keypad_isr_(KaidiDesk *desk) {
+  if (!desk->transmitting_)
+    desk->keypad_edge_ = true;
 }
 
 void KaidiDesk::dump_config() {
   ESP_LOGCONFIG(TAG, "Kaidi Desk:");
   LOG_PIN("  TX Enable Pin: ", this->tx_enable_pin_);
   LOG_PIN("  Wake Pin: ", this->wake_pin_);
+  LOG_PIN("  Keypad Sense Pin: ", this->keypad_sense_pin_);
   ESP_LOGCONFIG(TAG, "  Frame Interval: %" PRIu32 " ms", this->frame_interval_);
   ESP_LOGCONFIG(TAG, "  Wake Settle: %" PRIu32 " ms", this->wake_settle_);
   ESP_LOGCONFIG(TAG, "  Nudge Duration: %" PRIu32 " ms", this->nudge_duration_);
@@ -46,6 +56,12 @@ void KaidiDesk::dump_config() {
 void KaidiDesk::loop() {
   this->read_frames_();
   uint32_t now = millis();
+
+  if (this->keypad_edge_) {
+    this->keypad_edge_ = false;
+    if (this->state_ != State::IDLE)
+      this->abort_for_keypad_();
+  }
 
   if (this->state_ == State::IDLE) {
     if (this->box_mode_ != BOX_MODE_NONE && now - this->last_rx_ms_ > ASLEEP_AFTER_MS) {
@@ -200,12 +216,14 @@ void KaidiDesk::handle_frame_(uint8_t mode, uint16_t value) {
 void KaidiDesk::send_(Command command) {
   const uint8_t frame[7] = {FRAME_START, FRAME_ADDRESS, command, 0x00, 0x00,
                             static_cast<uint8_t>(FRAME_ADDRESS + command), FRAME_END};
+  this->transmitting_ = true;
   if (this->tx_enable_pin_ != nullptr)
     this->tx_enable_pin_->digital_write(true);
   this->write_array(frame, sizeof(frame));
   this->flush();
   if (this->tx_enable_pin_ != nullptr)
     this->tx_enable_pin_->digital_write(false);
+  this->transmitting_ = false;
   this->last_tx_ms_ = millis();
 }
 
@@ -220,6 +238,11 @@ void KaidiDesk::begin_(Action action) {
 void KaidiDesk::release_() {
   this->state_ = State::RELEASING;
   this->release_frames_ = RELEASE_IDLE_FRAMES;
+}
+
+void KaidiDesk::abort_for_keypad_() {
+  ESP_LOGI(TAG, "Keypad pressed, handing the desk back to it");
+  this->finish_();
 }
 
 void KaidiDesk::finish_() {
