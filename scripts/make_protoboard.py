@@ -16,7 +16,7 @@ from pathlib import Path
 import pcbnew
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from protoboard import C3_TOP, COLUMNS, PARTS, U2_PINS, WIRES  # noqa: E402
+from protoboard import C3_TOP, COLUMNS, PARTS, U2_PINS, WIRES
 
 OUT = Path(sys.argv[1])
 LIB = OUT / "proto.pretty"
@@ -51,14 +51,16 @@ def write_fp(name, body):
     (LIB / f"{name}.kicad_mod").write_text(
         f'(footprint "{name}" (version 20240108) (generator "make_protoboard") (layer "F.Cu") (attr through_hole) '
         f'(property "Reference" "REF**" (at 0 0 0) (layer "F.Fab") (hide yes) (uuid "{u()}") (effects (font (size 1 1)))) '
-        f'(property "Value" "{name}" (at 0 0 0) (layer "F.Fab") (hide yes) (uuid "{u()}") (effects (font (size 1 1)))) {body})\n')
+        f'(property "Value" "{name}" (at 0 0 0) (layer "F.Fab") (hide yes) (uuid "{u()}") (effects (font (size 1 1)))) {body})\n'
+    )
 
 
 def write_art(name, box, defs, body):
     x, y, w, h = box
     (ART / f"{name}.svg").write_text(
         f'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="{w}mm" height="{h}mm" viewBox="{x} {y} {w} {h}">'
-        f'<defs>{defs}</defs>{body}<rect id="origin" x="0" y="0" width="1" height="1" fill="#ff0000"/></svg>\n')
+        f'<defs>{defs}</defs>{body}<rect id="origin" x="0" y="0" width="1" height="1" fill="#ff0000"/></svg>\n'
+    )
 
 
 def lin(id_, stops, x2=0, y2=1):
@@ -67,42 +69,66 @@ def lin(id_, stops, x2=0, y2=1):
 
 
 ax, ay = hole("A1")
-grid = "".join(pad("", round(hole(f"{c}{r}")[0] - ax, 3), round(hole(f"{c}{r}")[1] - ay, 3)) for c in COLUMNS for r in range(1, 18))
+grid = "".join(
+    pad("", round(hole(f"{c}{r}")[0] - ax, 3), round(hole(f"{c}{r}")[1] - ay, 3)) for c in COLUMNS for r in range(1, 18)
+)
 write_fp("EPLZON_Mini_17x10", grid)
 
 C3_LEFT, C3_RIGHT = C3_TOP["C"], C3_TOP["G"]
 pins = "".join(pad(str(i + 1), 15.24, i * P, 1.7, 1.0) + pad(str(i + 9), 0, i * P, 1.7, 1.0) for i in range(8))
 write_fp("ESP32-C3_SuperMini_LabelsUp", pins)
-defs = (lin("pcb", [(0, "#2a5bd7"), (0.5, "#1c45b0"), (1, "#122f7a")], 1, 1)
-        + lin("silver", [(0, "#ffffff"), (0.45, "#c9d0d6"), (1, "#7d868f")])
-        + lin("gold", [(0, "#ffe7a3"), (0.5, "#d9a441"), (1, "#a0742a")]))
+defs = (
+    lin("pcb", [(0, "#2a5bd7"), (0.5, "#1c45b0"), (1, "#122f7a")], 1, 1)
+    + lin("silver", [(0, "#ffffff"), (0.45, "#c9d0d6"), (1, "#7d868f")])
+    + lin("gold", [(0, "#ffe7a3"), (0.5, "#d9a441"), (1, "#a0742a")])
+)
 art = '<rect x="-0.6" y="-2.7" width="18.04" height="22.52" rx="1" opacity="0.35" fill="#000"/>'
 art += '<rect x="-1.4" y="-3.6" width="18.04" height="22.52" rx="1" fill="url(#pcb)" stroke="#0b1d4d" stroke-width="0.15"/>'
-art += '<rect x="3.12" y="-6.9" width="9" height="4.6" rx="1.4" fill="url(#silver)" stroke="#6f7780" stroke-width="0.12"/>'
+art += (
+    '<rect x="3.12" y="-6.9" width="9" height="4.6" rx="1.4" fill="url(#silver)" stroke="#6f7780" stroke-width="0.12"/>'
+)
 art += '<rect x="4.32" y="-3.2" width="6.6" height="0.8" rx="0.4" fill="#5c646c"/>'
 for i in range(8):
     for x in (0.0, 15.24):
         art += f'<circle cx="{x}" cy="{i * P}" r="0.85" fill="url(#gold)" stroke="#8a6420" stroke-width="0.08"/>'
         art += f'<circle cx="{x}" cy="{i * P}" r="0.36" fill="#c9b26a"/>'
-    art += (f'<text x="13.7" y="{i * P + 0.38}" font-family="Helvetica, Arial" font-size="1.0" font-weight="700" '
-            f'text-anchor="end" fill="#f4f7fb">{C3_RIGHT[i]}</text>')
-    art += (f'<text x="1.55" y="{i * P + 0.38}" font-family="Helvetica, Arial" font-size="1.0" font-weight="700" '
-            f'fill="#f4f7fb">{C3_LEFT[i]}</text>')
-art += ('<text x="7.62" y="9.6" font-family="Helvetica, Arial" font-size="1.25" font-weight="800" text-anchor="middle" '
-        'fill="#f4f7fb" transform="rotate(90 7.62 9.6)">ESP32-C3 SuperMini</text>')
+    art += (
+        f'<text x="13.7" y="{i * P + 0.38}" font-family="Helvetica, Arial" font-size="1.0" font-weight="700" '
+        f'text-anchor="end" fill="#f4f7fb">{C3_RIGHT[i]}</text>'
+    )
+    art += (
+        f'<text x="1.55" y="{i * P + 0.38}" font-family="Helvetica, Arial" font-size="1.0" font-weight="700" '
+        f'fill="#f4f7fb">{C3_LEFT[i]}</text>'
+    )
+art += (
+    '<text x="7.62" y="9.6" font-family="Helvetica, Arial" font-size="1.25" font-weight="800" text-anchor="middle" '
+    'fill="#f4f7fb" transform="rotate(90 7.62 9.6)">ESP32-C3 SuperMini</text>'
+)
 art += '<text x="7.62" y="17.4" font-family="Helvetica, Arial" font-size="0.8" font-weight="600" text-anchor="middle" fill="#c9d6f2">labels up</text>'
 write_art("ESP32-C3_SuperMini_LabelsUp", (-2.0, -7.4, 19.4, 27.2), defs, art)
 
-C_ART = (lin("disc", [(0, "#f2b46b"), (0.6, "#d07a2c"), (1, "#8a4612")], 1, 1),
-         '<ellipse cx="2.84" cy="0.25" rx="1.7" ry="0.95" opacity="0.35" fill="#000"/>'
-         '<path d="M 0 0 L 1.2 0 M 3.88 0 L 5.08 0" stroke="#c9cdd2" stroke-width="0.5" stroke-linecap="round"/>'
-         '<ellipse cx="2.54" cy="0" rx="1.65" ry="0.9" fill="url(#disc)" stroke="#6b360f" stroke-width="0.08"/>'
-         '<text x="2.54" y="0.3" font-family="Helvetica, Arial" font-size="0.8" font-weight="700" text-anchor="middle" fill="#4a2208">104</text>')
+C_ART = (
+    lin("disc", [(0, "#f2b46b"), (0.6, "#d07a2c"), (1, "#8a4612")], 1, 1),
+    (
+        '<ellipse cx="2.84" cy="0.25" rx="1.7" ry="0.95" opacity="0.35" fill="#000"/>'
+        '<path d="M 0 0 L 1.2 0 M 3.88 0 L 5.08 0" stroke="#c9cdd2" stroke-width="0.5" stroke-linecap="round"/>'
+        '<ellipse cx="2.54" cy="0" rx="1.65" ry="0.9" fill="url(#disc)" stroke="#6b360f" stroke-width="0.08"/>'
+        '<text x="2.54" y="0.3" font-family="Helvetica, Arial" font-size="0.8" font-weight="700" '
+        'text-anchor="middle" fill="#4a2208">104</text>'
+    ),
+)
 write_fp("C_Disc_P5.08", pad("1", 0, 0) + pad("2", 5.08, 0))
 write_art("C_Disc_P5.08", (-0.8, -1.4, 6.7, 2.9), *C_ART)
 
-INSULATION = {"+5V": "#e5484d", "GND": "#2b2b2b", "TX": "#3b82f6", "EN_TX": "#a855f7", "OE_TX": "#ec4899",
-              "EN_WAKE": "#a855f7", "OE_WAKE": "#ec4899"}
+INSULATION = {
+    "+5V": "#e5484d",
+    "GND": "#2b2b2b",
+    "TX": "#3b82f6",
+    "EN_TX": "#a855f7",
+    "OE_TX": "#ec4899",
+    "EN_WAKE": "#a855f7",
+    "OE_WAKE": "#ec4899",
+}
 
 board = pcbnew.CreateEmptyBoard()
 
@@ -128,15 +154,23 @@ for i, (a, b, net, _, layer) in enumerate(WIRES):
     path = f"M 0 0 L {dx} 0 L {dx} {dy}" if dx and dy else f"M 0 0 L {dx} {dy}"
     color = INSULATION[net]
     if layer == "back":
-        body = "".join(f'<circle cx="{x}" cy="{y}" r="1.05" fill="none" stroke="{color}" stroke-width="0.35" '
-                       f'stroke-dasharray="0.5 0.35"/>' for x, y in ((0, 0), (dx, dy)))
+        body = "".join(
+            f'<circle cx="{x}" cy="{y}" r="1.05" fill="none" stroke="{color}" stroke-width="0.35" '
+            f'stroke-dasharray="0.5 0.35"/>'
+            for x, y in ((0, 0), (dx, dy))
+        )
     else:
-        body = (f'<path d="{path}" fill="none" stroke="#000" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" '
-                f'opacity="0.3" transform="translate(0.25 0.3)"/>'
-                f'<path d="{path}" fill="none" stroke="{color}" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round"/>'
-                f'<path d="{path}" fill="none" stroke="#ffffff" stroke-width="0.28" stroke-linecap="round" stroke-linejoin="round" '
-                f'opacity="0.35" transform="translate(-0.12 -0.18)"/>')
-    body += "".join(f'<circle cx="{x}" cy="{y}" r="0.42" fill="#d6d9dd" stroke="#8b9097" stroke-width="0.08"/>' for x, y in ((0, 0), (dx, dy)))
+        body = (
+            f'<path d="{path}" fill="none" stroke="#000" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" '
+            f'opacity="0.3" transform="translate(0.25 0.3)"/>'
+            f'<path d="{path}" fill="none" stroke="{color}" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round"/>'
+            f'<path d="{path}" fill="none" stroke="#ffffff" stroke-width="0.28" stroke-linecap="round" stroke-linejoin="round" '
+            f'opacity="0.35" transform="translate(-0.12 -0.18)"/>'
+        )
+    body += "".join(
+        f'<circle cx="{x}" cy="{y}" r="0.42" fill="#d6d9dd" stroke="#8b9097" stroke-width="0.08"/>'
+        for x, y in ((0, 0), (dx, dy))
+    )
     lo_x, hi_x = min(0, dx), max(0, dx)
     lo_y, hi_y = min(0, dy), max(0, dy)
     write_art(name, (lo_x - 1.5, lo_y - 1.5, hi_x - lo_x + 3.2, hi_y - lo_y + 3.2), "", body)
@@ -147,10 +181,12 @@ place(LIB, "ESP32-C3_SuperMini_LabelsUp", "U1", hole("C1"), 90)
 place(KICAD_FP / "Package_DIP.pretty", "DIP-14_W7.62mm", "U2", hole(U2_PINS[1]), 90, "74AHCT125")
 
 res = KICAD_FP / "Resistor_THT.pretty"
-pitch_fp = {7.62: "R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal",
-            10.16: "R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
-            15.24: "R_Axial_DIN0207_L6.3mm_D2.5mm_P15.24mm_Horizontal",
-            2.54: "R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical"}
+pitch_fp = {
+    7.62: "R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal",
+    10.16: "R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+    15.24: "R_Axial_DIN0207_L6.3mm_D2.5mm_P15.24mm_Horizontal",
+    2.54: "R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical",
+}
 values = {}
 for ref, value, a, b, _ in PARTS:
     (x1, _), (x2, _) = hole(a), hole(b)
@@ -161,7 +197,12 @@ for ref, value, a, b, _ in PARTS:
     place(res, pitch_fp[span], ref, hole(a), 0, value)
     values[ref] = value
 
-for x, y in ((BX + 2.2, BY + 2.2), (BX + BW - 2.2, BY + 2.2), (BX + 2.2, BY + BH - 2.2), (BX + BW - 2.2, BY + BH - 2.2)):
+for x, y in (
+    (BX + 2.2, BY + 2.2),
+    (BX + BW - 2.2, BY + 2.2),
+    (BX + 2.2, BY + BH - 2.2),
+    (BX + BW - 2.2, BY + BH - 2.2),
+):
     place(KICAD_FP / "MountingHole.pretty", "MountingHole_2.2mm_M2", "", (x, y))
 gap_y = (hole("E1")[1] + hole("F1")[1]) / 2
 for row in (1, 17):
@@ -187,8 +228,12 @@ for r in range(1, 18):
     silk(str(r), x0, hole("J1")[1] - 2.4, 0.9)
     silk(str(r), x0, hole("A1")[1] + 2.4, 0.9)
 
-for (sx, sy), (ex, ey) in (((BX, BY), (BX + BW, BY)), ((BX + BW, BY), (BX + BW, BY + BH)),
-                           ((BX + BW, BY + BH), (BX, BY + BH)), ((BX, BY + BH), (BX, BY))):
+for (sx, sy), (ex, ey) in (
+    ((BX, BY), (BX + BW, BY)),
+    ((BX + BW, BY), (BX + BW, BY + BH)),
+    ((BX + BW, BY + BH), (BX, BY + BH)),
+    ((BX, BY + BH), (BX, BY)),
+):
     s = pcbnew.PCB_SHAPE(board)
     s.SetShape(pcbnew.SHAPE_T_SEGMENT)
     s.SetStart(pcbnew.VECTOR2I(pcbnew.FromMM(sx), pcbnew.FromMM(sy)))

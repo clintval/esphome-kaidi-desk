@@ -31,6 +31,8 @@ List them with `pixi task list`.
 All must pass before a change is submitted:
 
 ```bash
+pixi run fmt-check
+pixi run lint
 pixi run compile
 pixi run check
 ```

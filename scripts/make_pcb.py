@@ -5,6 +5,7 @@ Run with KiCad's Python:
         scripts/make_pcb.py hardware/kaidi-desk.kicad_sch hardware/kaidi-desk.kicad_pcb
 """
 
+import json
 import os
 import subprocess
 import sys
@@ -24,8 +25,11 @@ YC = Y0 + H / 2
 
 with tempfile.TemporaryDirectory() as tmp:
     xml = Path(tmp) / "net.xml"
-    subprocess.run([str(CLI), "sch", "export", "netlist", "--format", "kicadxml", "-o", str(xml), str(SCH)],
-                   check=True, capture_output=True)
+    subprocess.run(
+        [str(CLI), "sch", "export", "netlist", "--format", "kicadxml", "-o", str(xml), str(SCH)],
+        check=True,
+        capture_output=True,
+    )
     root = ET.parse(xml).getroot()
 pad_net = {}
 for net in root.iter("net"):
@@ -39,6 +43,7 @@ board.SetCopperLayerCount(2)
 settings = board.GetDesignSettings()
 settings.m_TrackMinWidth = pcbnew.FromMM(0.25)
 settings.m_CopperEdgeClearance = pcbnew.FromMM(0.4)
+
 nets = {}
 
 
@@ -88,8 +93,12 @@ def model(fp, path, offset=(0, 0, 0)):
 
 def edge_outline():
     x1, y1, x2, y2, r = X0, Y0, X0 + W, Y0 + H, RADIUS
-    for (ax, ay), (bx, by) in (((x1 + r, y1), (x2 - r, y1)), ((x2, y1 + r), (x2, y2 - r)),
-                               ((x2 - r, y2), (x1 + r, y2)), ((x1, y2 - r), (x1, y1 + r))):
+    for (ax, ay), (bx, by) in (
+        ((x1 + r, y1), (x2 - r, y1)),
+        ((x2, y1 + r), (x2, y2 - r)),
+        ((x2 - r, y2), (x1 + r, y2)),
+        ((x1, y2 - r), (x1, y1 + r)),
+    ):
         s = pcbnew.PCB_SHAPE(board)
         s.SetShape(pcbnew.SHAPE_T_SEGMENT)
         s.SetStart(mm(ax, ay))
@@ -97,10 +106,12 @@ def edge_outline():
         s.SetLayer(pcbnew.Edge_Cuts)
         s.SetWidth(pcbnew.FromMM(0.1))
         board.Add(s)
-    k = r * (1 - 2 ** -0.5)
+    k = r * (1 - 2**-0.5)
     for (sx, sy), (mx, my), (ex, ey) in (
-        ((x1, y1 + r), (x1 + k, y1 + k), (x1 + r, y1)), ((x2 - r, y1), (x2 - k, y1 + k), (x2, y1 + r)),
-        ((x2, y2 - r), (x2 - k, y2 - k), (x2 - r, y2)), ((x1 + r, y2), (x1 + k, y2 - k), (x1, y2 - r)),
+        ((x1, y1 + r), (x1 + k, y1 + k), (x1 + r, y1)),
+        ((x2 - r, y1), (x2 - k, y1 + k), (x2, y1 + r)),
+        ((x2, y2 - r), (x2 - k, y2 - k), (x2 - r, y2)),
+        ((x1 + r, y2), (x1 + k, y2 - k), (x1, y2 - r)),
     ):
         a = pcbnew.PCB_SHAPE(board)
         a.SetShape(pcbnew.SHAPE_T_ARC)
@@ -142,7 +153,7 @@ model(fp, f"{models}/ESP32-C3_SuperMini.wrl")
 dip = FP / "Package_DIP.pretty"
 place(dip, "DIP-14_W7.62mm_Socket", "U2", X0 + 21.5, Y0 + 5.5)
 cap = place(FP / "Capacitor_THT.pretty", "C_Disc_D3.0mm_W1.6mm_P2.50mm", "C1", X0 + 24.0, Y0 + 2.2)
-dip_ref = [f for f in board.GetFootprints() if f.GetReference() == "U2"][0].Reference()
+dip_ref = next(f for f in board.GetFootprints() if f.GetReference() == "U2").Reference()
 dip_ref.SetVisible(False)
 for cap_pad in cap.Pads():
     cap_pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
@@ -204,8 +215,12 @@ for (cx1, cy1), (cx2, cy2) in zip(corners, corners[1:] + corners[:1]):
 silk("antenna keep-out", (corners[0][0] + corners[2][0]) / 2, U1_Y + 23.9, 0.9)
 
 inset = 0.65
-for x1, y1, x2, y2 in ((X0, Y0, X0 + W, Y0 + inset), (X0, Y0 + H - inset, X0 + W, Y0 + H),
-                       (X0, Y0, X0 + inset, Y0 + H), (X0 + W - inset, Y0, X0 + W, Y0 + H)):
+for x1, y1, x2, y2 in (
+    (X0, Y0, X0 + W, Y0 + inset),
+    (X0, Y0 + H - inset, X0 + W, Y0 + H),
+    (X0, Y0, X0 + inset, Y0 + H),
+    (X0 + W - inset, Y0, X0 + W, Y0 + H),
+):
     band = pcbnew.ZONE(board)
     band.SetIsRuleArea(True)
     band.SetLayerSet(layers)
@@ -226,25 +241,39 @@ for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
     z.SetMinThickness(pcbnew.FromMM(0.25))
     z.SetThermalReliefGap(pcbnew.FromMM(0.3))
     z.SetThermalReliefSpokeWidth(pcbnew.FromMM(0.4))
+    z.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
+    z.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL)
     outline = z.Outline()
     outline.NewOutline()
     for x, y in ((X0, Y0), (X0 + W, Y0), (X0 + W, Y0 + H), (X0, Y0 + H)):
         outline.Append(pcbnew.FromMM(x), pcbnew.FromMM(y))
     board.Add(z)
 
-missing = sorted({f"{r}.{p}" for (r, p) in pad_net} - {f"{fp.GetReference()}.{pad.GetNumber()}" for fp in board.GetFootprints() for pad in fp.Pads()})
+missing = sorted(
+    {f"{r}.{p}" for (r, p) in pad_net}
+    - {f"{fp.GetReference()}.{pad.GetNumber()}" for fp in board.GetFootprints() for pad in fp.Pads()}
+)
 assert not missing, f"netlist pads with no footprint pad: {missing}"
 pcbnew.ZONE_FILLER(board).Fill(board.Zones())
 board.Save(str(OUT))
+
+# Ground pads are routed with real traces, so a single thermal spoke into a pour is enough.
+project = OUT.with_suffix(".kicad_pro")
+config = json.loads(project.read_text()) if project.exists() else {}
+rules = config.setdefault("board", {}).setdefault("design_settings", {}).setdefault("rules", {})
+rules["min_resolved_spokes"] = 1
+project.write_text(json.dumps(config, indent=2) + "\n")
 
 geometry = {
     "board": {"x": X0, "y": Y0, "w": W, "h": H, "radius": RADIUS, "thickness": 1.6},
     "mounting_holes": [list(h) for h in HOLES],
     "screw_holes": [list(HOLES[0]), list(HOLES[3])],
-    "jacks": [{"ref": ref, "side": side, "y1": YC - 7.65, "y2": YC + 7.65, "height": 13.0} for ref, _, _, _, side in JACKS],
+    "jacks": [
+        {"ref": ref, "side": side, "y1": YC - 7.65, "y2": YC + 7.65, "height": 13.0} for ref, _, _, _, side in JACKS
+    ],
     "usb": {"side": "top", "center_x": U1_X + 7.62, "z": 0.2 + 1.0 + 1.6, "width": 9.0, "height": 3.2},
     "antenna": [list(u1_point(x, y)) for x, y in ((ax1, ay1), (ax2, ay2))],
     "tallest": 13.0,
 }
-(OUT.parent / "board.json").write_text(__import__("json").dumps(geometry, indent=2) + "\n")
+(OUT.parent / "board.json").write_text(json.dumps(geometry, indent=2) + "\n")
 print("placed", len(board.GetFootprints()), "footprints,", len(nets), "nets")

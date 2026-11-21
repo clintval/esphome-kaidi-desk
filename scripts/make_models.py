@@ -16,9 +16,11 @@ def box(x1, y1, z1, x2, y2, z2, color, shine=0.2, transparency=0.0):
     cx, cy, cz = (x1 + x2) / 2 / U, -(y1 + y2) / 2 / U, (z1 + z2) / 2 / U
     sx, sy, sz = abs(x2 - x1) / U, abs(y2 - y1) / U, abs(z2 - z1) / U
     r, g, b = color
-    return (f"Transform {{ translation {cx:.4f} {cy:.4f} {cz:.4f} children [ Shape {{ appearance Appearance {{ material "
-            f"Material {{ diffuseColor {r} {g} {b} specularColor {shine} {shine} {shine} shininess {shine} "
-            f"transparency {transparency} }} }} geometry Box {{ size {sx:.4f} {sy:.4f} {sz:.4f} }} }} ] }}\n")
+    return (
+        f"Transform {{ translation {cx:.4f} {cy:.4f} {cz:.4f} children [ Shape {{ appearance Appearance {{ material "
+        f"Material {{ diffuseColor {r} {g} {b} specularColor {shine} {shine} {shine} shininess {shine} "
+        f"transparency {transparency} }} }} geometry Box {{ size {sx:.4f} {sy:.4f} {sz:.4f} }} }} ] }}\n"
+    )
 
 
 def write(name, parts):

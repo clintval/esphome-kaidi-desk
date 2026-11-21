@@ -6,7 +6,6 @@ Holes are named by column and row, such as "G10". Run with:
     python3 scripts/protoboard.py
 """
 
-import sys
 from collections import defaultdict
 
 COLUMNS = "ABCDEFGHIJ"
@@ -114,7 +113,9 @@ def check() -> None:
 
     shared = {h: m for h, m in used.items() if len(m) > 1}
     assert not shared, f"holes used twice: {shared}"
-    spans = [(a, b, name) for name, _, a, b, _ in PARTS] + [(a, b, f"wire {a}-{b}") for a, b, _, _, layer in WIRES if layer == "top"]
+    spans = [(a, b, name) for name, _, a, b, _ in PARTS] + [
+        (a, b, f"wire {a}-{b}") for a, b, _, _, layer in WIRES if layer == "top"
+    ]
     for a, b, name in spans:
         if a[0] == b[0]:
             lo, hi = sorted((int(a[1:]), int(b[1:])))
@@ -143,4 +144,3 @@ def check() -> None:
 
 if __name__ == "__main__":
     check()
-

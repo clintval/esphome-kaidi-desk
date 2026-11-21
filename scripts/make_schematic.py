@@ -8,6 +8,7 @@ import os
 import re
 import sys
 import uuid
+from pathlib import Path
 
 LIBS = os.environ.get("KICAD_SHARE", "/Applications/KiCad/KiCad.app/Contents/SharedSupport") + "/symbols"
 GRID = 2.54
@@ -22,7 +23,7 @@ def uid():
 
 
 def lib_block(lib, name):
-    text = open(f"{LIBS}/{lib}.kicad_sym").read()
+    text = Path(f"{LIBS}/{lib}.kicad_sym").read_text()
     start = text.find(f'(symbol "{name}"')
     depth = 0
     for end in range(start, len(text)):
@@ -71,13 +72,9 @@ def module_symbol():
 
 def pins_of(block):
     found = {}
-    for m in re.finditer(
-        r'\(symbol "[^"]*_(\d+)_\d+"([\s\S]*?)(?=\(symbol "[^"]*_\d+_\d+"|\Z)', block
-    ):
+    for m in re.finditer(r'\(symbol "[^"]*_(\d+)_\d+"([\s\S]*?)(?=\(symbol "[^"]*_\d+_\d+"|\Z)', block):
         unit = int(m.group(1))
-        for p in re.finditer(
-            r'\(pin \w+ \w+\s*\(at ([-\d.]+) ([-\d.]+) (\d+)\)[\s\S]*?\(number "([^"]*)"', m.group(2)
-        ):
+        for p in re.finditer(r'\(pin \w+ \w+\s*\(at ([-\d.]+) ([-\d.]+) (\d+)\)[\s\S]*?\(number "([^"]*)"', m.group(2)):
             found[(unit, p.group(4))] = (float(p.group(1)), float(p.group(2)), int(p.group(3)))
     return found
 
@@ -107,8 +104,21 @@ instances = []
 root = uid()
 
 
-def place(lib_id, ref, value, x, y, unit=1, mirror=False, footprint="", ref_at=(0, -2.54), val_at=(0, 2.54),
-          hide_ref=False, hide_val=False, justify=""):
+def place(
+    lib_id,
+    ref,
+    value,
+    x,
+    y,
+    unit=1,
+    mirror=False,
+    footprint="",
+    ref_at=(0, -2.54),
+    val_at=(0, 2.54),
+    hide_ref=False,
+    hide_val=False,
+    justify="",
+):
     u = uid()
     hr = " (hide yes)" if hide_ref or ref.startswith("#") else ""
     hv = " (hide yes)" if hide_val else ""
@@ -170,13 +180,24 @@ def no_connect(pin):
 
 
 def text(s, x, y, size=1.8):
-    out.append(f'(text "{s}" (exclude_from_sim no) (at {x} {y} 0) (effects (font (size {size} {size}) (thickness 0.3) bold) (justify left)) (uuid "{uid()}"))')
+    out.append(
+        f'(text "{s}" (exclude_from_sim no) (at {x} {y} 0) (effects (font (size {size} {size}) (thickness 0.3) bold) (justify left)) (uuid "{uid()}"))'
+    )
 
 
 text("Keypad and desk", 22.86, 27.94)
 for ref, label, y in (("J1", "Keypad (RJ50)", 55.88), ("J2", "Desk (RJ50)", 116.84)):
-    p = place("Connector_Generic:Conn_01x10", ref, label, 38.1, y, mirror=True, footprint=FOOTPRINTS["J"],
-              ref_at=(0, -15.24), val_at=(0, -12.7))
+    p = place(
+        "Connector_Generic:Conn_01x10",
+        ref,
+        label,
+        38.1,
+        y,
+        mirror=True,
+        footprint=FOOTPRINTS["J"],
+        ref_at=(0, -15.24),
+        val_at=(0, -12.7),
+    )
     side = "KEYPAD" if ref == "J1" else "DESK"
     for num in ("1", "4", "5", "6", "9"):
         no_connect(p(num))
@@ -192,7 +213,17 @@ net(flag("1"), "GND")
 
 text("Keypad path: 1k in series, so the buffer overrides it only while sending", 76.2, 27.94, 1.5)
 for ref, a, b, x in (("R1", "CMD_KEYPAD", "CMD_DESK", 96.52), ("R2", "WAKE_KEYPAD", "WAKE_DESK", 132.08)):
-    p = place("Device:R", ref, "1k", x, 63.5, footprint=FOOTPRINTS["R"], ref_at=(2.54, -1.27), val_at=(2.54, 1.27), justify="left")
+    p = place(
+        "Device:R",
+        ref,
+        "1k",
+        x,
+        63.5,
+        footprint=FOOTPRINTS["R"],
+        ref_at=(2.54, -1.27),
+        val_at=(2.54, 1.27),
+        justify="left",
+    )
     net(p("1"), a)
     net(p("2"), b)
 
@@ -205,15 +236,46 @@ gates = [
 ]
 ab = {1: ("2", "1", "3"), 2: ("5", "4", "6"), 3: ("9", "10", "8"), 4: ("12", "13", "11")}
 for unit, x, y, a, oe, yy in gates:
-    p = place("74xx:74AHCT125", "U2", "74AHCT125", x, y, unit=unit, footprint=FOOTPRINTS["U2"], ref_at=(0, -5.08), hide_val=True)
+    p = place(
+        "74xx:74AHCT125",
+        "U2",
+        "74AHCT125",
+        x,
+        y,
+        unit=unit,
+        footprint=FOOTPRINTS["U2"],
+        ref_at=(0, -5.08),
+        hide_val=True,
+    )
     pa, poe, py = ab[unit]
     net(p(pa), a)
     net(p(poe), oe)
     net(p(py), yy)
-p = place("74xx:74AHCT125", "U2", "74AHCT125", 91.44, 137.16, unit=5, footprint=FOOTPRINTS["U2"], ref_at=(5.08, -1.27), val_at=(5.08, 1.27), justify="left")
+p = place(
+    "74xx:74AHCT125",
+    "U2",
+    "74AHCT125",
+    91.44,
+    137.16,
+    unit=5,
+    footprint=FOOTPRINTS["U2"],
+    ref_at=(5.08, -1.27),
+    val_at=(5.08, 1.27),
+    justify="left",
+)
 net(p("14"), "+5V")
 net(p("7"), "GND")
-p = place("Device:C", "C1", "100n", 78.74, 137.16, footprint=FOOTPRINTS["C"], ref_at=(-2.54, -1.27), val_at=(-2.54, 1.27), justify="right")
+p = place(
+    "Device:C",
+    "C1",
+    "100n",
+    78.74,
+    137.16,
+    footprint=FOOTPRINTS["C"],
+    ref_at=(-2.54, -1.27),
+    val_at=(-2.54, 1.27),
+    justify="right",
+)
 net(p("1"), "+5V")
 net(p("2"), "GND")
 
@@ -224,14 +286,44 @@ for ref, value, a, x, y in (
     ("R5", "100k", "EN_TX", 190.5, 157.48),
     ("R6", "100k", "EN_WAKE", 213.36, 157.48),
 ):
-    p = place("Device:R", ref, value, x, y, footprint=FOOTPRINTS["R"], ref_at=(2.54, -1.27), val_at=(2.54, 1.27), justify="left")
+    p = place(
+        "Device:R",
+        ref,
+        value,
+        x,
+        y,
+        footprint=FOOTPRINTS["R"],
+        ref_at=(2.54, -1.27),
+        val_at=(2.54, 1.27),
+        justify="left",
+    )
     net(p("1"), a)
     net(p("2"), "GND")
 
 text("Dividers (5 V to 3.1 V)", 182.88, 27.94)
 for top, bottom, a, mid, x in (("R7", "R8", "HEIGHT", "RX", 190.5), ("R9", "R10", "CMD_KEYPAD", "SENSE", 210.82)):
-    pt = place("Device:R", top, "10k", x, 53.34, footprint=FOOTPRINTS["R"], ref_at=(2.54, -1.27), val_at=(2.54, 1.27), justify="left")
-    pb = place("Device:R", bottom, "15k", x, 71.12, footprint=FOOTPRINTS["R"], ref_at=(2.54, -1.27), val_at=(2.54, 1.27), justify="left")
+    pt = place(
+        "Device:R",
+        top,
+        "10k",
+        x,
+        53.34,
+        footprint=FOOTPRINTS["R"],
+        ref_at=(2.54, -1.27),
+        val_at=(2.54, 1.27),
+        justify="left",
+    )
+    pb = place(
+        "Device:R",
+        bottom,
+        "15k",
+        x,
+        71.12,
+        footprint=FOOTPRINTS["R"],
+        ref_at=(2.54, -1.27),
+        val_at=(2.54, 1.27),
+        justify="left",
+    )
     net(pt("1"), a)
     (x1, y1), _ = pt("2")
     (x2, y2), _ = pb("1")
@@ -243,7 +335,16 @@ for top, bottom, a, mid, x in (("R7", "R8", "HEIGHT", "RX", 190.5), ("R9", "R10"
     net(pb("2"), "GND")
 
 text("ESP32-C3 SuperMini (USB-C powered)", 233.68, 27.94)
-p = place("kaidi:ESP32-C3_SuperMini", "U1", "ESP32-C3 SuperMini", 254.0, 63.5, footprint=FOOTPRINTS["U1"], ref_at=(0, -13.97), val_at=(0, 13.97))
+p = place(
+    "kaidi:ESP32-C3_SuperMini",
+    "U1",
+    "ESP32-C3 SuperMini",
+    254.0,
+    63.5,
+    footprint=FOOTPRINTS["U1"],
+    ref_at=(0, -13.97),
+    val_at=(0, 13.97),
+)
 uses = {"2": "GND", "4": "RX", "5": "SENSE", "10": "EN_TX", "11": "TX", "14": "EN_WAKE"}
 for num in map(str, range(1, 17)):
     if num in uses:
@@ -260,4 +361,4 @@ sch = f"""(kicad_sch (version 20250114) (generator "eeschema") (generator_versio
 {body}
 (sheet_instances (path "/" (page "1"))))
 """
-open(sys.argv[1], "w").write(sch)
+Path(sys.argv[1]).write_text(sch)

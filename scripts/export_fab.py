@@ -14,8 +14,9 @@ PCB = ROOT / "hardware/kaidi-desk.kicad_pcb"
 
 with tempfile.TemporaryDirectory() as tmp:
     for kind in ("gerbers", "drill"):
-        subprocess.run([os.environ["KICAD_CLI"], "pcb", "export", kind, "-o", f"{tmp}/", str(PCB)],
-                       check=True, capture_output=True)
+        subprocess.run(
+            [os.environ["KICAD_CLI"], "pcb", "export", kind, "-o", f"{tmp}/", str(PCB)], check=True, capture_output=True
+        )
     with zipfile.ZipFile(ROOT / "hardware/kaidi-desk-gerbers.zip", "w", zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(Path(tmp).iterdir()):
             archive.write(path, path.name)

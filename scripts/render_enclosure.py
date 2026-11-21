@@ -34,7 +34,30 @@ for name, view in VIEWS.items():
         board.Save(str(pcb))
         for asset in ("kaidi.3dshapes",):
             (Path(tmp) / asset).symlink_to(HW / asset)
-        subprocess.run([CLI, "pcb", "render", "-w", "1800", "-h", "1150", "--quality", "high", "--perspective",
-                        "--floor", "--background", "transparent", "--rotate", view["rotate"], "--zoom", view["zoom"],
-                        "-o", str(DOCS / f"{name}.png"), str(pcb)], check=True, capture_output=True)
+        subprocess.run(
+            [
+                CLI,
+                "pcb",
+                "render",
+                "-w",
+                "1800",
+                "-h",
+                "1150",
+                "--quality",
+                "high",
+                "--perspective",
+                "--floor",
+                "--background",
+                "transparent",
+                "--rotate",
+                view["rotate"],
+                "--zoom",
+                view["zoom"],
+                "-o",
+                str(DOCS / f"{name}.png"),
+                str(pcb),
+            ],
+            check=True,
+            capture_output=True,
+        )
     print("rendered", name)

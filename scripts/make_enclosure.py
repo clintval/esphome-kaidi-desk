@@ -36,6 +36,8 @@ b = geo["board"]
 X0, Y0, W, H, R, T = b["x"], b["y"], b["w"], b["h"], b["radius"], b["thickness"]
 
 GAP, WALL, FLOOR, STANDOFF, LID = 0.5, 2.2, 2.0, 4.0, 2.0
+INSERT_HOLE, INSERT_LENGTH = 4.0, 5.7
+SCREW_CLEARANCE, HEAD_DIAMETER, HEAD_HEIGHT, SCREW_LENGTH = 3.4, 5.7, 1.65, 20.0
 TOP = geo["tallest"] + 1.0
 Z_FLOOR = -(T + STANDOFF + FLOOR)
 IW, IH = W + 2 * GAP, H + 2 * GAP
@@ -52,13 +54,11 @@ def ky(y):
 
 
 with BuildPart() as base:
-    with BuildSketch(Plane.XY.offset(Z_FLOOR)):
-        with Locations((CX, CY)):
-            RectangleRounded(OW, OH, R + GAP + WALL)
+    with BuildSketch(Plane.XY.offset(Z_FLOOR)), Locations((CX, CY)):
+        RectangleRounded(OW, OH, R + GAP + WALL)
     extrude(amount=TOP - Z_FLOOR)
-    with BuildSketch(Plane.XY.offset(Z_FLOOR + FLOOR)):
-        with Locations((CX, CY)):
-            RectangleRounded(IW, IH, R + GAP)
+    with BuildSketch(Plane.XY.offset(Z_FLOOR + FLOOR)), Locations((CX, CY)):
+        RectangleRounded(IW, IH, R + GAP)
     extrude(amount=TOP - Z_FLOOR, mode=Mode.SUBTRACT)
 
     posts = [(kx(x), ky(y)) for x, y in geo["mounting_holes"]]
@@ -68,7 +68,9 @@ with BuildPart() as base:
             Cylinder(3.25, STANDOFF, align=(Align.CENTER, Align.CENTER, Align.MIN))
     for x, y in holes:
         with Locations(Location((x, y, -T))):
-            Cylinder(2.1, 5.5, align=(Align.CENTER, Align.CENTER, Align.MAX), mode=Mode.SUBTRACT)
+            Cylinder(
+                INSERT_HOLE / 2, STANDOFF + FLOOR, align=(Align.CENTER, Align.CENTER, Align.MAX), mode=Mode.SUBTRACT
+            )
 
     for jack in geo["jacks"]:
         wall_x = -(GAP + WALL / 2) if jack["side"] == "left" else W + GAP + WALL / 2
@@ -77,9 +79,8 @@ with BuildPart() as base:
             Box(WALL + 2, abs(jack["y2"] - jack["y1"]) + 0.8, TOP + 0.2, mode=Mode.SUBTRACT)
 
     usb = geo["usb"]
-    with BuildSketch(Plane.XZ.offset(-(GAP + WALL + 1))):
-        with Locations((kx(usb["center_x"]), usb["z"])):
-            RectangleRounded(12.6, 7.0, 3.0)
+    with BuildSketch(Plane.XZ.offset(-(GAP + WALL + 1))), Locations((kx(usb["center_x"]), usb["z"])):
+        RectangleRounded(12.6, 7.0, 3.0)
     extrude(amount=WALL + 2, mode=Mode.SUBTRACT)
 
     for ex in (14.0, W - 14.0):
@@ -90,16 +91,20 @@ with BuildPart() as base:
             Cylinder(2.3, 10, mode=Mode.SUBTRACT)
 
 with BuildPart() as lid:
-    with BuildSketch(Plane.XY.offset(TOP)):
-        with Locations((CX, CY)):
-            RectangleRounded(OW, OH, R + GAP + WALL)
+    with BuildSketch(Plane.XY.offset(TOP)), Locations((CX, CY)):
+        RectangleRounded(OW, OH, R + GAP + WALL)
     extrude(amount=LID)
     for x, y in holes:
         with Locations(Location((x, y, TOP))):
             Cylinder(3.25, TOP - 0.2, align=(Align.CENTER, Align.CENTER, Align.MAX))
         with Locations(Location((x, y, TOP + LID))):
-            Cylinder(1.7, TOP + LID, align=(Align.CENTER, Align.CENTER, Align.MAX), mode=Mode.SUBTRACT)
-            Cylinder(3.0, 1.2, align=(Align.CENTER, Align.CENTER, Align.MAX), mode=Mode.SUBTRACT)
+            Cylinder(SCREW_CLEARANCE / 2, TOP + LID, align=(Align.CENTER, Align.CENTER, Align.MAX), mode=Mode.SUBTRACT)
+            Cylinder(
+                HEAD_DIAMETER / 2 + 0.25,
+                HEAD_HEIGHT + 0.05,
+                align=(Align.CENTER, Align.CENTER, Align.MAX),
+                mode=Mode.SUBTRACT,
+            )
     with BuildSketch(Plane.XY.offset(TOP + LID - 0.5)):
         with Locations((CX, CY - 2.0)):
             Text("esphome-kaidi-desk", 5.0)
@@ -118,5 +123,11 @@ out.mkdir(exist_ok=True)
 for name, part in (("base", base.part), ("lid", lid.part)):
     export_step(part, str(out / f"{name}.step"))
     export_stl(part, str(out / f"{name}.stl"))
+seat = TOP + LID - HEAD_HEIGHT - 0.05
+tip = seat - SCREW_LENGTH
+engagement = -T - tip
+assert INSERT_LENGTH <= STANDOFF + FLOOR, "the insert must fit inside its post"
+assert 3.0 <= engagement <= INSERT_LENGTH, f"an M3 x {SCREW_LENGTH:g} screw engages {engagement:.1f} mm of the insert"
+print(f"M3 x {SCREW_LENGTH:g} mm button-head screws engage {engagement:.1f} mm of the {INSERT_LENGTH} mm inserts")
 size = base.part.bounding_box().size
 print(f"base {size.X:.1f} x {size.Y:.1f} x {size.Z + LID:.1f} mm overall, inner height above the board {TOP:.1f} mm")

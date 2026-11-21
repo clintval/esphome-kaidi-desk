@@ -32,18 +32,41 @@ EXPECTED = {
 failures = []
 
 with tempfile.TemporaryDirectory() as tmp:
-    erc = subprocess.run([CLI, "sch", "erc", "--severity-error", "--exit-code-violations", "-o", f"{tmp}/erc.rpt", str(SCH)],
-                         capture_output=True, text=True)
+    erc = subprocess.run(
+        [CLI, "sch", "erc", "--severity-error", "--exit-code-violations", "-o", f"{tmp}/erc.rpt", str(SCH)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
     if erc.returncode:
         failures.append("ERC errors:\n" + Path(f"{tmp}/erc.rpt").read_text())
-    drc = subprocess.run([CLI, "pcb", "drc", "--severity-error", "--schematic-parity", "--exit-code-violations",
-                          "-o", f"{tmp}/drc.rpt", str(PCB)], capture_output=True, text=True)
+    drc = subprocess.run(
+        [
+            CLI,
+            "pcb",
+            "drc",
+            "--severity-error",
+            "--schematic-parity",
+            "--exit-code-violations",
+            "-o",
+            f"{tmp}/drc.rpt",
+            str(PCB),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
     if drc.returncode:
         failures.append("DRC errors:\n" + Path(f"{tmp}/drc.rpt").read_text())
-    subprocess.run([CLI, "sch", "export", "netlist", "--format", "kicadxml", "-o", f"{tmp}/net.xml", str(SCH)],
-                   check=True, capture_output=True)
-    nets = {n.get("name"): {f"{x.get('ref')}.{x.get('pin')}" for x in n.iter("node")}
-            for n in ET.parse(f"{tmp}/net.xml").getroot().iter("net")}
+    subprocess.run(
+        [CLI, "sch", "export", "netlist", "--format", "kicadxml", "-o", f"{tmp}/net.xml", str(SCH)],
+        check=True,
+        capture_output=True,
+    )
+    nets = {
+        n.get("name"): {f"{x.get('ref')}.{x.get('pin')}" for x in n.iter("node")}
+        for n in ET.parse(f"{tmp}/net.xml").getroot().iter("net")
+    }
 nets = {k: v for k, v in nets.items() if len(v) > 1}
 for name, want in EXPECTED.items():
     if nets.get(name) != want:
@@ -51,7 +74,7 @@ for name, want in EXPECTED.items():
 for extra in set(nets) - set(EXPECTED):
     failures.append(f"unexpected net {extra}: {sorted(nets[extra])}")
 
-proto = subprocess.run(["python", str(ROOT / "scripts/protoboard.py")], capture_output=True, text=True)
+proto = subprocess.run(["python", str(ROOT / "scripts/protoboard.py")], capture_output=True, text=True, check=False)
 if proto.returncode:
     failures.append("protoboard layout:\n" + proto.stderr)
 
