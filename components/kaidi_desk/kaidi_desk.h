@@ -74,6 +74,7 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   void publish_status_(const char *status);
   void sync_target_();
   bool box_awake_(uint32_t now) const;
+  void keep_alive_(uint32_t now);
   void apply_wake_pin_();
   void abort_for_keypad_();
   static void keypad_isr_(KaidiDesk *desk);
@@ -115,6 +116,7 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   uint32_t last_tx_ms_{0};
   uint8_t release_frames_{0};
   bool keep_awake_{false};
+  uint8_t keepalive_frames_{0};
 
   HighFrequencyLoopRequester high_freq_;
 };

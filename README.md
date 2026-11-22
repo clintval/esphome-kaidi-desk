@@ -69,7 +69,7 @@ A complete config with every entity is in [`example/kaidi-desk.yaml`](example/ka
 | `button` | `nudge_up`, `nudge_down` | Move briefly up or down, about half an inch |
 | `button` | `stop` | Stop any move |
 | `button` | `reset` | Hold Up and Down until the box re-zeros, which clears E04 |
-| `switch` | `keep_awake` | Hold the wake line high so height streams live and moves start at once |
+| `switch` | `keep_awake` | Hold the wake line high and send a few Idle frames every 10 s, so the box never sleeps, height streams live and moves start at once |
 
 ## Hardware
 

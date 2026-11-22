@@ -17,6 +17,8 @@ static const uint32_t ASLEEP_AFTER_MS = 2000;
 static const uint32_t HEIGHT_STALE_MS = 3000;
 static const uint32_t WAKE_HOLD_MS = 500;
 static const uint8_t RELEASE_IDLE_FRAMES = 3;
+static const uint32_t KEEPALIVE_INTERVAL_MS = 10000;
+static const uint8_t KEEPALIVE_FRAMES = 3;
 
 void KaidiDesk::setup() {
   if (this->tx_enable_pin_ != nullptr) {
@@ -68,6 +70,7 @@ void KaidiDesk::loop() {
       this->box_mode_ = BOX_MODE_NONE;
       this->publish_status_("Asleep");
     }
+    this->keep_alive_(now);
     return;
   }
   if (now - this->last_tx_ms_ < this->frame_interval_)
@@ -288,7 +291,20 @@ void KaidiDesk::apply_wake_pin_() {
 
 void KaidiDesk::set_keep_awake(bool keep_awake) {
   this->keep_awake_ = keep_awake;
+  this->keepalive_frames_ = keep_awake ? KEEPALIVE_FRAMES : 0;
   this->apply_wake_pin_();
+}
+
+// Holding the wake line alone does not stop the box from sleeping; like the keypad, it needs Idle frames.
+void KaidiDesk::keep_alive_(uint32_t now) {
+  if (!this->keep_awake_)
+    return;
+  if (this->keepalive_frames_ == 0 && now - this->last_tx_ms_ >= KEEPALIVE_INTERVAL_MS)
+    this->keepalive_frames_ = KEEPALIVE_FRAMES;
+  if (this->keepalive_frames_ > 0 && now - this->last_tx_ms_ >= this->frame_interval_) {
+    this->send_(COMMAND_IDLE);
+    this->keepalive_frames_--;
+  }
 }
 
 void KaidiDesk::nudge(bool up) { this->begin_(up ? Action::NUDGE_UP : Action::NUDGE_DOWN); }
