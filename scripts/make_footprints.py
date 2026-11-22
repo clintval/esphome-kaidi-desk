@@ -12,6 +12,9 @@ import sys
 import uuid
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from dimensions import C3_LENGTH, C3_PIN1_INSET, C3_USB_OVERHANG, C3_WIDTH
+
 LIB = sys.argv[1]
 
 
@@ -87,10 +90,10 @@ Path(f"{LIB}/RJ50_Amphenol_54602-910_Horizontal.kicad_mod").write_text(
 
 pins = ""
 for i in range(8):
-    pins += pad(str(i + 1), 0, round(i * 2.54, 2), "rect" if i == 0 else "oval" if False else "circle", 1.7, 1.0)
-    pins += pad(str(i + 9), 15.24, round(i * 2.54, 2), "circle", 1.7, 1.0)
-w0, w1 = -1.38, 15.24 + 1.38
-h0, h1 = -4.3, 7 * 2.54 + 1.4
+    pins += pad(str(i + 1), 15.24, round(i * 2.54, 2), "rect" if i == 0 else "circle", 1.7, 1.0)
+    pins += pad(str(i + 9), 0, round(i * 2.54, 2), "circle", 1.7, 1.0)
+w0, w1 = 7.62 - C3_WIDTH / 2, 7.62 + C3_WIDTH / 2
+h0, h1 = -C3_PIN1_INSET, C3_LENGTH - C3_PIN1_INSET
 body = (
     text("Reference", "U**", 7.62, h1 + 2, "F.SilkS")
     + text("Value", "ESP32-C3_SuperMini", 7.62, 8.9, "F.Fab")
@@ -99,14 +102,14 @@ body = (
     + line(w0, h0, w0, 12.0, "F.SilkS", 0.12)
     + line(w1, h0, w1, 12.0, "F.SilkS", 0.12)
     + rect(w0, h0, w1, h1, "F.Fab", 0.1)
-    + line(4.12, h0, 4.12, h0 - 1.6, "F.SilkS", 0.12)
-    + line(11.12, h0, 11.12, h0 - 1.6, "F.SilkS", 0.12)
-    + rect(w0 - 0.5, h0 - 0.5, w1 + 0.5, h1 + 0.5, "F.CrtYd", 0.05)
+    + line(3.12, h0, 3.12, h0 - C3_USB_OVERHANG, "F.SilkS", 0.12)
+    + line(12.12, h0, 12.12, h0 - C3_USB_OVERHANG, "F.SilkS", 0.12)
+    + rect(w0 - 0.5, h0 - C3_USB_OVERHANG, w1 + 0.5, h1 + 0.5, "F.CrtYd", 0.05)
 )
 Path(f"{LIB}/ESP32-C3_SuperMini.kicad_mod").write_text(
     footprint(
         "ESP32-C3_SuperMini",
-        "ESP32-C3 SuperMini plugged into two 1x8 round-pin socket strips, component side up, USB-C toward -Y; pins 1-8 5V GND 3V3 4 3 2 1 0, pins 9-16 GPIO5 6 7 8 9 10 20 21",
+        "ESP32-C3 SuperMini plugged into two 1x8 round-pin socket strips, component side up, USB-C toward -Y, antenna toward +Y; pins 1-8 (right) 5V GND 3V3 4 3 2 1 0, pins 9-16 (left) GPIO5 6 7 8 9 10 20 21",
         body,
     )
 )

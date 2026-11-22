@@ -14,7 +14,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pcbnew
-from dimensions import C3_BOTTOM, C3_THICKNESS
+from dimensions import C3_BOTTOM, C3_LENGTH, C3_PIN1_INSET, C3_THICKNESS, C3_USB_OVERHANG
 
 FP = Path(os.environ.get("KICAD_SHARE", "/Applications/KiCad/KiCad.app/Contents/SharedSupport")) / "footprints"
 CLI = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli")
@@ -146,7 +146,7 @@ for ref, x, y, angle, _ in JACKS:
 silk("KEYPAD", X0 + 8.9, YC - 9.6, 1.4, bold=True)
 silk("DESK", X0 + W - 8.9, YC - 9.6, 1.4, bold=True)
 
-U1_X, U1_Y = X0 + W / 2 - 7.62, Y0 + 6.9
+U1_X, U1_Y = X0 + W / 2 - 7.62, Y0 + C3_PIN1_INSET + C3_USB_OVERHANG
 fp = place(jack_lib, "ESP32-C3_SuperMini", "U1", U1_X, U1_Y, angle=0)
 fp.Reference().SetVisible(False)
 model(fp, f"{models}/ESP32-C3_SuperMini.wrl")
@@ -186,8 +186,9 @@ def polygon(zone, points):
         outline.Append(pcbnew.FromMM(x), pcbnew.FromMM(y))
 
 
-ANTENNA = (-3.4, 13.9, 18.64, 23.0)
-SLOT = (1.9, 13.6, 13.34, 21.0)
+C3_END = C3_LENGTH - C3_PIN1_INSET
+ANTENNA = (-3.4, 16.0, 18.64, C3_END + 3.0)
+SLOT = (1.9, 15.2, 13.34, C3_END + 0.6)
 ax1, ay1, ax2, ay2 = ANTENNA
 keepout = pcbnew.ZONE(board)
 keepout.SetIsRuleArea(True)
@@ -213,7 +214,7 @@ for (cx1, cy1), (cx2, cy2) in zip(corners, corners[1:] + corners[:1]):
     s.SetLayer(pcbnew.Edge_Cuts)
     s.SetWidth(pcbnew.FromMM(0.1))
     board.Add(s)
-silk("antenna keep-out", (corners[0][0] + corners[2][0]) / 2, U1_Y + 23.9, 0.9)
+silk("antenna keep-out", (corners[0][0] + corners[2][0]) / 2, U1_Y + ANTENNA[3] + 0.9, 0.9)
 
 inset = 0.65
 for x1, y1, x2, y2 in (

@@ -7,7 +7,16 @@ KiCad's VRML units (2.54 mm, y flipped). Run with: python3 scripts/make_models.p
 import sys
 from pathlib import Path
 
-from dimensions import C3_BOTTOM, C3_THICKNESS, SOCKET_STRIP
+from dimensions import (
+    C3_BOTTOM,
+    C3_LENGTH,
+    C3_PIN1_INSET,
+    C3_THICKNESS,
+    C3_USB_LENGTH,
+    C3_USB_OVERHANG,
+    C3_WIDTH,
+    SOCKET_STRIP,
+)
 
 OUT = Path(sys.argv[1])
 OUT.mkdir(parents=True, exist_ok=True)
@@ -43,13 +52,15 @@ write("RJ50_Amphenol_54602-910_Horizontal.wrl", jack)
 
 z0, z1 = C3_BOTTOM, C3_BOTTOM + C3_THICKNESS
 blue = (0.05, 0.12, 0.28)
-module = [box(-1.38, -3.6, z0, 16.62, 18.92, z1, blue, 0.3)]
-module.append(box(3.12, -6.9, z1, 12.12, 0.4, z1 + 3.2, SILVER, 0.8))
-module.append(box(5.12, 6.0, z1, 10.12, 11.0, z1 + 0.9, BLACK, 0.3))
-module.append(box(4.62, 14.4, z1, 10.62, 17.4, z1 + 1.2, (0.92, 0.9, 0.86), 0.2))
+edge, end = -C3_PIN1_INSET, C3_LENGTH - C3_PIN1_INSET
+usb = edge - C3_USB_OVERHANG
+module = [box(7.62 - C3_WIDTH / 2, edge, z0, 7.62 + C3_WIDTH / 2, end, z1, blue, 0.3)]
+module.append(box(3.12, usb, z1, 12.12, usb + C3_USB_LENGTH, z1 + 3.2, SILVER, 0.8))
+module.append(box(5.12, 8.0, z1, 10.12, 13.0, z1 + 0.9, BLACK, 0.3))
+module.append(box(9.6, end - 2.6, z1, 13.8, end - 0.8, z1 + 0.9, (0.82, 0.2, 0.2), 0.2))
 for x in (1.2, 12.4):
-    module.append(box(x, 1.4, z1, x + 2.6, 4.2, z1 + 1.4, (0.7, 0.7, 0.7), 0.4))
-    module.append(box(x + 0.6, 2.0, z1 + 1.4, x + 2.0, 3.6, z1 + 1.9, BLACK, 0.2))
+    module.append(box(x, 7.0, z1, x + 2.6, 9.8, z1 + 1.4, (0.7, 0.7, 0.7), 0.4))
+    module.append(box(x + 0.6, 7.6, z1 + 1.4, x + 2.0, 9.2, z1 + 1.9, BLACK, 0.2))
 socketed = C3_BOTTOM > SOCKET_STRIP
 for x in (0.0, 15.24):
     if socketed:
