@@ -13,7 +13,7 @@ import tempfile
 KICAD_CLI = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli")
 THEMES = pathlib.Path(os.environ.get("KICAD_CONFIG", pathlib.Path.home() / "Library/Preferences/kicad/10.0")) / "colors"
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-X, Y, W, H = 12.0, 18.0, 284.0, 190.0
+X, Y, W, H = 10.0, 18.0, 302.0, 190.0
 
 THEMES.mkdir(parents=True, exist_ok=True)
 shutil.copy(ROOT / "hardware/themes/kaidi-dark.json", THEMES / "kaidi-dark.json")
