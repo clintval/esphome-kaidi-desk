@@ -1,7 +1,8 @@
 """Build a two-part 3D-printable box around the dongle PCB from hardware/board.json.
 
 The base holds the board on four posts (two with M3 heat-set inserts) and has openings for the keypad
-jack on one end, the desk jack on the other and the USB-C port on the top side. The lid screws down
+jack on one end, the desk jack on the other and the USB-C power input on the bottom side. The C3's own
+USB-C gets no opening: it is only for the first flash, with the board out of the box. The lid screws down
 through two bosses that clamp the board and is engraved KEYPAD and DESK at the matching ends, with
 chevrons between them. Nothing metal sits near the C3's antenna: the screws are at the far corners.
 Models are written in KiCad's 3D frame (origin at the board's top-left, Y up, Z = 0 on the board's
@@ -85,9 +86,11 @@ with BuildPart() as base:
             Box(WALL + 2, abs(jack["y2"] - jack["y1"]) + 0.8, TOP + 1.3, mode=Mode.SUBTRACT)
 
     usb = geo["usb"]
-    with BuildSketch(Plane.XZ.offset(-(GAP + WALL + 1))), Locations((kx(usb["center_x"]), usb["z"])):
+    start = -(GAP + WALL + 1) if usb["side"] == "top" else H - 0.5
+    depth = WALL + 2 if usb["side"] == "top" else GAP + WALL + 1.5
+    with BuildSketch(Plane.XZ.offset(start)), Locations((kx(usb["center_x"]), usb["z"])):
         RectangleRounded(13.4, 7.6, 3.2)
-    extrude(amount=WALL + 2, mode=Mode.SUBTRACT)
+    extrude(amount=depth, mode=Mode.SUBTRACT)
 
 
 with BuildPart() as lid:
@@ -109,9 +112,9 @@ with BuildPart() as lid:
         with Locations(*[(x, CY) for x in CHEVRONS]):
             Polygon((-6.0, 8.0), (-1.0, 8.0), (7.0, 0.0), (-1.0, -8.0), (-6.0, -8.0), (2.0, 0.0))
         with Locations((LABEL_INSET, CY)):
-            Text("KEYPAD", LABEL_SIZE, font_style=FontStyle.BOLD, rotation=180)
+            Text("KEYPAD", LABEL_SIZE, font_style=FontStyle.BOLD)
         with Locations((W - LABEL_INSET, CY)):
-            Text("DESK", LABEL_SIZE, font_style=FontStyle.BOLD, rotation=180)
+            Text("DESK", LABEL_SIZE, font_style=FontStyle.BOLD)
     extrude(amount=1.0, mode=Mode.SUBTRACT)
 
 out = HW / "enclosure"

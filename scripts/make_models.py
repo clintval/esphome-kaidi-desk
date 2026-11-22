@@ -1,4 +1,4 @@
-"""Write simple VRML 3D models for the RJ50 jack and the ESP32-C3 SuperMini, for KiCad's 3D renders.
+"""Write simple VRML 3D models for the RJ50 jack, the ESP32-C3 SuperMini, the USB-C breakout and the B0505S, for KiCad's 3D renders.
 
 Coordinates are in footprint millimetres (x right, y down the footprint, z up) and are converted to
 KiCad's VRML units (2.54 mm, y flipped). Run with: python3 scripts/make_models.py hardware/kaidi.3dshapes
@@ -8,6 +8,12 @@ import sys
 from pathlib import Path
 
 from dimensions import (
+    B0505S_HEIGHT,
+    B0505S_LENGTH,
+    B0505S_PIN1_INSET,
+    B0505S_PIN_ROW_INSET,
+    B0505S_STANDOFF,
+    B0505S_THICKNESS,
     C3_BOTTOM,
     C3_LENGTH,
     C3_PIN1_INSET,
@@ -16,6 +22,14 @@ from dimensions import (
     C3_USB_OVERHANG,
     C3_WIDTH,
     SOCKET_STRIP,
+    USBC_BREAKOUT_DEPTH,
+    USBC_BREAKOUT_PIN_INSET,
+    USBC_BREAKOUT_STANDOFF,
+    USBC_BREAKOUT_THICKNESS,
+    USBC_BREAKOUT_WIDTH,
+    USBC_RECEPTACLE_DEPTH,
+    USBC_RECEPTACLE_HEIGHT,
+    USBC_RECEPTACLE_WIDTH,
 )
 
 OUT = Path(sys.argv[1])
@@ -76,3 +90,46 @@ for x in (0.0, 15.24):
         )
         module.append(box(x - 0.75, i * 2.54 - 0.75, z1, x + 0.75, i * 2.54 + 0.75, z1 + 0.25, GOLD, 0.7))
 write("ESP32-C3_SuperMini.wrl", module)
+
+RED = (0.78, 0.12, 0.1)
+cx = 2.5 * 2.54
+b0, b1 = USBC_BREAKOUT_STANDOFF, USBC_BREAKOUT_STANDOFF + USBC_BREAKOUT_THICKNESS
+end = USBC_BREAKOUT_DEPTH - USBC_BREAKOUT_PIN_INSET
+breakout = [
+    box(cx - USBC_BREAKOUT_WIDTH / 2, -USBC_BREAKOUT_PIN_INSET, b0, cx + USBC_BREAKOUT_WIDTH / 2, end, b1, RED, 0.3)
+]
+breakout.append(
+    box(
+        cx - USBC_RECEPTACLE_WIDTH / 2,
+        end - USBC_RECEPTACLE_DEPTH,
+        b1,
+        cx + USBC_RECEPTACLE_WIDTH / 2,
+        end,
+        b1 + USBC_RECEPTACLE_HEIGHT,
+        SILVER,
+        0.8,
+    )
+)
+breakout.append(box(cx - 3.6, end - 0.2, b1 + 1.0, cx + 3.6, end + 0.01, b1 + 2.26, BLACK, 0.1))
+breakout.append(box(-1.27, -1.27, 0.0, 6 * 2.54 - 1.27, 1.27, USBC_BREAKOUT_STANDOFF, BLACK, 0.15))
+for i in range(6):
+    x = i * 2.54
+    breakout.append(box(x - 0.32, -0.32, -1.5, x + 0.32, 0.32, b1 + 0.8, GOLD, 0.6))
+write("USB-C_Breakout_Cermant_1x06.wrl", breakout)
+
+z0 = B0505S_STANDOFF
+converter = [
+    box(
+        -B0505S_PIN1_INSET,
+        -B0505S_PIN_ROW_INSET,
+        z0,
+        B0505S_LENGTH - B0505S_PIN1_INSET,
+        B0505S_THICKNESS - B0505S_PIN_ROW_INSET,
+        z0 + B0505S_HEIGHT,
+        BLACK,
+        0.2,
+    )
+]
+for x in (0.0, 2.54, 7.62, 12.7):
+    converter.append(box(x - 0.25, -0.25, -1.5, x + 0.25, 0.25, z0 + 0.5, SILVER, 0.6))
+write("Converter_DCDC_Mornsun_B_S-2WR3_SIP.wrl", converter)

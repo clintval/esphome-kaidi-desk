@@ -14,10 +14,10 @@ import pcbnew
 HW, DOCS = Path(sys.argv[1]).resolve(), Path(sys.argv[2]).resolve()
 CLI = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli")
 VIEWS = {
-    "enclosure-open": {"lid_z": 28.0, "rotate": "-55,0,-20", "zoom": "0.78"},
-    "enclosure-closed": {"lid_z": 0.0, "rotate": "-58,0,-140", "zoom": "0.9"},
-    "enclosure-usb": {"lid_z": 0.0, "rotate": "-60,0,200", "zoom": "0.9"},
-    "board-3d": {"lid_z": None, "rotate": "-58,0,-140", "zoom": "0.9"},
+    "enclosure-open": {"lid_z": 28.0, "rotate": "-55,0,-20", "zoom": "0.6"},
+    "enclosure-closed": {"lid_z": 0.0, "rotate": "-58,0,40", "zoom": "0.74"},
+    "enclosure-usb": {"lid_z": 0.0, "rotate": "-60,0,20", "zoom": "0.78"},
+    "board-3d": {"lid_z": None, "rotate": "-58,0,40", "zoom": "0.74"},
 }
 
 for name, view in VIEWS.items():

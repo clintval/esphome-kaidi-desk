@@ -73,6 +73,6 @@ def render(out, side, rotate, zoom, *lights):
 
 
 FLAT_LIGHTS = ("--light-camera", "0.9", "--light-bottom", "0.6", "--light-side", "0.5")
-render(ROOT / "docs/board-3d-top.png", "top", "-12,0,-6", "1.3", *FLAT_LIGHTS)
-render(ROOT / "docs/board-3d-bottom.png", "bottom", "-12,0,-6", "1.3", *FLAT_LIGHTS)
+render(ROOT / "docs/board-3d-top.png", "top", "-12,0,-6", "0.92", *FLAT_LIGHTS)
+render(ROOT / "docs/board-3d-bottom.png", "bottom", "-12,0,-6", "0.92", *FLAT_LIGHTS)
 print("rendered the board art and its 3D renders into docs/")
