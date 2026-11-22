@@ -38,13 +38,13 @@ WIRES = [
 ]
 
 EXTERNAL = [
-    ("keypad", 2, "A14", "+5V", "Bipom 2, with the desk cable's 2"),
-    ("keypad", 3, "I17", "GND", "Bipom 3, with the desk cable's 3"),
+    ("keypad", 2, "A14", "+5V", "Bipom 2, with the desk cable's 2, brown"),
+    ("keypad", 3, "I17", "GND", "Bipom 3, with the desk cable's 3, red"),
     ("keypad", 7, "C12", "CMD", "Bipom 7 through a 1k in the terminal"),
-    ("keypad", 8, "I9", "HEIGHT", "Bipom 8, with the desk cable's 8"),
+    ("keypad", 8, "I9", "HEIGHT", "Bipom 8, with the desk cable's 8, purple"),
     ("keypad", 10, "I16", "WAKE", "Bipom 10 through a 1k in the terminal"),
-    ("desk", 7, "B12", "CMD", "desk cable 7"),
-    ("desk", 10, "G16", "WAKE", "desk cable 10"),
+    ("desk", 7, "B12", "CMD", "desk cable 7, blue"),
+    ("desk", 10, "G16", "WAKE", "desk cable 10, white"),
 ]
 
 EXPECTED = {

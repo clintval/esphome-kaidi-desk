@@ -13,6 +13,7 @@ from protoboard import COLUMNS, EXTERNAL, PARTS, WIRES
 P, BX, BY, BW, BH = 2.54, 100.0, 100.0, 50.8, 38.1
 NET = {"+5V": "#e5484d", "GND": "#2b2b2b", "CMD": "#3b82f6", "HEIGHT": "#16a34a", "WAKE": "#d946ef"}
 FONT = "Helvetica, Arial, sans-serif"
+STRAND = {2: "#8b5a2b", 3: "#e5484d", 7: "#3b82f6", 8: "#8b5cf6", 10: "#ffffff"}
 
 
 def hole(name):
@@ -66,8 +67,12 @@ for side, contact, where, net, note in EXTERNAL:
     out.append(
         f'<text x="{lx + 0.6}" y="{ly - 0.05}" font-family="{FONT}" font-size="1.35" font-weight="800" fill="#fff">{tag}</text>'
     )
+    if side == "desk" or "desk cable" in note:
+        out.append(
+            f'<circle cx="{lx + 4.85}" cy="{ly - 0.5}" r="0.6" fill="{STRAND[contact]}" stroke="#333" stroke-width="0.12"/>'
+        )
     out.append(
-        f'<text x="{lx + 5.2}" y="{ly}" font-family="{FONT}" font-size="1.35" fill="#333"><tspan font-weight="700">{where}</tspan>  {note}</text>'
+        f'<text x="{lx + 5.9}" y="{ly}" font-family="{FONT}" font-size="1.35" fill="#333"><tspan font-weight="700">{where}</tspan>  {note}</text>'
     )
     ly += 2.6
 ly += 1.6
@@ -94,6 +99,10 @@ for line in (
     "K = keypad side, the Bipom breakout terminals.",
     "D = the cut desk cable. Its 2, 3 and 8 share",
     "Bipom terminals 2, 3 and 8 with the keypad.",
+    "Dots are the desk strand colors in the usual",
+    "resistor-code order (1 black ... 10 white):",
+    "2 brown, 3 red, 7 blue, 8 purple, 10 white.",
+    "Beep your cable to confirm.",
     "Each row is two strips on the back: A-E and F-J.",
     "Firmware: TX GPIO7, enables GPIO6 and GPIO0,",
     "height on GPIO3.",
