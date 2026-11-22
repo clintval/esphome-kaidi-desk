@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from protoboard import COLUMNS, EXTERNAL, PARTS, WIRES
+from protoboard import COLUMNS, EXTERNAL, PARTS, U2_PINS, WIRES
 
 P, BX, BY, BW, BH = 2.54, 100.0, 100.0, 50.8, 38.1
 NET = {"+5V": "#e5484d", "GND": "#2b2b2b", "CMD": "#3b82f6", "HEIGHT": "#16a34a", "WAKE": "#d946ef"}
@@ -30,6 +30,12 @@ out = []
 out.append(
     f'<text x="{x0}" y="{y0 - 2.2}" font-family="{FONT}" font-size="2.6" font-weight="800" fill="#1d1d1f">Kaidi desk dongle, protoboard build on an EPLZON 1.5 x 2 in board</text>'
 )
+for pin, where in U2_PINS.items():
+    x, y = hole(where)
+    y += -1.15 if where[0] == "E" else 1.75
+    out.append(
+        f'<text x="{x}" y="{y}" text-anchor="middle" font-family="{FONT}" font-size="1.05" font-weight="800" fill="#fff">{pin}</text>'
+    )
 for name, value, a, b, _ in PARTS:
     (xa, ya), (xb, yb) = hole(a), hole(b)
     label = value.replace("nF", " nF")
