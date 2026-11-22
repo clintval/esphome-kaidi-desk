@@ -148,6 +148,10 @@ The cable must be wired straight through; flat telephone-style 10P10C cables are
 
 The protoboard build is the same circuit hand-built on a 1.5 × 2 in EPLZON solderable breadboard, with a Bipom BRK10P10CSJ breakout for the keypad and a cut 10P10C cable to the desk.
 
+> [!IMPORTANT]
+> Power the protoboard build from a grounded (three-prong) USB charger, a computer's USB port or a power bank.
+> It has no isolated power input, so a two-prong charger leaks a little mains AC onto the desk's ground and touch-sensitive keypads barely register a press.
+
 <p align="center">
   <img src="docs/protoboard.svg" width="100%" alt="Protoboard build guide">
 </p>
