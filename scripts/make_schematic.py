@@ -283,7 +283,7 @@ text("Fail-safe defaults", 185.42, 104.14)
 for ref, value, a, x, y in (
     ("R3", "10k", "OE_TX", 190.5, 124.46),
     ("R4", "10k", "OE_WAKE", 213.36, 124.46),
-    ("R5", "100k", "EN_TX", 190.5, 157.48),
+    ("R5", "10k", "EN_TX", 190.5, 157.48),
     ("R6", "100k", "EN_WAKE", 213.36, 157.48),
 ):
     p = place(
@@ -300,7 +300,7 @@ for ref, value, a, x, y in (
     net(p("1"), a)
     net(p("2"), "GND")
 
-text("Dividers (5 V to 3.1 V)", 182.88, 27.94)
+text("Dividers (5 V to 3.0 V)", 182.88, 27.94)
 for top, bottom, a, mid, x in (("R7", "R8", "HEIGHT", "RX", 190.5), ("R9", "R10", "CMD_KEYPAD", "SENSE", 210.82)):
     pt = place(
         "Device:R",

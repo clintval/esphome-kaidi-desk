@@ -71,7 +71,7 @@ with BuildPart() as base:
     holes = [(kx(x), ky(y)) for x, y in geo["screw_holes"]]
     for x, y in posts:
         with Locations(Location((x, y, Z_FLOOR + FLOOR))):
-            Cylinder(3.25, STANDOFF, align=(Align.CENTER, Align.CENTER, Align.MIN))
+            Cylinder(4.0, STANDOFF, align=(Align.CENTER, Align.CENTER, Align.MIN))
     for x, y in holes:
         with Locations(Location((x, y, -T))):
             Cylinder(
@@ -81,12 +81,12 @@ with BuildPart() as base:
     for jack in geo["jacks"]:
         wall_x = -(GAP + WALL / 2) if jack["side"] == "left" else W + GAP + WALL / 2
         y_mid = (ky(jack["y1"]) + ky(jack["y2"])) / 2
-        with Locations(Location((wall_x, y_mid, (TOP - 0.2) / 2 - 0.1))):
-            Box(WALL + 2, abs(jack["y2"] - jack["y1"]) + 0.8, TOP + 0.2, mode=Mode.SUBTRACT)
+        with Locations(Location((wall_x, y_mid, (TOP + 0.7) / 2))):
+            Box(WALL + 2, abs(jack["y2"] - jack["y1"]) + 0.8, TOP + 1.3, mode=Mode.SUBTRACT)
 
     usb = geo["usb"]
     with BuildSketch(Plane.XZ.offset(-(GAP + WALL + 1))), Locations((kx(usb["center_x"]), usb["z"])):
-        RectangleRounded(12.6, 7.0, 3.0)
+        RectangleRounded(13.4, 7.6, 3.2)
     extrude(amount=WALL + 2, mode=Mode.SUBTRACT)
 
 

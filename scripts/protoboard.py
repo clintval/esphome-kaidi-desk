@@ -16,7 +16,7 @@ U2_PINS = {n: (f"E{9 + n}" if n <= 7 else f"F{24 - n}") for n in range(1, 15)}
 
 PARTS = [
     ("R2", "10k", "C15", "C16", "pulls the command enable low"),
-    ("R3", "100k", "B13", "B16", "holds GPIO6 low while the ESP is off"),
+    ("R3", "10k", "B13", "B16", "holds GPIO6 low while the ESP is off and through its boot pull-up"),
     ("R4", "10k", "H14", "H17", "pulls the wake enable low"),
     ("R5", "100k", "I2", "I8", "holds GPIO0 low while the ESP is off"),
     ("R6", "4.7k", "H5", "H9", "height divider, top"),
