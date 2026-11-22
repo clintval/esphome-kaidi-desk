@@ -105,6 +105,7 @@ A 74AHCT125 drives the box only while the ESP is sending, so the keypad keeps wo
 
 The board is an 84 × 40 mm, two-layer, all through-hole KiCad design in [`hardware/`](hardware).
 The ESP32-C3 SuperMini plugs into two round-pin socket strips, so it can be pulled out, and runs from its own USB-C port; the desk's 5 V can't supply its Wi-Fi current.
+Power it from a grounded (three-prong) USB charger or a computer's USB port. On a two-prong charger the keypad's commands get garbled and the desk only creeps a millimeter per press, while moves from Home Assistant still work.
 To solder the C3 flat instead, set `C3_BOTTOM = 0.2` in [`scripts/dimensions.py`](scripts/dimensions.py) and run `pixi run hardware` so the box's USB-C opening drops to match.
 
 ## Enclosure
