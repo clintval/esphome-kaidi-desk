@@ -2,6 +2,7 @@
 
 The ground pours are lifted off the board while Freerouting runs, so it routes every ground pad with a
 real trace instead of trusting a pour that later fills around it, then they go back and are refilled.
+Rule areas that only forbid pours are lifted too, since Freerouting would treat them as full keepouts.
 Each attempt must pass KiCad's connectivity check and full DRC, otherwise it is routed again with
 a different Freerouting strategy.
 
@@ -32,7 +33,7 @@ STRATEGIES = [
 
 def route(placed, attempt):
     board = pcbnew.LoadBoard(placed)
-    pours = [z for z in board.Zones() if not z.GetIsRuleArea()]
+    pours = [z for z in board.Zones() if not z.GetIsRuleArea() or not z.GetDoNotAllowTracks()]
     for zone in pours:
         board.Remove(zone)
     netclass = board.GetDesignSettings().m_NetSettings.GetDefaultNetclass()

@@ -70,6 +70,31 @@ def module_symbol():
     )
 
 
+def converter_symbol():
+    pins = [
+        ("power_in", -10.16, 2.54, 0, "Vin", "1"),
+        ("power_in", -10.16, -2.54, 0, "GND", "2"),
+        ("power_out", 10.16, 2.54, 180, "+Vo", "6"),
+        ("passive", 10.16, -2.54, 180, "0V", "4"),
+    ]
+    body = "".join(
+        f'(pin {k} line (at {x} {y} {a}) (length 2.54) (name "{n}" (effects (font (size 1.27 1.27)))) '
+        f'(number "{num}" (effects (font (size 1.27 1.27)))))'
+        for k, x, y, a, n, num in pins
+    )
+    return (
+        '(symbol "kaidi:B0505S-2WR3" (pin_names (offset 1.016)) (exclude_from_sim no) (in_bom yes) (on_board yes)'
+        '(property "Reference" "U" (at 0 7.62 0) (effects (font (size 1.27 1.27))))'
+        '(property "Value" "B0505S-2WR3" (at 0 -7.62 0) (effects (font (size 1.27 1.27))))'
+        '(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))'
+        '(property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))'
+        '(symbol "B0505S-2WR3_0_1" (rectangle (start -7.62 5.08) (end 7.62 -5.08) '
+        "(stroke (width 0.254) (type default)) (fill (type background)))"
+        "(polyline (pts (xy 0 5.08) (xy 0 -5.08)) (stroke (width 0.254) (type dash)) (fill (type none))))"
+        f'(symbol "B0505S-2WR3_1_1" {body}))'
+    )
+
+
 def pins_of(block):
     found = {}
     for m in re.finditer(r'\(symbol "[^"]*_(\d+)_\d+"([\s\S]*?)(?=\(symbol "[^"]*_\d+_\d+"|\Z)', block):
@@ -82,6 +107,10 @@ def pins_of(block):
 SYMBOLS = {
     "Device:R": embed("Device", "R"),
     "Device:C": embed("Device", "C"),
+    "Device:C_Polarized": embed("Device", "C_Polarized"),
+    "Device:D_Schottky": embed("Device", "D_Schottky"),
+    "Connector_Generic:Conn_01x06": embed("Connector_Generic", "Conn_01x06"),
+    "kaidi:B0505S-2WR3": converter_symbol(),
     "74xx:74AHCT125": embed("74xx", "74LS125", "74AHCT125"),
     "Connector_Generic:Conn_01x10": embed("Connector_Generic", "Conn_01x10"),
     "power:+5V": embed("power", "+5V"),
@@ -97,6 +126,11 @@ FOOTPRINTS = {
     "U2": "Package_DIP:DIP-14_W7.62mm_Socket",
     "U1": "kaidi:ESP32-C3_SuperMini",
     "J": "kaidi:RJ50_Amphenol_54602-910_Horizontal",
+    "J3": "kaidi:USB-C_Breakout_Cermant_1x06",
+    "U3": "kaidi:Converter_DCDC_Mornsun_B_S-2WR3_SIP",
+    "C2": "Capacitor_THT:CP_Radial_D8.0mm_P3.50mm",
+    "C3": "Capacitor_THT:CP_Radial_D5.0mm_P2.00mm",
+    "D1": "Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal",
 }
 
 out = []
@@ -334,7 +368,7 @@ for top, bottom, a, mid, x in (("R7", "R8", "HEIGHT", "RX", 190.5), ("R9", "R10"
     net(((x1, jy), (1, 0)), mid)
     net(pb("2"), "GND")
 
-text("ESP32-C3 SuperMini (USB-C powered)", 233.68, 27.94)
+text("ESP32-C3 SuperMini (5V from the isolated input)", 233.68, 27.94)
 p = place(
     "kaidi:ESP32-C3_SuperMini",
     "U1",
@@ -345,12 +379,84 @@ p = place(
     ref_at=(0, -13.97),
     val_at=(0, 13.97),
 )
-uses = {"2": "GND", "4": "RX", "5": "SENSE", "10": "EN_TX", "11": "TX", "14": "EN_WAKE"}
+uses = {"1": "ESP_5V", "2": "GND", "4": "RX", "5": "SENSE", "10": "EN_TX", "11": "TX", "14": "EN_WAKE"}
 for num in map(str, range(1, 17)):
     if num in uses:
         net(p(num), uses[num], stub=10.16 if num in ("4", "5") else STUB)
     else:
         no_connect(p(num))
+
+text("Isolated USB-C power input: the charger never shares a ground with the desk", 22.86, 170.18, 1.5)
+p = place(
+    "Connector_Generic:Conn_01x06",
+    "J3",
+    "USB-C breakout",
+    38.1,
+    185.42,
+    mirror=True,
+    footprint=FOOTPRINTS["J3"],
+    ref_at=(0, -10.16),
+    val_at=(0, -7.62),
+)
+net(p("1"), "VIN_ISO")
+net(p("2"), "GND_ISO")
+for num in ("3", "4", "5", "6"):
+    no_connect(p(num))
+p = place(
+    "Device:C_Polarized",
+    "C3",
+    "10u",
+    63.5,
+    187.96,
+    footprint=FOOTPRINTS["C3"],
+    ref_at=(2.54, -1.27),
+    val_at=(2.54, 1.27),
+    justify="left",
+)
+net(p("1"), "VIN_ISO")
+net(p("2"), "GND_ISO")
+p = place(
+    "kaidi:B0505S-2WR3",
+    "U3",
+    "B0505S-2WR3",
+    96.52,
+    185.42,
+    footprint=FOOTPRINTS["U3"],
+    ref_at=(0, -7.62),
+    val_at=(0, 7.62),
+)
+net(p("1"), "VIN_ISO")
+net(p("2"), "GND_ISO")
+net(p("6"), "VOUT")
+net(p("4"), "GND")
+p = place(
+    "Device:C_Polarized",
+    "C2",
+    "470u",
+    127.0,
+    187.96,
+    footprint=FOOTPRINTS["C2"],
+    ref_at=(2.54, -1.27),
+    val_at=(2.54, 1.27),
+    justify="left",
+)
+net(p("1"), "VOUT")
+net(p("2"), "GND")
+p = place(
+    "Device:D_Schottky",
+    "D1",
+    "1N5819",
+    157.48,
+    182.88,
+    footprint=FOOTPRINTS["D1"],
+    ref_at=(0, -2.54),
+    val_at=(0, 2.54),
+)
+net(p("2"), "VOUT")
+net(p("1"), "ESP_5V")
+for ref, name, x in (("#FLG03", "VIN_ISO", 48.26), ("#FLG04", "GND_ISO", 58.42), ("#FLG05", "ESP_5V", 142.24)):
+    flag = place("power:PWR_FLAG", ref, "PWR_FLAG", x, 190.5, hide_val=True)
+    net(flag("1"), name)
 
 body = "\n".join(out)
 lib = "\n".join(SYMBOLS.values())

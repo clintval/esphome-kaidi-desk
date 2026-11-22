@@ -14,14 +14,23 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pcbnew
-from dimensions import C3_BOTTOM, C3_LENGTH, C3_PIN1_INSET, C3_THICKNESS, C3_USB_OVERHANG
+from dimensions import (
+    C3_LENGTH,
+    C3_PIN1_INSET,
+    C3_USB_OVERHANG,
+    USBC_BREAKOUT_DEPTH,
+    USBC_BREAKOUT_PIN_INSET,
+    USBC_BREAKOUT_STANDOFF,
+    USBC_BREAKOUT_THICKNESS,
+    USBC_RECEPTACLE_HEIGHT,
+)
 
 FP = Path(os.environ.get("KICAD_SHARE", "/Applications/KiCad/KiCad.app/Contents/SharedSupport")) / "footprints"
 CLI = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli")
 ROOT = Path(__file__).resolve().parent.parent
 SCH, OUT = Path(sys.argv[1]), Path(sys.argv[2])
 
-X0, Y0, W, H, RADIUS = 100.0, 100.0, 84.0, 40.0, 3.0
+X0, Y0, W, H, RADIUS = 100.0, 100.0, 84.0, 60.0, 3.0
 YC = Y0 + H / 2
 
 with tempfile.TemporaryDirectory() as tmp:
@@ -73,7 +82,7 @@ def place(lib, name, ref, x, y, angle=0, value=None):
         fp.Reference().SetPosition(pcbnew.VECTOR2I(int(mid.x), int(mid.y)))
         fp.Reference().SetTextSize(mm(0.8, 0.8))
         fp.Reference().SetTextThickness(pcbnew.FromMM(0.12))
-    if ref.startswith("J") or ref == "C1":
+    if ref.startswith("J") or ref in ("C1", "C2", "C3"):
         fp.Reference().SetVisible(False)
     if not ref:
         fp.SetBoardOnly(True)
@@ -171,8 +180,19 @@ HOLES = [(X0 + 3.6, Y0 + 3.6), (X0 + W - 3.6, Y0 + 3.6), (X0 + 3.6, Y0 + H - 3.6
 for x, y in HOLES:
     place(FP / "MountingHole.pretty", "MountingHole_3.2mm_M3", "", x, y, value="M3")
 
-silk("esphome-kaidi-desk", X0 + 8.0, Y0 + H - 7.0, 1.6, bold=True, left=True)
-silk("Kaidi KDDY094 dongle", X0 + 8.0, Y0 + H - 4.6, 1.0, left=True)
+USB_X, USB_Y = X0 + W / 2 - 2.5 * 2.54, Y0 + H - USBC_BREAKOUT_DEPTH + USBC_BREAKOUT_PIN_INSET
+fp = place(jack_lib, "USB-C_Breakout_Cermant_1x06", "J3", USB_X, USB_Y)
+model(fp, f"{models}/USB-C_Breakout_Cermant_1x06.wrl")
+U3_X = USB_X - 6.15
+fp = place(jack_lib, "Converter_DCDC_Mornsun_B_S-2WR3_SIP", "U3", U3_X, USB_Y, angle=180)
+model(fp, f"{models}/Converter_DCDC_Mornsun_B_S-2WR3_SIP.wrl")
+caps = FP / "Capacitor_THT.pretty"
+place(caps, "CP_Radial_D5.0mm_P2.00mm", "C3", USB_X + 1.35, USB_Y - 5.5)
+place(caps, "CP_Radial_D8.0mm_P3.50mm", "C2", X0 + 5.55, USB_Y - 1.6)
+place(FP / "Diode_THT.pretty", "D_DO-41_SOD81_P10.16mm_Horizontal", "D1", X0 + 9.5, Y0 + H - 3.2)
+silk("USB-C power in", USB_X + 11.85, USB_Y - 3.5, 0.9)
+silk("esphome-kaidi-desk", X0 + 56.0, USB_Y + 1.9, 1.6, bold=True, left=True)
+silk("Kaidi KDDY094 dongle", X0 + 56.0, USB_Y + 4.3, 1.0, left=True)
 
 
 def u1_point(lx, ly):
@@ -215,6 +235,33 @@ for (cx1, cy1), (cx2, cy2) in zip(corners, corners[1:] + corners[:1]):
     s.SetWidth(pcbnew.FromMM(0.1))
     board.Add(s)
 silk("antenna keep-out", (corners[0][0] + corners[2][0]) / 2, U1_Y + ANTENNA[3] + 0.9, 0.9)
+
+# The charger side (J3, C3 and U3 pins 1-2) gets no ground pour, a moat no other trace can cross,
+# and nothing bridges the converter's barrier.
+ISLAND = (U3_X - 5.1, USB_Y - 8.5, USB_X + 17.6, Y0 + H)
+BARRIER = (U3_X - 6.6, USB_Y - 6.3, U3_X - 3.6, USB_Y + 2.9)
+
+
+def rule_area(name, rect, tracks):
+    zone = pcbnew.ZONE(board)
+    zone.SetIsRuleArea(True)
+    zone.SetLayerSet(layers)
+    zone.SetDoNotAllowTracks(tracks)
+    zone.SetDoNotAllowVias(tracks)
+    zone.SetDoNotAllowZoneFills(True)
+    zone.SetDoNotAllowPads(False)
+    zone.SetDoNotAllowFootprints(False)
+    zone.SetZoneName(name)
+    x1, y1, x2, y2 = rect
+    polygon(zone, ((x1, y1), (x2, y1), (x2, y2), (x1, y2)))
+    board.Add(zone)
+
+
+rule_area("ISOLATED_INPUT", ISLAND, tracks=False)
+rule_area("ISOLATION_BARRIER", BARRIER, tracks=True)
+ix1, iy1, ix2, iy2 = ISLAND
+for band in ((ix1, iy1, ix2, iy1 + 1.0), (ix1, iy1, ix1 + 1.0, iy2), (ix2 - 1.0, iy1, ix2, iy2)):
+    rule_area("ISOLATION_MOAT", band, tracks=True)
 
 inset = 0.65
 for x1, y1, x2, y2 in (
@@ -273,7 +320,12 @@ geometry = {
     "jacks": [
         {"ref": ref, "side": side, "y1": YC - 7.65, "y2": YC + 7.65, "height": 13.0} for ref, _, _, _, side in JACKS
     ],
-    "usb": {"side": "top", "center_x": U1_X + 7.62, "z": C3_BOTTOM + C3_THICKNESS + 1.6, "width": 9.0, "height": 3.2},
+    "usb": {
+        "side": "bottom",
+        "center_x": USB_X + 2.5 * 2.54,
+        "z": USBC_BREAKOUT_STANDOFF + USBC_BREAKOUT_THICKNESS + USBC_RECEPTACLE_HEIGHT / 2,
+    },
+    "island": list(ISLAND),
     "antenna": [list(u1_point(x, y)) for x, y in ((ax1, ay1), (ax2, ay2))],
     "tallest": 13.0,
 }
