@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="660" viewBox="0 0 1100 660" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1100" height="660" rx="24" fill="#fbfaf7"/>
+  <text x="40" y="58" font-size="30" font-weight="800" fill="#1d1d1f">Isolated power test</text>
+  <text x="40" y="88" font-size="16" fill="#555">Runs the C3 from any USB charger without joining the charger's ground to the desk's.</text>
+
+  <rect x="30" y="112" width="500" height="320" rx="16" fill="#eef0f4"/>
+  <rect x="570" y="112" width="500" height="320" rx="16" fill="#e8f3ec"/>
+  <text x="50" y="140" font-size="14" font-weight="700" fill="#6b7280">CHARGER SIDE</text>
+  <text x="590" y="140" font-size="14" font-weight="700" fill="#4b7a5c">DESK SIDE</text>
+
+  <line x1="550" y1="104" x2="550" y2="440" stroke="#9ca3af" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="550" y="456" font-size="13" text-anchor="middle" fill="#6b7280">isolation barrier</text>
+
+  <rect x="50" y="230" width="130" height="90" rx="12" fill="#fff" stroke="#1d1d1f" stroke-width="2"/>
+  <text x="115" y="267" font-size="16" font-weight="700" text-anchor="middle" fill="#1d1d1f">USB charger</text>
+  <text x="115" y="289" font-size="13" text-anchor="middle" fill="#555">any, even</text>
+  <text x="115" y="305" font-size="13" text-anchor="middle" fill="#555">two-prong</text>
+  <line x1="180" y1="275" x2="230" y2="275" stroke="#1d1d1f" stroke-width="6" stroke-linecap="round"/>
+  <text x="205" y="262" font-size="12" text-anchor="middle" fill="#555">USB-C</text>
+
+  <rect x="230" y="185" width="130" height="150" rx="12" fill="#d93a3a"/>
+  <text x="295" y="211" font-size="15" font-weight="700" text-anchor="middle" fill="#fff">USB-C breakout</text>
+  <text x="295" y="228" font-size="12" text-anchor="middle" fill="#ffe4e4">5.1k on CC built in</text>
+  <circle cx="345" cy="245" r="6" fill="#ffd36b"/>
+  <text x="335" y="250" font-size="13" font-weight="700" text-anchor="end" fill="#fff">VBUS</text>
+  <circle cx="345" cy="305" r="6" fill="#ffd36b"/>
+  <text x="335" y="310" font-size="13" font-weight="700" text-anchor="end" fill="#fff">GND</text>
+
+  <rect x="430" y="195" width="240" height="150" rx="10" fill="#26262b"/>
+  <text x="550" y="280" font-size="15" font-weight="700" text-anchor="middle" fill="#fff">B0505S-2WR3</text>
+  <circle cx="445" cy="245" r="6" fill="#ffd36b"/>
+  <text x="458" y="250" font-size="13" font-weight="700" fill="#fff">2  +IN</text>
+  <circle cx="445" cy="305" r="6" fill="#ffd36b"/>
+  <text x="458" y="310" font-size="13" font-weight="700" fill="#fff">1  −IN</text>
+  <circle cx="655" cy="245" r="6" fill="#ffd36b"/>
+  <text x="642" y="250" font-size="13" font-weight="700" text-anchor="end" fill="#fff">+OUT  4</text>
+  <circle cx="655" cy="305" r="6" fill="#ffd36b"/>
+  <text x="642" y="310" font-size="13" font-weight="700" text-anchor="end" fill="#fff">0V  3</text>
+
+  <line x1="351" y1="245" x2="439" y2="245" stroke="#e5484d" stroke-width="4"/>
+  <line x1="351" y1="305" x2="439" y2="305" stroke="#2b2b2b" stroke-width="4"/>
+
+  <line x1="661" y1="245" x2="800" y2="245" stroke="#e5484d" stroke-width="4"/>
+  <line x1="661" y1="305" x2="960" y2="305" stroke="#2b2b2b" stroke-width="4"/>
+
+  <circle cx="740" cy="245" r="5" fill="#e5484d"/>
+  <circle cx="740" cy="305" r="5" fill="#2b2b2b"/>
+  <line x1="740" y1="245" x2="740" y2="259" stroke="#e5484d" stroke-width="3"/>
+  <rect x="726" y="259" width="28" height="32" rx="5" fill="#1f3b8a"/>
+  <rect x="726" y="281" width="28" height="10" rx="2" fill="#c9d3ef"/>
+  <line x1="740" y1="291" x2="740" y2="305" stroke="#2b2b2b" stroke-width="3"/>
+  <text x="740" y="334" font-size="12" font-weight="700" text-anchor="middle" fill="#1d1d1f">470 µF 16 V</text>
+  <text x="740" y="350" font-size="12" text-anchor="middle" fill="#555">stripe (−) to pin 3</text>
+
+  <rect x="800" y="234" width="60" height="22" rx="4" fill="#2b2b2b"/>
+  <rect x="848" y="234" width="8" height="22" fill="#d9d9d9"/>
+  <text x="830" y="210" font-size="13" font-weight="700" text-anchor="middle" fill="#1d1d1f">1N5819</text>
+  <text x="830" y="226" font-size="12" text-anchor="middle" fill="#555">band toward H1</text>
+  <line x1="860" y1="245" x2="960" y2="245" stroke="#e5484d" stroke-width="4"/>
+
+  <rect x="960" y="185" width="100" height="150" rx="10" fill="#1b7f43"/>
+  <text x="1010" y="211" font-size="15" font-weight="700" text-anchor="middle" fill="#fff">Protoboard</text>
+  <circle cx="975" cy="245" r="6" fill="#ffd36b"/>
+  <text x="988" y="250" font-size="13" font-weight="700" fill="#fff">H1</text>
+  <circle cx="975" cy="305" r="6" fill="#ffd36b"/>
+  <text x="988" y="310" font-size="13" font-weight="700" fill="#fff">A16</text>
+  <text x="1010" y="360" font-size="12" text-anchor="middle" fill="#1d1d1f">H1 = C3 5V strip</text>
+  <text x="1010" y="376" font-size="12" text-anchor="middle" fill="#1d1d1f">A16 = ground strip</text>
+
+  <text x="40" y="496" font-size="18" font-weight="800" fill="#1d1d1f">Before powering</text>
+  <text x="40" y="524" font-size="14" fill="#333">1. Keep the breakout, converter, capacitor and diode on a solderless breadboard, off the protoboard.</text>
+  <text x="40" y="548" font-size="14" fill="#333">2. Meter on beep: breakout GND to protoboard A16 must <tspan font-weight="700">not</tspan> beep. Nothing on the charger side may touch the desk side.</text>
+  <text x="40" y="572" font-size="14" fill="#333">3. Converter pins, printed side facing you: 1 −IN, 2 +IN, 3 0V, 4 +OUT. Check your part's markings.</text>
+  <text x="40" y="596" font-size="14" fill="#333">4. Unplug the C3's own USB-C, then plug the charger into the breakout. The diode makes plugging both harmless.</text>
+  <text x="40" y="620" font-size="14" fill="#333">5. Hold Down on the keypad. Normal movement on a two-prong charger means isolation works.</text>
+</svg>
