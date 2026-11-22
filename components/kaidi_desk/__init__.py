@@ -20,6 +20,7 @@ CONF_NUDGE_DURATION = "nudge_duration"
 CONF_MOVE_TIMEOUT = "move_timeout"
 CONF_RESET_TIMEOUT = "reset_timeout"
 CONF_TOLERANCE = "tolerance"
+CONF_COAST = "coast"
 
 kaidi_desk_ns = cg.esphome_ns.namespace("kaidi_desk")
 KaidiDesk = kaidi_desk_ns.class_("KaidiDesk", cg.Component, uart.UARTDevice)
@@ -38,6 +39,7 @@ CONFIG_SCHEMA = (
             cv.Optional(CONF_MOVE_TIMEOUT, default="45s"): cv.positive_time_period_milliseconds,
             cv.Optional(CONF_RESET_TIMEOUT, default="90s"): cv.positive_time_period_milliseconds,
             cv.Optional(CONF_TOLERANCE, default=0.4): cv.positive_float,
+            cv.Optional(CONF_COAST, default=1.3): cv.positive_float,
         }
     )
     .extend(cv.COMPONENT_SCHEMA)
@@ -72,3 +74,4 @@ async def to_code(config):
     cg.add(var.set_move_timeout(config[CONF_MOVE_TIMEOUT]))
     cg.add(var.set_reset_timeout(config[CONF_RESET_TIMEOUT]))
     cg.add(var.set_tolerance(config[CONF_TOLERANCE]))
+    cg.add(var.set_coast(config[CONF_COAST]))

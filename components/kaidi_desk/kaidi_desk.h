@@ -54,6 +54,7 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   void set_move_timeout(uint32_t ms) { this->move_timeout_ = ms; }
   void set_reset_timeout(uint32_t ms) { this->reset_timeout_ = ms; }
   void set_tolerance(float cm) { this->tolerance_ = cm; }
+  void set_coast(float cm) { this->coast_ = cm; }
 
   void move_to(float cm);
   void nudge(bool up);
@@ -96,6 +97,8 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   uint32_t move_timeout_{45000};
   uint32_t reset_timeout_{90000};
   float tolerance_{0.4f};
+  float coast_{1.3f};
+  bool moving_up_{true};
 
   uint8_t buffer_[7]{};
   uint8_t buffer_len_{0};

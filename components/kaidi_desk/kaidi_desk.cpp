@@ -49,6 +49,7 @@ void KaidiDesk::dump_config() {
   ESP_LOGCONFIG(TAG, "  Wake Settle: %" PRIu32 " ms", this->wake_settle_);
   ESP_LOGCONFIG(TAG, "  Nudge Duration: %" PRIu32 " ms", this->nudge_duration_);
   ESP_LOGCONFIG(TAG, "  Tolerance: %.1f cm", this->tolerance_);
+  ESP_LOGCONFIG(TAG, "  Coast: %.1f cm", this->coast_);
   LOG_SENSOR("  ", "Height", this->height_sensor_);
   LOG_TEXT_SENSOR("  ", "Status", this->status_sensor_);
   LOG_NUMBER("  ", "Target Height", this->target_number_);
@@ -120,11 +121,12 @@ void KaidiDesk::step_action_(uint32_t now) {
         this->release_();
         return;
       }
-      if (std::fabs(this->height_ - this->target_) <= this->tolerance_) {
+      float remaining = this->moving_up_ ? this->target_ - this->height_ : this->height_ - this->target_;
+      if (std::fabs(this->height_ - this->target_) <= this->tolerance_ || remaining <= this->coast_) {
         this->release_();
         return;
       }
-      this->send_(this->height_ < this->target_ ? COMMAND_UP : COMMAND_DOWN);
+      this->send_(this->moving_up_ ? COMMAND_UP : COMMAND_DOWN);
       return;
     }
     case Action::NUDGE_UP:
@@ -277,6 +279,7 @@ void KaidiDesk::sync_target_() {
 
 void KaidiDesk::move_to(float cm) {
   this->target_ = cm;
+  this->moving_up_ = std::isnan(this->height_) || this->height_ < cm;
   if (this->state_ == State::ACTING && this->action_ == Action::MOVE) {
     this->state_since_ms_ = millis();
     return;
