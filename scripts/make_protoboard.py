@@ -1,4 +1,4 @@
-"""Model the rev 4 protoboard build in KiCad, from the layout checked in scripts/protoboard.py.
+"""Model the protoboard build in KiCad, from the layout checked in scripts/protoboard.py.
 
 The EPLZON 1.5 x 2 in board is drawn landscape: rows 1-17 run left to right, columns A-E sit
 below the center gap and F-J above it. Run with KiCad's Python:
@@ -82,18 +82,17 @@ defs = (
     + lin("silver", [(0, "#ffffff"), (0.45, "#c9d0d6"), (1, "#7d868f")])
     + lin("gold", [(0, "#ffe7a3"), (0.5, "#d9a441"), (1, "#a0742a")])
 )
-art = '<rect x="-0.6" y="-2.7" width="18.04" height="22.52" rx="1" opacity="0.35" fill="#000"/>'
-art += '<rect x="-1.4" y="-3.6" width="18.04" height="22.52" rx="1" fill="url(#pcb)" stroke="#0b1d4d" stroke-width="0.15"/>'
-art += (
-    '<rect x="3.12" y="-6.9" width="9" height="4.6" rx="1.4" fill="url(#silver)" stroke="#6f7780" stroke-width="0.12"/>'
-)
-art += '<rect x="4.32" y="-3.2" width="6.6" height="0.8" rx="0.4" fill="#5c646c"/>'
+art = '<rect x="-0.6" y="-0.4" width="18.04" height="22.52" rx="1" opacity="0.35" fill="#000"/>'
+art += '<rect x="-1.4" y="-1.3" width="18.04" height="22.52" rx="1" fill="url(#pcb)" stroke="#0b1d4d" stroke-width="0.15"/>'
+art += '<rect x="3.12" y="-2.3" width="9" height="7.35" rx="1.4" fill="url(#silver)" stroke="#6f7780" stroke-width="0.12"/>'
+art += '<rect x="4.32" y="-1.9" width="6.6" height="0.8" rx="0.4" fill="#5c646c"/>'
+art += '<rect x="9.4" y="18.9" width="4.2" height="1.7" rx="0.2" fill="#d33a3a" stroke="#7a1f1f" stroke-width="0.1"/>'
 for i in range(8):
     for x in (0.0, 15.24):
         art += f'<circle cx="{x}" cy="{i * P}" r="0.85" fill="url(#gold)" stroke="#8a6420" stroke-width="0.08"/>'
         art += f'<circle cx="{x}" cy="{i * P}" r="0.36" fill="#c9b26a"/>'
     art += (
-        f'<text x="13.7" y="{i * P + 0.38}" font-family="Helvetica, Arial" font-size="1.0" font-weight="700" '
+        f'<text x="14.2" y="{i * P + 0.38}" font-family="Helvetica, Arial" font-size="1.0" font-weight="700" '
         f'text-anchor="end" fill="#f4f7fb">{C3_RIGHT[i]}</text>'
     )
     art += (
@@ -101,11 +100,11 @@ for i in range(8):
         f'fill="#f4f7fb">{C3_LEFT[i]}</text>'
     )
 art += (
-    '<text x="7.62" y="9.6" font-family="Helvetica, Arial" font-size="1.25" font-weight="800" text-anchor="middle" '
-    'fill="#f4f7fb" transform="rotate(90 7.62 9.6)">ESP32-C3 SuperMini</text>'
+    '<text x="7.62" y="11.6" font-family="Helvetica, Arial" font-size="1.25" font-weight="800" text-anchor="middle" '
+    'fill="#f4f7fb" transform="rotate(90 7.62 11.6)">ESP32-C3 SuperMini</text>'
 )
-art += '<text x="7.62" y="17.4" font-family="Helvetica, Arial" font-size="0.8" font-weight="600" text-anchor="middle" fill="#c9d6f2">labels up</text>'
-write_art("ESP32-C3_SuperMini_LabelsUp", (-2.0, -7.4, 19.4, 27.2), defs, art)
+art += '<text x="9.4" y="11.6" font-family="Helvetica, Arial" font-size="0.8" font-weight="600" text-anchor="middle" fill="#c9d6f2" transform="rotate(90 9.4 11.6)">labels up</text>'
+write_art("ESP32-C3_SuperMini_LabelsUp", (-2.0, -3.0, 19.4, 25.4), defs, art)
 
 C_ART = (
     lin("disc", [(0, "#f2b46b"), (0.6, "#d07a2c"), (1, "#8a4612")], 1, 1),

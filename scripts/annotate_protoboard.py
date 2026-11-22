@@ -1,4 +1,4 @@
-"""Add wire tags and a legend to the PcbDraw drawing of the rev 4 protoboard.
+"""Add part values, wire tags and a legend to the PcbDraw drawing of the protoboard.
 
 Run with: python3 scripts/annotate_protoboard.py IN.svg docs/protoboard.svg
 """
@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from protoboard import COLUMNS, EXTERNAL, WIRES
+from protoboard import COLUMNS, EXTERNAL, PARTS, WIRES
 
 P, BX, BY, BW, BH = 2.54, 100.0, 100.0, 50.8, 38.1
 NET = {"+5V": "#e5484d", "GND": "#2b2b2b", "CMD": "#3b82f6", "HEIGHT": "#16a34a", "WAKE": "#d946ef"}
@@ -23,11 +23,24 @@ def hole(name):
 svg = Path(sys.argv[1]).read_text()
 x0, y0, w, h = (float(v) for v in re.search(r'viewBox="([^"]+)"', svg).group(1).split())
 panel = 46.0
-OFFSET = {"I17": (1.4, -0.95)}
+OFFSET = {"I17": (1.4, -0.95), "A14": (1.4, -0.95), "I9": (1.4, -0.95), "C12": (-4.2, -0.95)}
+LABEL_SHIFT = {"C1": (-3.6, 0.0)}
 out = []
 out.append(
-    f'<text x="{x0}" y="{y0 - 2.2}" font-family="{FONT}" font-size="2.6" font-weight="800" fill="#1d1d1f">Kaidi desk dongle, rev 4 on an EPLZON 1.5 x 2 in board</text>'
+    f'<text x="{x0}" y="{y0 - 2.2}" font-family="{FONT}" font-size="2.6" font-weight="800" fill="#1d1d1f">Kaidi desk dongle, protoboard build on an EPLZON 1.5 x 2 in board</text>'
 )
+for name, value, a, b, _ in PARTS:
+    (xa, ya), (xb, yb) = hole(a), hole(b)
+    label = value.replace("nF", " nF")
+    width = 0.6 + 0.78 * len(label)
+    dx, dy = LABEL_SHIFT.get(name, (0.0, 0.0))
+    cx, cy = (xa + xb) / 2 + dx, (ya + yb) / 2 + dy
+    out.append(
+        f'<rect x="{cx - width / 2}" y="{cy - 0.85}" width="{width}" height="1.7" rx="0.5" fill="#fff" fill-opacity="0.92" stroke="#1d1d1f" stroke-width="0.12"/>'
+    )
+    out.append(
+        f'<text x="{cx}" y="{cy + 0.48}" text-anchor="middle" font-family="{FONT}" font-size="1.3" font-weight="800" fill="#1d1d1f">{label}</text>'
+    )
 for i, (side, contact, where, net, note) in enumerate(EXTERNAL):
     x, y = hole(where)
     color = NET[net]

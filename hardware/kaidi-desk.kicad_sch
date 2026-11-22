@@ -1,5 +1,5 @@
 (kicad_sch (version 20250114) (generator "eeschema") (generator_version "9.0") (uuid "81103b1c-096a-5c26-8e64-d1ec369bc0a0") (paper "A4")
-(title_block (title "Kaidi Desk Dongle") (date "2026-11-21") (rev "5") (company "esphome-kaidi-desk")
+(title_block (title "Kaidi Desk Dongle") (date "2026-11-21") (company "esphome-kaidi-desk")
  (comment 1 "Inline between the keypad and a Kaidi KDDY094 control box") (comment 2 "github.com/clintval/esphome-kaidi-desk"))
 (lib_symbols (symbol "Device:R"
 		(pin_numbers

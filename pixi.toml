@@ -18,7 +18,7 @@ pcb = { cmd = "$KICAD_PYTHON scripts/make_pcb.py hardware/kaidi-desk.kicad_sch h
 fab = { cmd = "python scripts/export_fab.py", depends-on = ["pcb"], description = "Export the Gerber zip" }
 art = { cmd = "python scripts/render_art.py", depends-on = ["pcb", "kicad-tools"], description = "Draw and render the PCB" }
 enclosure = { cmd = "python scripts/make_enclosure.py hardware && $KICAD_PYTHON scripts/render_enclosure.py hardware docs", depends-on = ["pcb"], description = "Build and render the 3D-printable box" }
-protoboard = { cmd = "python scripts/protoboard.py && python scripts/render_protoboard.py", depends-on = ["kicad-tools"], description = "Check and draw the rev 4 protoboard build" }
+protoboard = { cmd = "python scripts/protoboard.py && python scripts/render_protoboard.py", depends-on = ["kicad-tools"], description = "Check and draw the protoboard build" }
 hardware = { depends-on = ["fab", "art", "enclosure", "protoboard"], description = "Regenerate the whole hardware design" }
 check = { cmd = "python scripts/check_hardware.py", description = "Run ERC, DRC, parity, netlist and protoboard checks" }
 

@@ -1,4 +1,4 @@
-"""Render the dongle PCB inside its box with KiCad's raytracer: one exploded, one closed.
+"""Render the dongle PCB inside its box with KiCad's raytracer, plus the bare board from the closed box's camera.
 
 Run with KiCad's Python: $KPY scripts/render_enclosure.py hardware docs
 """
@@ -17,13 +17,15 @@ VIEWS = {
     "enclosure-open": {"lid_z": 28.0, "rotate": "-55,0,-20", "zoom": "0.78"},
     "enclosure-closed": {"lid_z": 0.0, "rotate": "-58,0,-140", "zoom": "0.9"},
     "enclosure-usb": {"lid_z": 0.0, "rotate": "-60,0,200", "zoom": "0.9"},
+    "board-3d": {"lid_z": None, "rotate": "-58,0,-140", "zoom": "0.9"},
 }
 
 for name, view in VIEWS.items():
     board = pcbnew.LoadBoard(str(HW / "kaidi-desk.kicad_pcb"))
     fp = pcbnew.FOOTPRINT(board)
     fp.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(100), pcbnew.FromMM(100)))
-    for part, z in (("base", 0.0), ("lid", view["lid_z"])):
+    parts = () if view["lid_z"] is None else (("base", 0.0), ("lid", view["lid_z"]))
+    for part, z in parts:
         model = pcbnew.FP_3DMODEL()
         model.m_Filename = str(HW / "enclosure" / f"{part}.step")
         model.m_Offset = pcbnew.VECTOR3D(0, 0, z)

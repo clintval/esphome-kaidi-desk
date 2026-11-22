@@ -4,7 +4,7 @@
 [![ESPHome](https://img.shields.io/badge/ESPHome-external%20component-000000.svg)](https://esphome.io/components/external_components.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Control a Kaidi standing desk, such as the ApexDesk K Series, from Home Assistant with an ESP32 and ESPHome.
+Control a Kaidi standing desk from Home Assistant with an ESP32 and ESPHome.
 
 <p align="center">
   <img src="docs/enclosure-closed.png" width="49%" alt="The dongle in its closed box, desk jack and USB-C side">
@@ -78,7 +78,7 @@ A 74AHCT125 drives the box only while the ESP is sending, so the keypad keeps wo
 
 <p align="center">
   <img src="docs/board-resistors.svg" width="49%" alt="The dongle PCB with only its resistors fitted">
-  <img src="docs/board.svg" width="49%" alt="The fully assembled dongle PCB">
+  <img src="docs/board-3d-top.png" width="49%" alt="3D render of the top of the assembled dongle PCB">
 </p>
 
 <p align="center">
@@ -86,9 +86,14 @@ A 74AHCT125 drives the box only while the ESP is sending, so the keypad keeps wo
   <img src="docs/board-3d-bottom.png" width="49%" alt="3D render of the underside of the dongle PCB">
 </p>
 
+<details>
+<summary>Schematic</summary>
+
 <p align="center">
   <img src="docs/schematic.svg" width="100%" alt="Schematic">
 </p>
+
+</details>
 
 | RJ50 contact | Signal | Path |
 | --- | --- | --- |
@@ -139,10 +144,10 @@ The cable must be wired straight through; flat telephone-style 10P10C cables are
 
 ## Build Without a PCB
 
-Rev 4 is the same circuit hand-built on a 1.5 × 2 in EPLZON solderable breadboard, with a Bipom BRK10P10CSJ breakout for the keypad and a cut 10P10C cable to the desk.
+The protoboard build is the same circuit hand-built on a 1.5 × 2 in EPLZON solderable breadboard, with a Bipom BRK10P10CSJ breakout for the keypad and a cut 10P10C cable to the desk.
 
 <p align="center">
-  <img src="docs/protoboard.svg" width="100%" alt="Rev 4 protoboard build guide">
+  <img src="docs/protoboard.svg" width="100%" alt="Protoboard build guide">
 </p>
 
 On this build, configure `tx_enable_pin: GPIO6`, `wake_pin: GPIO0` and `rx_pin: GPIO3`, and leave out `keypad_sense_pin`.

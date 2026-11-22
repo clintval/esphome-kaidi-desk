@@ -355,7 +355,7 @@ for num in map(str, range(1, 17)):
 body = "\n".join(out)
 lib = "\n".join(SYMBOLS.values())
 sch = f"""(kicad_sch (version 20250114) (generator "eeschema") (generator_version "9.0") (uuid "{root}") (paper "A4")
-(title_block (title "Kaidi Desk Dongle") (date "2026-11-21") (rev "5") (company "esphome-kaidi-desk")
+(title_block (title "Kaidi Desk Dongle") (date "2026-11-21") (company "esphome-kaidi-desk")
  (comment 1 "Inline between the keypad and a Kaidi KDDY094 control box") (comment 2 "github.com/clintval/esphome-kaidi-desk"))
 (lib_symbols {lib})
 {body}

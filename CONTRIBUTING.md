@@ -23,7 +23,7 @@ pixi run hardware    # schematic, footprints, PCB placement and routing, Gerbers
 pixi run check       # ERC, DRC, schematic parity, netlist and protoboard layout
 ```
 
-Smaller steps are available too: `schematic`, `footprints`, `pcb`, `fab`, `art`, `enclosure` and `protoboard`.
+Smaller steps are available too: `schematic`, `footprints`, `pcb`, `fab`, `art`, `enclosure` and `protoboard`.\
 List them with `pixi task list`.
 
 ## Mandatory Pre-submission Checks

@@ -1,4 +1,4 @@
-"""Model the rev 4 protoboard in KiCad, draw it with PcbDraw and label it.
+"""Model the protoboard in KiCad, draw it with PcbDraw and label it.
 
 Run with: python scripts/render_protoboard.py
 """

@@ -1,4 +1,4 @@
-"""Place the rev 5 dongle PCB from the schematic's netlist, using KiCad's own pcbnew API.
+"""Place the dongle PCB from the schematic's netlist, using KiCad's own pcbnew API.
 
 Run with KiCad's Python:
     /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3 \
@@ -172,7 +172,7 @@ for x, y in HOLES:
     place(FP / "MountingHole.pretty", "MountingHole_3.2mm_M3", "", x, y, value="M3")
 
 silk("esphome-kaidi-desk", X0 + 8.0, Y0 + H - 7.0, 1.6, bold=True, left=True)
-silk("Kaidi KDDY094 dongle  rev 5", X0 + 8.0, Y0 + H - 4.6, 1.0, left=True)
+silk("Kaidi KDDY094 dongle", X0 + 8.0, Y0 + H - 4.6, 1.0, left=True)
 
 
 def u1_point(lx, ly):

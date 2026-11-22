@@ -1,4 +1,4 @@
-"""Rev 4 dongle on an EPLZON 1.5 x 2 inch solderable breadboard: the layout and its netlist check.
+"""Protoboard build of the dongle on an EPLZON 1.5 x 2 inch solderable breadboard: the layout and its netlist check.
 
 The board has 17 rows of two 5-hole strips, A-E and F-J, on either side of a center gap.
 Holes are named by column and row, such as "G10". Run with:
@@ -15,7 +15,6 @@ C3_TOP = {"C": ["5", "6", "7", "8", "9", "10", "20", "21"], "G": ["5V", "GND", "
 U2_PINS = {n: (f"E{9 + n}" if n <= 7 else f"F{24 - n}") for n in range(1, 15)}
 
 PARTS = [
-    ("R1", "1k", "C9", "C12", "command, keypad side to desk side"),
     ("R2", "10k", "C15", "C16", "pulls the command enable low"),
     ("R3", "100k", "B13", "B16", "holds GPIO6 low while the ESP is off"),
     ("R4", "10k", "H14", "H17", "pulls the wake enable low"),
@@ -41,8 +40,8 @@ WIRES = [
 EXTERNAL = [
     ("keypad", 2, "A14", "+5V", "Bipom 2, with the desk cable's 2"),
     ("keypad", 3, "I17", "GND", "Bipom 3, with the desk cable's 3"),
-    ("keypad", 7, "D9", "CMD", "Bipom 7"),
-    ("keypad", 8, "G9", "HEIGHT", "Bipom 8, with the desk cable's 8"),
+    ("keypad", 7, "C12", "CMD", "Bipom 7 through a 1k in the terminal"),
+    ("keypad", 8, "I9", "HEIGHT", "Bipom 8, with the desk cable's 8"),
     ("keypad", 10, "I16", "WAKE", "Bipom 10 through a 1k in the terminal"),
     ("desk", 7, "B12", "CMD", "desk cable 7"),
     ("desk", 10, "G16", "WAKE", "desk cable 10"),
@@ -53,8 +52,7 @@ EXPECTED = {
     "GND": {"U2.7", "U1.GND", "C1", "keypad.3", "R2", "R3", "R4", "R5", "R7"},
     "OE_TX": {"U2.1", "U2.6", "R2"},
     "TX": {"U1.7", "U2.2"},
-    "CMD_DESK": {"U2.3", "desk.7", "R1"},
-    "CMD_KEYPAD": {"keypad.7", "R1"},
+    "CMD_DESK": {"U2.3", "desk.7", "keypad.7"},
     "EN_TX": {"U1.6", "U2.4", "R3"},
     "OE_WAKE": {"U2.10", "U2.11", "R4"},
     "EN_WAKE": {"U1.0", "U2.13", "R5"},
@@ -71,7 +69,7 @@ def strip_of(hole: str) -> str:
 
 def under_c3(hole: str) -> bool:
     column, row = hole[0], int(hole[1:])
-    return row <= 8 and column in "DEF"
+    return (row <= 8 and column in "DEF") or (row == 9 and column in "CDEFG")
 
 
 def check() -> None:

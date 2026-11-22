@@ -4144,7 +4144,7 @@
 			)
 		)
 	)
-	(gr_text "Kaidi KDDY094 dongle  rev 5"
+	(gr_text "Kaidi KDDY094 dongle"
 		(at 108 135.4 0)
 		(layer "F.SilkS")
 		(uuid "992aa235-398c-4488-9318-91efcc75ba90")

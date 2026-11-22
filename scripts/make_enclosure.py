@@ -109,9 +109,9 @@ with BuildPart() as lid:
         with Locations(*[(x, CY) for x in CHEVRONS]):
             Polygon((-6.0, 8.0), (-1.0, 8.0), (7.0, 0.0), (-1.0, -8.0), (-6.0, -8.0), (2.0, 0.0))
         with Locations((LABEL_INSET, CY)):
-            Text("KEYPAD", LABEL_SIZE, font_style=FontStyle.BOLD)
+            Text("KEYPAD", LABEL_SIZE, font_style=FontStyle.BOLD, rotation=180)
         with Locations((W - LABEL_INSET, CY)):
-            Text("DESK", LABEL_SIZE, font_style=FontStyle.BOLD)
+            Text("DESK", LABEL_SIZE, font_style=FontStyle.BOLD, rotation=180)
     extrude(amount=1.0, mode=Mode.SUBTRACT)
 
 out = HW / "enclosure"
