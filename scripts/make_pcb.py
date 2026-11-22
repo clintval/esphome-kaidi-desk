@@ -161,7 +161,9 @@ fp.Reference().SetVisible(False)
 model(fp, f"{models}/ESP32-C3_SuperMini.wrl")
 
 dip = FP / "Package_DIP.pretty"
-place(dip, "DIP-14_W7.62mm_Socket", "U2", X0 + 21.5, Y0 + 5.5)
+socket = place(dip, "DIP-14_W7.62mm_Socket", "U2", X0 + 21.5, Y0 + 5.5)
+# The socket footprint only models the empty socket, so seat the chip in it for the renders.
+model(socket, "${KICAD10_3DMODEL_DIR}/Package_DIP.3dshapes/DIP-14_W7.62mm.step", (0, 0, 2.6))
 cap = place(FP / "Capacitor_THT.pretty", "C_Disc_D3.0mm_W1.6mm_P2.50mm", "C1", X0 + 24.0, Y0 + 2.2)
 dip_ref = next(f for f in board.GetFootprints() if f.GetReference() == "U2").Reference()
 dip_ref.SetVisible(False)
