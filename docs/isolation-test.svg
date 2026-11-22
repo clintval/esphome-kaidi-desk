@@ -29,13 +29,13 @@
   <rect x="430" y="195" width="240" height="150" rx="10" fill="#26262b"/>
   <text x="550" y="280" font-size="15" font-weight="700" text-anchor="middle" fill="#fff">B0505S-2WR3</text>
   <circle cx="445" cy="245" r="6" fill="#ffd36b"/>
-  <text x="458" y="250" font-size="13" font-weight="700" fill="#fff">2  +IN</text>
+  <text x="458" y="250" font-size="13" font-weight="700" fill="#fff">1  +IN</text>
   <circle cx="445" cy="305" r="6" fill="#ffd36b"/>
-  <text x="458" y="310" font-size="13" font-weight="700" fill="#fff">1  −IN</text>
+  <text x="458" y="310" font-size="13" font-weight="700" fill="#fff">2  −IN</text>
   <circle cx="655" cy="245" r="6" fill="#ffd36b"/>
-  <text x="642" y="250" font-size="13" font-weight="700" text-anchor="end" fill="#fff">+OUT  4</text>
+  <text x="642" y="250" font-size="13" font-weight="700" text-anchor="end" fill="#fff">+OUT  6</text>
   <circle cx="655" cy="305" r="6" fill="#ffd36b"/>
-  <text x="642" y="310" font-size="13" font-weight="700" text-anchor="end" fill="#fff">0V  3</text>
+  <text x="642" y="310" font-size="13" font-weight="700" text-anchor="end" fill="#fff">0V  4</text>
 
   <line x1="351" y1="245" x2="439" y2="245" stroke="#e5484d" stroke-width="4"/>
   <line x1="351" y1="305" x2="439" y2="305" stroke="#2b2b2b" stroke-width="4"/>
@@ -50,7 +50,7 @@
   <rect x="726" y="281" width="28" height="10" rx="2" fill="#c9d3ef"/>
   <line x1="740" y1="291" x2="740" y2="305" stroke="#2b2b2b" stroke-width="3"/>
   <text x="740" y="334" font-size="12" font-weight="700" text-anchor="middle" fill="#1d1d1f">470 µF 16 V</text>
-  <text x="740" y="350" font-size="12" text-anchor="middle" fill="#555">stripe (−) to pin 3</text>
+  <text x="740" y="350" font-size="12" text-anchor="middle" fill="#555">stripe (−) to pin 4</text>
 
   <rect x="800" y="234" width="60" height="22" rx="4" fill="#2b2b2b"/>
   <rect x="848" y="234" width="8" height="22" fill="#d9d9d9"/>
@@ -70,7 +70,7 @@
   <text x="40" y="496" font-size="18" font-weight="800" fill="#1d1d1f">Before powering</text>
   <text x="40" y="524" font-size="14" fill="#333">1. Keep the breakout, converter, capacitor and diode on a solderless breadboard, off the protoboard.</text>
   <text x="40" y="548" font-size="14" fill="#333">2. Meter on beep: breakout GND to protoboard A16 must <tspan font-weight="700">not</tspan> beep. Nothing on the charger side may touch the desk side.</text>
-  <text x="40" y="572" font-size="14" fill="#333">3. Converter pins, printed side facing you: 1 −IN, 2 +IN, 3 0V, 4 +OUT. Check your part's markings.</text>
+  <text x="40" y="572" font-size="14" fill="#333">3. Converter pins from the dotted end: 1 +IN, 2 −IN, 4 0V, 6 +OUT (no pins at 3 and 5), per the Mornsun datasheet.</text>
   <text x="40" y="596" font-size="14" fill="#333">4. Unplug the C3's own USB-C, then plug the charger into the breakout. The diode makes plugging both harmless.</text>
   <text x="40" y="620" font-size="14" fill="#333">5. Hold Down on the keypad. Normal movement on a two-prong charger means isolation works.</text>
 </svg>
