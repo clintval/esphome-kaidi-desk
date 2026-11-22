@@ -1,8 +1,9 @@
 """Write the two custom footprints: the Amphenol/FCI 54602-x10 right-angle RJ50 jack and the C3 SuperMini socket.
 
-The jack follows FCI drawing C-BMJ-0101 rev F (10 pol shallow latch, PCB layout view) and the same
-conventions as KiCad's RJ45_Amphenol_54602-x08_Horizontal: pin 1 at the origin, odd pins on the
-front row, even pins 2.54 mm behind, locating pegs 6.35 mm toward the opening.
+The jack follows FCI drawing C-BMJ-0101 rev F (10 pol shallow latch, PCB layout view): pin 1 at the
+origin in line with one locating peg, odd pins on the row 8.89 mm from the pegs, even pins on the row
+6.35 mm from them, ending in line with the other peg. This is KiCad's RJ45_Amphenol_54602-x08 with
+one more contact at each end.
 
 Run with: python3 scripts/make_footprints.py hardware/kaidi.pretty
 """
@@ -61,7 +62,7 @@ def footprint(name, descr, body):
 
 pitch, row = 1.27, 2.54
 pins = "".join(
-    pad(str(n), round((n - 1) * pitch, 3), 0 if n % 2 else -row, "rect" if n == 1 else "circle", 1.5, 0.76)
+    pad(str(n), round((n - 1) * pitch, 3), -row if n % 2 else 0, "rect" if n == 1 else "circle", 1.5, 0.76)
     for n in range(1, 11)
 )
 span = 9 * pitch
