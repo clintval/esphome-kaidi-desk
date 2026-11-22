@@ -73,6 +73,10 @@ A complete config with every entity is in [`example/kaidi-desk.yaml`](example/ka
 
 ## Hardware
 
+> [!WARNING]
+> This board revision is untested. The isolation test, the measurements of the USB-C breakout and the B0505S-2WR3, and the RJ50 jack fit check are still pending, so don't order boards from it yet.
+> The [protoboard build](#build-without-a-pcb) is tested and works.
+
 The dongle sits inline: the keypad plugs into one end, and a short cable runs from the other end to the control box.
 A 74AHCT125 drives the box only while the ESP is sending, so the keypad keeps working if the ESP is unplugged or dead.
 Power comes in on the board's own USB-C through an isolated converter, so any USB charger works.
