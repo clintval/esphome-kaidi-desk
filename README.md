@@ -108,7 +108,7 @@ Power comes in on the board's own USB-C through an isolated converter, so any US
 | 8 | Height, box to keypad | Straight through; 10 kΩ over 15 kΩ to GPIO4 |
 | 10 | Wake, keypad to box | Keypad through 1 kΩ; gate B drives the box side high when GPIO10 is high |
 
-The board is an 84 × 60 mm, two-layer, all through-hole KiCad design in [`hardware/`](hardware).
+The board is an 84 × 50 mm, two-layer, all through-hole KiCad design in [`hardware/`](hardware).
 Power comes in on a USB-C breakout (J3) standing on a 1 × 6 header at the board's bottom edge, then through a Mornsun B0505S-2WR3 isolated converter (U3) and a 1N5819 Schottky diode (D1) to the C3's 5V pin.
 The converter keeps the charger's ground apart from the desk's, so any USB charger works, two-prong ones included.
 Without it, a two-prong charger leaks a little mains AC onto the desk's ground, which upsets touch-sensitive keypads: they barely register a press and the desk creeps a millimeter at a time.
@@ -120,7 +120,7 @@ To solder the C3 flat instead, set `C3_BOTTOM = 0.2` in the same file and run `p
 
 ## Enclosure
 
-A two-part, 89 × 65 × 24 mm box is in [`hardware/enclosure/`](hardware/enclosure) as STEP and STL, sized to sit in the desk's cable tray beside the control box.
+A two-part, 89 × 55 × 24 mm box is in [`hardware/enclosure/`](hardware/enclosure) as STEP and STL, sized to sit in the desk's cable tray beside the control box.
 Its only USB-C opening lines up with the power breakout; the C3's own port stays inside.
 
 <p align="center">
@@ -135,7 +135,7 @@ Print it in MJF nylon or, at home, PETG; resin tends to crack around the inserts
 
 | Qty | Part | Where to order |
 | --- | --- | --- |
-| 1 | PCB, 84 × 60 mm, 2 layers, 1.6 mm | [JLCPCB](https://jlcpcb.com/): upload [`hardware/kaidi-desk-gerbers.zip`](hardware/kaidi-desk-gerbers.zip) |
+| 1 | PCB, 84 × 50 mm, 2 layers, 1.6 mm | [JLCPCB](https://jlcpcb.com/): upload [`hardware/kaidi-desk-gerbers.zip`](hardware/kaidi-desk-gerbers.zip) |
 | 1 | Enclosure base and lid, MJF nylon (PA12) | [JLCPCB 3D printing](https://jlcpcb.com/3d-printing): upload [`base.stl`](hardware/enclosure/base.stl) and [`lid.stl`](hardware/enclosure/lid.stl) |
 | 2 | Amphenol/FCI 54602-910LF, 10P10C right-angle jack (J1, J2) | [DigiKey](https://www.digikey.com/en/products/detail/amphenol-cs-fci/54602-910LF/1001361) |
 | 1 | SN74AHCT125N quad buffer, DIP-14 (U2) | [DigiKey](https://www.digikey.com/en/products/result?keywords=SN74AHCT125N) |
@@ -151,9 +151,9 @@ Print it in MJF nylon or, at home, PETG; resin tends to crack around the inserts
 | 1 | Cermant USB-C female breakout with 5.1 kΩ on CC (J3) | [Amazon](https://www.amazon.com/s?k=Cermant+Type-C+female+breakout+16P) |
 | 1 | 1 × 6 male pin header, 2.54 mm, for the breakout (J3) | Any header strip, cut to length |
 | 1 | Mornsun B0505S-2WR3 isolated 5 V to 5 V converter, 2 W, SIP (U3) | [DigiKey](https://www.digikey.com/en/products/result?keywords=B0505S-2WR3) or [Amazon](https://www.amazon.com/s?k=B0505S-2WR3) |
-| 1 | 470 µF 16 V electrolytic, 8 mm, 3.5 mm lead pitch (C2) | [DigiKey](https://www.digikey.com/en/products/result?keywords=470uF%2016V%20radial%208mm) |
+| 1 | 220 µF 16 V electrolytic, 6.3 mm, 2.5 mm lead pitch (C2) | [DigiKey](https://www.digikey.com/en/products/result?keywords=220uF%2016V%20radial%206.3mm) |
 | 1 | 10 µF 16 V electrolytic, 5 mm, 2 mm lead pitch (C3, converter input) | [DigiKey](https://www.digikey.com/en/products/result?keywords=10uF%2016V%20radial%205mm) |
-| 1 | 1N5819 Schottky diode, DO-41 (D1) | [DigiKey](https://www.digikey.com/en/products/result?keywords=1N5819) |
+| 1 | 1N5819 Schottky diode, DO-41, mounted standing (D1) | [DigiKey](https://www.digikey.com/en/products/result?keywords=1N5819) |
 | 1 | RJ50 (10P10C) cable, about 1 ft, wired straight through, dongle to control box | [Winford CBM10R1TS-1](https://www.winford.com/products/cbm10.php) (US) or [Delock 80185](https://www.delock.com/produkt/80185/merkmale.html) (EU) |
 | 2 | M3 × 20 mm socket-head cap screw, ISO 4762 | [Amazon](https://www.amazon.com/s?k=M3x20+socket+head+cap+screw+ISO+4762+stainless) |
 | 2 | M3 heat-set insert, 5.7 mm long, 4.0 mm hole (ruthex M3) | [Amazon](https://www.amazon.com/s?k=ruthex+M3+heat+set+inserts) |
