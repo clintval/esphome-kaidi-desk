@@ -30,7 +30,7 @@ CLI = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/
 ROOT = Path(__file__).resolve().parent.parent
 SCH, OUT = Path(sys.argv[1]), Path(sys.argv[2])
 
-X0, Y0, W, H, RADIUS = 100.0, 100.0, 84.0, 60.0, 3.0
+X0, Y0, W, H, RADIUS = 100.0, 100.0, 84.0, 50.0, 3.0
 YC = Y0 + H / 2
 
 with tempfile.TemporaryDirectory() as tmp:
@@ -174,7 +174,7 @@ res = FP / "Resistor_THT.pretty"
 axial = "R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
 right = [("R3", 0), ("R4", 1), ("R5", 2), ("R6", 3), ("R7", 4), ("R8", 5), ("R9", 6), ("R10", 7)]
 placements = [(ref, X0 + 54.5, Y0 + 3.0 + i * 3.4, 0) for ref, i in right]
-placements += [("R1", X0 + 43.0, Y0 + 33.2, 0), ("R2", X0 + 43.0, Y0 + 36.6, 0)]
+placements += [("R1", X0 + 65.5, Y0 + 10.0, 0), ("R2", X0 + 65.5, Y0 + 13.4, 0)]
 for ref, x, y, a in placements:
     place(res, axial, ref, x, y, a)
 
@@ -185,13 +185,14 @@ for x, y in HOLES:
 USB_X, USB_Y = X0 + W / 2 - 2.5 * 2.54, Y0 + H - USBC_BREAKOUT_DEPTH + USBC_BREAKOUT_PIN_INSET
 fp = place(jack_lib, "USB-C_Breakout_Cermant_1x06", "J3", USB_X, USB_Y)
 model(fp, f"{models}/USB-C_Breakout_Cermant_1x06.wrl")
-U3_X = USB_X - 6.15
-fp = place(jack_lib, "Converter_DCDC_Mornsun_B_S-2WR3_SIP", "U3", U3_X, USB_Y, angle=180)
+U3_X, U3_Y = USB_X - 6.15, Y0 + H - 2.5
+fp = place(jack_lib, "Converter_DCDC_Mornsun_B_S-2WR3_SIP", "U3", U3_X, U3_Y, angle=180)
 model(fp, f"{models}/Converter_DCDC_Mornsun_B_S-2WR3_SIP.wrl")
 caps = FP / "Capacitor_THT.pretty"
-place(caps, "CP_Radial_D5.0mm_P2.00mm", "C3", USB_X + 1.35, USB_Y - 5.5)
-place(caps, "CP_Radial_D8.0mm_P3.50mm", "C2", X0 + 5.55, USB_Y - 1.6)
-place(FP / "Diode_THT.pretty", "D_DO-41_SOD81_P10.16mm_Horizontal", "D1", X0 + 9.5, Y0 + H - 3.2)
+C3_X, C3_Y = U3_X - 2.5, USB_Y - 0.5
+place(caps, "CP_Radial_D5.0mm_P2.00mm", "C3", C3_X, C3_Y)
+place(caps, "CP_Radial_D6.3mm_P2.50mm", "C2", X0 + 5.5, USB_Y - 0.1)
+place(FP / "Diode_THT.pretty", "D_DO-41_SOD81_P5.08mm_Vertical_AnodeUp", "D1", X0 + 13.5, USB_Y - 1.6)
 silk("USB-C power in", USB_X + 11.85, USB_Y - 3.5, 0.9)
 silk("esphome-kaidi-desk", X0 + 56.0, USB_Y + 1.9, 1.6, bold=True, left=True)
 silk("Kaidi KDDY094 dongle", X0 + 56.0, USB_Y + 4.3, 1.0, left=True)
@@ -240,8 +241,8 @@ silk("antenna keep-out", (corners[0][0] + corners[2][0]) / 2, U1_Y + ANTENNA[3] 
 
 # The charger side (J3, C3 and U3 pins 1-2) gets no ground pour, a moat no other trace can cross,
 # and nothing bridges the converter's barrier.
-ISLAND = (U3_X - 5.1, USB_Y - 8.5, USB_X + 17.6, Y0 + H)
-BARRIER = (U3_X - 6.6, USB_Y - 6.3, U3_X - 3.6, USB_Y + 2.9)
+ISLAND = (U3_X - 5.1, C3_Y - 4.3, USB_X + 17.6, Y0 + H)
+BARRIER = (U3_X - 6.6, U3_Y - 6.3, U3_X - 3.6, Y0 + H)
 
 
 def rule_area(name, rect, tracks):

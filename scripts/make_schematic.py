@@ -128,9 +128,9 @@ FOOTPRINTS = {
     "J": "kaidi:RJ50_Amphenol_54602-910_Horizontal",
     "J3": "kaidi:USB-C_Breakout_Cermant_1x06",
     "U3": "kaidi:Converter_DCDC_Mornsun_B_S-2WR3_SIP",
-    "C2": "Capacitor_THT:CP_Radial_D8.0mm_P3.50mm",
+    "C2": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
     "C3": "Capacitor_THT:CP_Radial_D5.0mm_P2.00mm",
-    "D1": "Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal",
+    "D1": "Diode_THT:D_DO-41_SOD81_P5.08mm_Vertical_AnodeUp",
 }
 
 out = []
@@ -432,7 +432,7 @@ net(p("4"), "GND")
 p = place(
     "Device:C_Polarized",
     "C2",
-    "470u",
+    "220u",
     127.0,
     187.96,
     footprint=FOOTPRINTS["C2"],
