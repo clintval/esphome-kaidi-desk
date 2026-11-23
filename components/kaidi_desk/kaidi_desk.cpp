@@ -19,6 +19,7 @@ static const uint32_t WAKE_HOLD_MS = 500;
 static const uint8_t RELEASE_IDLE_FRAMES = 3;
 static const uint32_t KEEPALIVE_INTERVAL_MS = 10000;
 static const uint8_t KEEPALIVE_FRAMES = 3;
+static const uint32_t KEEPALIVE_AFTER_MOTION_MS = 3000;
 
 void KaidiDesk::setup() {
   if (this->tx_enable_pin_ != nullptr) {
@@ -208,7 +209,10 @@ void KaidiDesk::handle_frame_(uint8_t mode, uint16_t value) {
   if (mode != BOX_MODE_HEIGHT)
     return;
 
-  this->height_ = value / 10.0f;
+  float height = value / 10.0f;
+  if (height != this->height_)
+    this->motion_ms_ = now;
+  this->height_ = height;
   this->height_ms_ = now;
   if (this->height_sensor_ != nullptr && this->height_ != this->published_height_) {
     this->published_height_ = this->height_;
@@ -302,6 +306,11 @@ void KaidiDesk::set_keep_awake(bool keep_awake) {
 void KaidiDesk::keep_alive_(uint32_t now) {
   if (!this->keep_awake_)
     return;
+  // The box is awake while it moves, and a burst then would cut into the keypad's own frames.
+  if (now - this->motion_ms_ < KEEPALIVE_AFTER_MOTION_MS) {
+    this->keepalive_frames_ = 0;
+    return;
+  }
   if (this->keepalive_frames_ == 0 && now - this->last_tx_ms_ >= KEEPALIVE_INTERVAL_MS)
     this->keepalive_frames_ = KEEPALIVE_FRAMES;
   if (this->keepalive_frames_ > 0 && now - this->last_tx_ms_ >= this->frame_interval_) {

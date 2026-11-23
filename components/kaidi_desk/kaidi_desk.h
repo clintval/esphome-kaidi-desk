@@ -120,6 +120,7 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   uint8_t release_frames_{0};
   bool keep_awake_{false};
   uint8_t keepalive_frames_{0};
+  uint32_t motion_ms_{0};
 
   HighFrequencyLoopRequester high_freq_;
 };
