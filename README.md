@@ -65,9 +65,11 @@ A complete config with every entity is in [`example/kaidi-desk.yaml`](example/ka
 | --- | --- | --- |
 | `sensor` | `height` | Height above the desk's lowest point, in cm (Home Assistant converts units) |
 | `text_sensor` | `status` | `Ready`, `Reset Needed` (E04), `Resetting`, or `Asleep` |
+| `text_sensor` | `last_stop` | Why the last move ended, such as `Reached target`, `Reached preset 2`, `Stopped`, `Stopped short at a limit or obstruction` or `Lost the height` |
 | `number` | `target_height` | Move to a height; follows the real height while idle, in `cm` or `in` |
 | `button` | `nudge_up`, `nudge_down` | Move briefly up or down, about half an inch |
 | `button` | `stop` | Stop any move |
+| `button` | `preset_1` to `preset_4` | Go to a position saved on the keypad; the box drives there and stops by itself |
 | `button` | `reset` | Hold Up and Down until the box re-zeros, which clears E04 |
 | `switch` | `keep_awake` | Hold the wake line high and send a few Idle frames every 10 s, so the box never sleeps, height streams live and moves start at once |
 
@@ -184,6 +186,7 @@ Each frame is 7 bytes, `0x68 0x01 <mode> <hi> <lo> <checksum> 0x16`, where the c
 | Keypad to box | `0x02` | Down |
 | Keypad to box | `0x03` | Idle |
 | Keypad to box | `0x04` | Up and Down held (reset) |
+| Keypad to box | `0x06` to `0x09` | Go to preset 1 to 4, repeated until the box stops |
 | Box to keypad | `0x00` | Height in 0.1 cm |
 | Box to keypad | `0x30` | Reset needed (E04); the value counts down during the reset |
 | Box to keypad | `0x04` | Reset rebound in progress |
@@ -198,6 +201,7 @@ See the [contributing guide](./CONTRIBUTING.md) for more information.
 ## Acknowledgements
 
 The frame format was first decoded in [`xvzf/kaidi-desk-controller-protocol`](https://github.com/xvzf/kaidi-desk-controller-protocol), and [`jcappaert/esphome-kaidi`](https://github.com/jcappaert/esphome-kaidi) read the height on the same `KDDY094` box.
+The preset commands were documented by [`yog18r/kaidi-desk-esphome`](https://github.com/yog18r/kaidi-desk-esphome), a separate desk-powered board for the same box.
 
 ## License
 

@@ -1,6 +1,9 @@
 #include "kaidi_desk.h"
 
+#include <algorithm>
+#include <cinttypes>
 #include <cmath>
+#include <cstdio>
 
 #include "esphome/core/log.h"
 
@@ -14,12 +17,15 @@ static const uint8_t FRAME_ADDRESS = 0x01;
 static const uint8_t FRAME_END = 0x16;
 static const uint32_t AWAKE_FRESH_MS = 150;
 static const uint32_t ASLEEP_AFTER_MS = 2000;
-static const uint32_t HEIGHT_STALE_MS = 3000;
+static const uint32_t HEIGHT_STALE_MS = 500;
 static const uint32_t WAKE_HOLD_MS = 500;
 static const uint8_t RELEASE_IDLE_FRAMES = 3;
 static const uint32_t KEEPALIVE_INTERVAL_MS = 10000;
 static const uint8_t KEEPALIVE_FRAMES = 3;
 static const uint32_t KEEPALIVE_AFTER_MOTION_MS = 3000;
+static const uint32_t START_TIMEOUT_MS = 2500;
+static const uint32_t STALL_MS = 1500;
+static const float MOVED_CM = 0.5f;
 
 void KaidiDesk::setup() {
   if (this->tx_enable_pin_ != nullptr) {
@@ -53,6 +59,7 @@ void KaidiDesk::dump_config() {
   ESP_LOGCONFIG(TAG, "  Coast: %.1f cm", this->coast_);
   LOG_SENSOR("  ", "Height", this->height_sensor_);
   LOG_TEXT_SENSOR("  ", "Status", this->status_sensor_);
+  LOG_TEXT_SENSOR("  ", "Last Stop", this->last_stop_sensor_);
   LOG_NUMBER("  ", "Target Height", this->target_number_);
   this->check_uart_settings(9600);
 }
@@ -84,10 +91,13 @@ void KaidiDesk::loop() {
         this->state_ = State::ACTING;
         this->state_since_ms_ = now;
         this->reset_seen_ = false;
+        this->sent_ = false;
+        if (this->action_ == Action::MOVE)
+          this->moving_up_ = this->height_ < this->target_;
+        this->start_motion_();
         this->step_action_(now);
       } else if (now - this->state_since_ms_ > this->wake_timeout_) {
-        ESP_LOGW(TAG, "Box did not answer within %" PRIu32 " ms", this->wake_timeout_);
-        this->release_();
+        this->release_("Box did not answer");
       } else {
         this->send_(COMMAND_IDLE);
       }
@@ -112,28 +122,44 @@ void KaidiDesk::step_action_(uint32_t now) {
   uint32_t elapsed = now - this->state_since_ms_;
   switch (this->action_) {
     case Action::MOVE: {
-      if (std::isnan(this->height_) || now - this->height_ms_ > HEIGHT_STALE_MS) {
-        ESP_LOGW(TAG, "Height feedback went stale, stopping");
-        this->release_();
-        return;
-      }
-      if (elapsed > this->move_timeout_) {
-        ESP_LOGW(TAG, "Move took longer than %" PRIu32 " ms, stopping", this->move_timeout_);
-        this->release_();
+      if (const char *fault = this->motion_fault_(now)) {
+        this->release_(fault);
         return;
       }
       float remaining = this->moving_up_ ? this->target_ - this->height_ : this->height_ - this->target_;
-      if (std::fabs(this->height_ - this->target_) <= this->tolerance_ || remaining <= this->coast_) {
-        this->release_();
+      bool close = std::fabs(this->height_ - this->target_) <= this->tolerance_;
+      if (close || remaining <= this->coast_) {
+        if (this->sent_)
+          this->release_("Reached target");
+        else
+          this->release_(close ? "Already at target" : "Target too close to move");
         return;
       }
       this->send_(this->moving_up_ ? COMMAND_UP : COMMAND_DOWN);
+      this->sent_ = true;
+      return;
+    }
+    case Action::PRESET: {
+      char reason[40];
+      bool done = this->has_moved_ && now - this->motion_ms_ > STALL_MS;
+      bool unmoved = !this->has_moved_ && elapsed > START_TIMEOUT_MS && this->box_mode_ == BOX_MODE_HEIGHT;
+      if (done || unmoved) {
+        snprintf(reason, sizeof(reason), done ? "Reached preset %u" : "Already at preset %u, or not saved",
+                 this->preset_);
+        this->release_(reason);
+        return;
+      }
+      if (const char *fault = this->motion_fault_(now)) {
+        this->release_(fault);
+        return;
+      }
+      this->send_(COMMAND_PRESET_1 + this->preset_ - 1);
       return;
     }
     case Action::NUDGE_UP:
     case Action::NUDGE_DOWN:
       if (elapsed >= this->nudge_duration_) {
-        this->release_();
+        this->release_("Nudge finished");
         return;
       }
       this->send_(this->action_ == Action::NUDGE_UP ? COMMAND_UP : COMMAND_DOWN);
@@ -142,25 +168,46 @@ void KaidiDesk::step_action_(uint32_t now) {
       if (this->box_mode_ == BOX_MODE_RESET_NEEDED || this->box_mode_ == BOX_MODE_REBOUND)
         this->reset_seen_ = true;
       if (this->reset_seen_ && this->box_mode_ == BOX_MODE_HEIGHT) {
-        this->release_();
+        this->release_("Reset finished");
         return;
       }
       if (!this->reset_seen_ && elapsed > 5000) {
-        ESP_LOGW(TAG, "Box never entered its reset, stopping");
-        this->release_();
+        this->release_("Reset never started");
         return;
       }
       if (elapsed > this->reset_timeout_) {
-        ESP_LOGW(TAG, "Reset did not finish within %" PRIu32 " ms, stopping", this->reset_timeout_);
-        this->release_();
+        this->release_("Reset timed out");
         return;
       }
       this->send_(COMMAND_RESET);
       return;
     default:
-      this->release_();
+      this->release_("Stopped");
       return;
   }
+}
+
+void KaidiDesk::start_motion_() {
+  this->start_height_ = this->height_;
+  this->furthest_ = this->height_;
+  this->has_moved_ = false;
+}
+
+const char *KaidiDesk::motion_fault_(uint32_t now) {
+  if (this->box_mode_ == BOX_MODE_RESET_NEEDED || this->box_mode_ == BOX_MODE_REBOUND)
+    return "Reset needed";
+  if (std::isnan(this->height_) || now - this->height_ms_ > HEIGHT_STALE_MS)
+    return "Lost the height";
+  uint32_t elapsed = now - this->state_since_ms_;
+  if (elapsed > this->move_timeout_)
+    return "Timed out";
+  if (!this->has_moved_)
+    return elapsed > START_TIMEOUT_MS ? "Did not move" : nullptr;
+  if ((this->moving_up_ ? this->furthest_ - this->height_ : this->height_ - this->furthest_) >= MOVED_CM)
+    return "Reversed by an obstruction or the keypad";
+  if (now - this->motion_ms_ > STALL_MS)
+    return "Stopped short at a limit or obstruction";
+  return nullptr;
 }
 
 void KaidiDesk::read_frames_() {
@@ -214,6 +261,16 @@ void KaidiDesk::handle_frame_(uint8_t mode, uint16_t value) {
     this->motion_ms_ = now;
   this->height_ = height;
   this->height_ms_ = now;
+  if (this->state_ == State::ACTING) {
+    float climbed = height - this->start_height_;
+    if (!this->has_moved_) {
+      if (this->action_ == Action::PRESET && std::fabs(climbed) >= MOVED_CM)
+        this->moving_up_ = climbed > 0;
+      this->has_moved_ = (this->moving_up_ ? climbed : -climbed) >= MOVED_CM;
+      this->furthest_ = height;
+    }
+    this->furthest_ = this->moving_up_ ? std::max(this->furthest_, height) : std::min(this->furthest_, height);
+  }
   if (this->height_sensor_ != nullptr && this->height_ != this->published_height_) {
     this->published_height_ = this->height_;
     this->height_sensor_->publish_state(this->height_);
@@ -222,7 +279,7 @@ void KaidiDesk::handle_frame_(uint8_t mode, uint16_t value) {
     this->sync_target_();
 }
 
-void KaidiDesk::send_(Command command) {
+void KaidiDesk::send_(uint8_t command) {
   const uint8_t frame[7] = {FRAME_START, FRAME_ADDRESS, command, 0x00, 0x00,
                             static_cast<uint8_t>(FRAME_ADDRESS + command), FRAME_END};
   this->transmitting_ = true;
@@ -244,13 +301,14 @@ void KaidiDesk::begin_(Action action) {
   this->high_freq_.start();
 }
 
-void KaidiDesk::release_() {
+void KaidiDesk::release_(const char *reason) {
+  this->publish_last_stop_(reason);
   this->state_ = State::RELEASING;
   this->release_frames_ = RELEASE_IDLE_FRAMES;
 }
 
 void KaidiDesk::abort_for_keypad_() {
-  ESP_LOGI(TAG, "Keypad pressed, handing the desk back to it");
+  this->publish_last_stop_("Keypad took over");
   this->finish_();
 }
 
@@ -273,6 +331,12 @@ void KaidiDesk::publish_status_(const char *status) {
   this->status_sensor_->publish_state(status);
 }
 
+void KaidiDesk::publish_last_stop_(const char *reason) {
+  ESP_LOGI(TAG, "Stopped at %.1f cm: %s", this->height_, reason);
+  if (this->last_stop_sensor_ != nullptr)
+    this->last_stop_sensor_->publish_state(reason);
+}
+
 void KaidiDesk::sync_target_() {
   if (this->target_number_ == nullptr || std::isnan(this->height_))
     return;
@@ -286,9 +350,15 @@ void KaidiDesk::move_to(float cm) {
   this->moving_up_ = std::isnan(this->height_) || this->height_ < cm;
   if (this->state_ == State::ACTING && this->action_ == Action::MOVE) {
     this->state_since_ms_ = millis();
+    this->start_motion_();
     return;
   }
   this->begin_(Action::MOVE);
+}
+
+void KaidiDesk::preset(uint8_t number) {
+  this->preset_ = number;
+  this->begin_(Action::PRESET);
 }
 
 void KaidiDesk::apply_wake_pin_() {
@@ -324,8 +394,8 @@ void KaidiDesk::nudge(bool up) { this->begin_(up ? Action::NUDGE_UP : Action::NU
 void KaidiDesk::reset() { this->begin_(Action::RESET); }
 
 void KaidiDesk::stop() {
-  if (this->state_ != State::IDLE)
-    this->release_();
+  if (this->state_ == State::WAKING || this->state_ == State::ACTING)
+    this->release_("Stopped");
 }
 
 void KaidiTargetNumber::control(float value) {
@@ -351,6 +421,9 @@ void KaidiButton::press_action() {
       break;
     case ButtonAction::RESET:
       this->parent_->reset();
+      break;
+    default:
+      this->parent_->preset(static_cast<uint8_t>(this->action_) - static_cast<uint8_t>(ButtonAction::PRESET_1) + 1);
       break;
   }
 }

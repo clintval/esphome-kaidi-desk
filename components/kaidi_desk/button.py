@@ -14,6 +14,7 @@ BUTTONS = {
     "nudge_down": (ButtonAction.NUDGE_DOWN, "mdi:arrow-down-bold"),
     "stop": (ButtonAction.STOP, "mdi:stop"),
     "reset": (ButtonAction.RESET, "mdi:restore"),
+    **{f"preset_{n}": (getattr(ButtonAction, f"PRESET_{n}"), f"mdi:numeric-{n}-box-outline") for n in range(1, 5)},
 }
 
 CONFIG_SCHEMA = cv.Schema(

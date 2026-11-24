@@ -18,6 +18,7 @@ enum Command : uint8_t {
   COMMAND_DOWN = 0x02,
   COMMAND_IDLE = 0x03,
   COMMAND_RESET = 0x04,
+  COMMAND_PRESET_1 = 0x06,
 };
 
 enum BoxMode : uint8_t {
@@ -27,7 +28,7 @@ enum BoxMode : uint8_t {
   BOX_MODE_NONE = 0xFF,
 };
 
-enum class Action : uint8_t { NONE, MOVE, NUDGE_UP, NUDGE_DOWN, RESET };
+enum class Action : uint8_t { NONE, MOVE, NUDGE_UP, NUDGE_DOWN, RESET, PRESET };
 
 enum class State : uint8_t { IDLE, WAKING, ACTING, RELEASING };
 
@@ -43,6 +44,7 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   void set_keypad_sense_pin(InternalGPIOPin *pin) { this->keypad_sense_pin_ = pin; }
   void set_height_sensor(sensor::Sensor *sensor) { this->height_sensor_ = sensor; }
   void set_status_sensor(text_sensor::TextSensor *sensor) { this->status_sensor_ = sensor; }
+  void set_last_stop_sensor(text_sensor::TextSensor *sensor) { this->last_stop_sensor_ = sensor; }
   void set_target_number(number::Number *number, float units_per_cm) {
     this->target_number_ = number;
     this->units_per_cm_ = units_per_cm;
@@ -58,6 +60,7 @@ class KaidiDesk : public Component, public uart::UARTDevice {
 
   void move_to(float cm);
   void nudge(bool up);
+  void preset(uint8_t number);
   void reset();
   void stop();
   void set_keep_awake(bool keep_awake);
@@ -67,9 +70,12 @@ class KaidiDesk : public Component, public uart::UARTDevice {
  protected:
   void read_frames_();
   void handle_frame_(uint8_t mode, uint16_t value);
-  void send_(Command command);
+  void send_(uint8_t command);
   void begin_(Action action);
-  void release_();
+  void release_(const char *reason);
+  void start_motion_();
+  const char *motion_fault_(uint32_t now);
+  void publish_last_stop_(const char *reason);
   void finish_();
   void step_action_(uint32_t now);
   void publish_status_(const char *status);
@@ -87,6 +93,7 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   volatile bool keypad_edge_{false};
   sensor::Sensor *height_sensor_{nullptr};
   text_sensor::TextSensor *status_sensor_{nullptr};
+  text_sensor::TextSensor *last_stop_sensor_{nullptr};
   number::Number *target_number_{nullptr};
   float units_per_cm_{1.0f};
 
@@ -99,6 +106,11 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   float tolerance_{0.4f};
   float coast_{1.3f};
   bool moving_up_{true};
+  bool has_moved_{false};
+  bool sent_{false};
+  float start_height_{NAN};
+  float furthest_{NAN};
+  uint8_t preset_{0};
 
   uint8_t buffer_[7]{};
   uint8_t buffer_len_{0};
@@ -135,7 +147,7 @@ class KaidiKeepAwakeSwitch : public switch_::Switch, public Parented<KaidiDesk> 
   void write_state(bool state) override;
 };
 
-enum class ButtonAction : uint8_t { NUDGE_UP, NUDGE_DOWN, STOP, RESET };
+enum class ButtonAction : uint8_t { NUDGE_UP, NUDGE_DOWN, STOP, RESET, PRESET_1, PRESET_2, PRESET_3, PRESET_4 };
 
 class KaidiButton : public button::Button, public Parented<KaidiDesk> {
  public:
