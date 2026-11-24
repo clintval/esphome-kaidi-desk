@@ -72,7 +72,7 @@ A complete config with every entity is in [`example/kaidi-desk.yaml`](example/ka
 | `button` | `stop` | Stop any move |
 | `button` | `preset_1` to `preset_4` | Go to a position saved on the keypad; the box drives there and stops by itself |
 | `button` | `reset` | Hold Up and Down until the box re-zeros, which clears E04; it ignores other moves until it finishes, and may clear the keypad's presets |
-| `switch` | `keep_awake` | Hold the wake line high and send a few Idle frames every 10 s, so the box never sleeps, height streams live and moves start at once |
+| `switch` | `keep_awake` | Hold the wake line high and send an Idle frame every 4 s, inside the box's 10 to 12 s sleep timer, so the box stays awake, height streams live and moves start at once |
 
 ## Hardware
 

@@ -21,8 +21,8 @@ static const uint32_t ASLEEP_AFTER_MS = 2000;
 static const uint32_t HEIGHT_STALE_MS = 500;
 static const uint32_t WAKE_HOLD_MS = 500;
 static const uint8_t RELEASE_IDLE_FRAMES = 3;
-static const uint32_t KEEPALIVE_INTERVAL_MS = 10000;
-static const uint8_t KEEPALIVE_FRAMES = 3;
+static const uint32_t KEEPALIVE_INTERVAL_MS = 4000;
+static const uint8_t WAKE_FRAMES = 3;
 static const uint32_t KEEPALIVE_AFTER_MOTION_MS = 3000;
 static const uint32_t START_TIMEOUT_MS = 2500;
 static const uint32_t STALL_MS = 1500;
@@ -399,7 +399,7 @@ void KaidiDesk::apply_wake_pin_() {
 
 void KaidiDesk::set_keep_awake(bool keep_awake) {
   this->keep_awake_ = keep_awake;
-  this->keepalive_frames_ = keep_awake ? KEEPALIVE_FRAMES : 0;
+  this->keepalive_frames_ = keep_awake ? WAKE_FRAMES : 0;
   this->apply_wake_pin_();
 }
 
@@ -413,7 +413,7 @@ void KaidiDesk::keep_alive_(uint32_t now) {
     return;
   }
   if (this->keepalive_frames_ == 0 && now - this->last_tx_ms_ >= KEEPALIVE_INTERVAL_MS)
-    this->keepalive_frames_ = KEEPALIVE_FRAMES;
+    this->keepalive_frames_ = this->box_mode_ == BOX_MODE_NONE ? WAKE_FRAMES : 1;
   if (this->keepalive_frames_ > 0 && now - this->last_tx_ms_ >= this->frame_interval_) {
     this->send_(COMMAND_IDLE);
     this->keepalive_frames_--;
