@@ -78,12 +78,13 @@ A complete config with every entity is in [`example/kaidi-desk.yaml`](example/ka
 ## Hardware
 
 > [!WARNING]
-> This board revision is untested. The isolation test, the measurements of the USB-C breakout and the B0505S-2WR3, and the RJ50 jack fit check are still pending, so don't order boards from it yet.
+> This board revision is untested. The desk-power test, the isolation test, the measurements of the USB-C breakout and the B0505S-2WR3, and the RJ50 jack fit check are still pending, so don't order boards from it yet.
+> In an early test without D2 and C4, the C3 reset whenever the desk's motors started, so desk power may not work on every box.
 > The [protoboard build](#build-without-a-pcb) is tested and works.
 
 The dongle sits inline: the keypad plugs into one end, and a short cable runs from the other end to the control box.
 A 74AHCT125 drives the box only while the ESP is sending, so the keypad keeps working if the ESP is unplugged or dead.
-Power comes in on the board's own USB-C through an isolated converter, so any USB charger works.
+Power comes from the desk by default, or from the board's own USB-C through an optional isolated converter.
 
 <p align="center">
   <img src="docs/board-resistors.svg" width="49%" alt="The dongle PCB with only its resistors fitted">
@@ -106,19 +107,25 @@ Power comes in on the board's own USB-C through an isolated converter, so any US
 
 | RJ50 contact | Signal | Path |
 | --- | --- | --- |
-| 2 | +5 V | Straight through; also powers the 74AHCT125 |
+| 2 | +5 V | Straight through; also powers the 74AHCT125 and, through JP1, the C3 |
 | 3 | Ground | Straight through |
 | 7 | Command, keypad to box | Keypad through 1 kΩ; gate A drives the box side from GPIO7 when GPIO6 is high |
 | 8 | Height, box to keypad | Straight through; 10 kΩ over 15 kΩ to GPIO4 |
 | 10 | Wake, keypad to box | Keypad through 1 kΩ; gate B drives the box side high when GPIO10 is high |
 
 The board is an 84 × 50 mm, two-layer, all through-hole KiCad design in [`hardware/`](hardware).
-Power comes in on a USB-C breakout (J3) standing on a 1 × 6 header at the board's bottom edge, then through a Mornsun B0505S-2WR3 isolated converter (U3) and a 1N5819 Schottky diode (D1) to the C3's 5V pin.
+The C3's 5V pin has two supplies, each behind its own 1N5819 Schottky diode, so neither can feed back into the other:
+
+- **Desk power, the default:** contact 2's 5 V, through the JP1 shunt, R11 and D2. R11 limits the inrush into C4, a 1000 µF reserve that covers Wi-Fi bursts; run the C3 at 80 MHz (`cpu_frequency: 80MHz`).
+- **Isolated USB-C, optional:** a USB-C breakout (J3) standing on a 1 × 6 header at the board's bottom edge, then a Mornsun B0505S-2WR3 isolated converter (U3) and D1. Leave out J3, U3, C2, C3 and D1 if you only use desk power.
+
+With both connected, the higher voltage supplies the C3. If your box can't supply it, pull JP1 and use USB-C.
+
 The converter keeps the charger's ground apart from the desk's, so any USB charger works, two-prong ones included.
 Without it, a two-prong charger leaks a little mains AC onto the desk's ground, which upsets touch-sensitive keypads: they barely register a press and the desk creeps a millimeter at a time.
 The charger side of the board (J3, the input capacitor C3 and the converter's pins 1 and 2) has its own copper, with no ground pour and a moat no other trace crosses.
-The ESP32-C3 SuperMini plugs into two round-pin socket strips, so it can be pulled out; the desk's 5 V can't supply its Wi-Fi current, so it never powers the C3.
-Its own USB-C is only for the first flash, with the board out of the box, and ESPHome updates over Wi-Fi after that. The diode makes it harmless to have both USB-C ports plugged in.
+The ESP32-C3 SuperMini plugs into two round-pin socket strips, so it can be pulled out.
+Its own USB-C is only for the first flash, with the board out of the box, and ESPHome updates over Wi-Fi after that. D1 and D2 keep it from feeding the converter or the desk. Don't leave it plugged in: unlike J3, it shares the desk's ground.
 The breakout's outline is estimated from photos, so check it against your part in [`scripts/dimensions.py`](scripts/dimensions.py) before ordering.
 To solder the C3 flat instead, set `C3_BOTTOM = 0.2` in the same file and run `pixi run hardware`.
 
@@ -152,12 +159,15 @@ Print it in MJF nylon or, at home, PETG; resin tends to crack around the inserts
 | 1 | 100 kΩ, 1/4 W (R6) | [DigiKey CF14JT100K](https://www.digikey.com/en/products/result?keywords=CF14JT100K) |
 | 2 | 15 kΩ, 1/4 W (R8, R10) | [DigiKey CF14JT15K0](https://www.digikey.com/en/products/result?keywords=CF14JT15K0) |
 | 1 | 100 nF ceramic, 2.5 mm lead pitch (C1) | [DigiKey](https://www.digikey.com/en/products/result?keywords=100nF%2050V%20ceramic%20radial%202.5mm) |
-| 1 | Cermant USB-C female breakout with 5.1 kΩ on CC (J3) | [Amazon](https://www.amazon.com/s?k=Cermant+Type-C+female+breakout+16P) |
-| 1 | 1 × 6 male pin header, 2.54 mm, for the breakout (J3) | Any header strip, cut to length |
-| 1 | Mornsun B0505S-2WR3 isolated 5 V to 5 V converter, 2 W, SIP (U3) | [DigiKey](https://www.digikey.com/en/products/result?keywords=B0505S-2WR3) or [Amazon](https://www.amazon.com/s?k=B0505S-2WR3) |
-| 1 | 220 µF 16 V electrolytic, 6.3 mm, 2.5 mm lead pitch (C2) | [DigiKey](https://www.digikey.com/en/products/result?keywords=220uF%2016V%20radial%206.3mm) |
-| 1 | 10 µF 16 V electrolytic, 5 mm, 2 mm lead pitch (C3, converter input) | [DigiKey](https://www.digikey.com/en/products/result?keywords=10uF%2016V%20radial%205mm) |
-| 1 | 1N5819 Schottky diode, DO-41, mounted standing (D1) | [DigiKey](https://www.digikey.com/en/products/result?keywords=1N5819) |
+| 1 | 4.7 Ω, 1/4 W (R11) | [DigiKey CF14JT4R70](https://www.digikey.com/en/products/result?keywords=CF14JT4R70) |
+| 1 | 1000 µF 16 V electrolytic, 10 mm wide, at most 12.5 mm tall, 5 mm lead pitch (C4) | [DigiKey Rubycon 16PX1000MEFC10X12.5](https://www.digikey.com/en/products/result?keywords=16PX1000MEFC10X12.5) |
+| 1 | 1 × 2 male pin header, 2.54 mm, and a jumper shunt (JP1) | Any |
+| 1 | Cermant USB-C female breakout with 5.1 kΩ on CC (J3, optional) | [Amazon](https://www.amazon.com/s?k=Cermant+Type-C+female+breakout+16P) |
+| 1 | 1 × 6 male pin header, 2.54 mm, for the breakout (J3, optional) | Any header strip, cut to length |
+| 1 | Mornsun B0505S-2WR3 isolated 5 V to 5 V converter, 2 W, SIP (U3, optional) | [DigiKey](https://www.digikey.com/en/products/result?keywords=B0505S-2WR3) or [Amazon](https://www.amazon.com/s?k=B0505S-2WR3) |
+| 1 | 220 µF 16 V electrolytic, 6.3 mm, 2.5 mm lead pitch (C2, optional) | [DigiKey](https://www.digikey.com/en/products/result?keywords=220uF%2016V%20radial%206.3mm) |
+| 1 | 10 µF 16 V electrolytic, 5 mm, 2 mm lead pitch (C3, converter input, optional) | [DigiKey](https://www.digikey.com/en/products/result?keywords=10uF%2016V%20radial%205mm) |
+| 2 | 1N5819 Schottky diode, DO-41, mounted standing (D2, and D1 for USB-C) | [DigiKey](https://www.digikey.com/en/products/result?keywords=1N5819) |
 | 1 | RJ50 (10P10C) cable, about 1 ft, wired straight through, dongle to control box | [Winford CBM10R1TS-1](https://www.winford.com/products/cbm10.php) (US) or [Delock 80185](https://www.delock.com/produkt/80185/merkmale.html) (EU) |
 | 2 | M3 × 20 mm socket-head cap screw, ISO 4762 | [Amazon](https://www.amazon.com/s?k=M3x20+socket+head+cap+screw+ISO+4762+stainless) |
 | 2 | M3 heat-set insert, 5.7 mm long, 4.0 mm hole (ruthex M3) | [Amazon](https://www.amazon.com/s?k=ruthex+M3+heat+set+inserts) |

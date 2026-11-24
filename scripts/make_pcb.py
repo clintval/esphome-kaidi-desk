@@ -82,7 +82,7 @@ def place(lib, name, ref, x, y, angle=0, value=None):
         fp.Reference().SetPosition(pcbnew.VECTOR2I(int(mid.x), int(mid.y)))
         fp.Reference().SetTextSize(mm(0.8, 0.8))
         fp.Reference().SetTextThickness(pcbnew.FromMM(0.12))
-    if ref.startswith("J") or ref in ("C1", "C2", "C3"):
+    if ref.startswith("J") or ref in ("C1", "C2", "C3", "C4"):
         fp.Reference().SetVisible(False)
     if not ref:
         fp.SetBoardOnly(True)
@@ -174,7 +174,7 @@ res = FP / "Resistor_THT.pretty"
 axial = "R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
 right = [("R3", 0), ("R4", 1), ("R5", 2), ("R6", 3), ("R7", 4), ("R8", 5), ("R9", 6), ("R10", 7)]
 placements = [(ref, X0 + 54.5, Y0 + 3.0 + i * 3.4, 0) for ref, i in right]
-placements += [("R1", X0 + 65.5, Y0 + 10.0, 0), ("R2", X0 + 65.5, Y0 + 13.4, 0)]
+placements += [("R1", X0 + 9.4, Y0 + 9.8, 0), ("R2", X0 + 9.4, Y0 + 13.4, 0)]
 for ref, x, y, a in placements:
     place(res, axial, ref, x, y, a)
 
@@ -193,9 +193,14 @@ C3_X, C3_Y = U3_X - 2.5, USB_Y - 0.5
 place(caps, "CP_Radial_D5.0mm_P2.00mm", "C3", C3_X, C3_Y)
 place(caps, "CP_Radial_D6.3mm_P2.50mm", "C2", X0 + 5.5, USB_Y - 0.1)
 place(FP / "Diode_THT.pretty", "D_DO-41_SOD81_P5.08mm_Vertical_AnodeUp", "D1", X0 + 13.5, USB_Y - 1.6)
+place(FP / "Diode_THT.pretty", "D_DO-41_SOD81_P5.08mm_Vertical_AnodeUp", "D2", X0 + 56.4, Y0 + 36.6)
+place(res, axial, "R11", X0 + 55.6, Y0 + 42.2)
+place(FP / "Connector_PinHeader_2.54mm.pretty", "PinHeader_1x02_P2.54mm_Vertical", "JP1", X0 + 65.2, Y0 + 36.0)
+place(caps, "CP_Radial_D10.0mm_P5.00mm", "C4", X0 + 70.4, Y0 + 39.6)
+silk("DESK PWR", X0 + 67.6, Y0 + 33.9, 0.9)
 silk("USB-C power in", USB_X + 11.85, USB_Y - 3.5, 0.9)
-silk("esphome-kaidi-desk", X0 + 56.0, USB_Y + 1.9, 1.6, bold=True, left=True)
-silk("Kaidi KDDY094 dongle", X0 + 56.0, USB_Y + 4.3, 1.0, left=True)
+silk("esphome-kaidi-desk", X0 + 55.5, Y0 + 46.3, 1.3, bold=True, left=True)
+silk("Kaidi KDDY094 dongle", X0 + 55.5, Y0 + 48.3, 0.9, left=True)
 
 
 def u1_point(lx, ly):

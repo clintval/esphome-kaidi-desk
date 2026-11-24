@@ -17,8 +17,23 @@ ROOT = Path(__file__).resolve().parent.parent
 CLI = os.environ["KICAD_CLI"]
 SCH, PCB = ROOT / "hardware/kaidi-desk.kicad_sch", ROOT / "hardware/kaidi-desk.kicad_pcb"
 EXPECTED = {
-    "+5V": {"J1.2", "J2.2", "U2.14", "U2.5", "U2.9", "U2.12", "C1.1"},
-    "GND": {"J1.3", "J2.3", "U1.2", "U2.7", "U3.4", "C1.2", "C2.2", "R3.2", "R4.2", "R5.2", "R6.2", "R8.2", "R10.2"},
+    "+5V": {"J1.2", "J2.2", "U2.14", "U2.5", "U2.9", "U2.12", "C1.1", "JP1.1"},
+    "GND": {
+        "J1.3",
+        "J2.3",
+        "U1.2",
+        "U2.7",
+        "U3.4",
+        "C1.2",
+        "C2.2",
+        "C4.2",
+        "R3.2",
+        "R4.2",
+        "R5.2",
+        "R6.2",
+        "R8.2",
+        "R10.2",
+    },
     "/CMD_DESK": {"J2.7", "U2.3", "R1.2"},
     "/CMD_KEYPAD": {"J1.7", "R1.1", "R9.1"},
     "/WAKE_DESK": {"J2.10", "U2.6", "R2.2"},
@@ -34,7 +49,9 @@ EXPECTED = {
     "/VIN_ISO": {"J3.1", "U3.1", "C3.1"},
     "/GND_ISO": {"J3.2", "U3.2", "C3.2"},
     "/VOUT": {"U3.6", "C2.1", "D1.2"},
-    "/ESP_5V": {"D1.1", "U1.1"},
+    "/ESP_5V": {"D1.1", "D2.1", "C4.1", "U1.1"},
+    "/DESK_SW": {"JP1.2", "R11.1"},
+    "/DESK_LIM": {"R11.2", "D2.2"},
 }
 ISOLATED = {"/VIN_ISO", "/GND_ISO"}
 failures = []

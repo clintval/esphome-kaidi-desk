@@ -9,8 +9,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PCB = ROOT / "hardware/kaidi-desk.kicad_pcb"
-VALUES = "R1:1k,R2:1k,R3:10k,R4:10k,R5:10k,R6:100k,R7:10k,R8:15k,R9:10k,R10:15k"
-RESISTORS = ",".join(f"R{i}" for i in range(1, 11))
+VALUES = "R1:1k,R2:1k,R3:10k,R4:10k,R5:10k,R6:100k,R7:10k,R8:15k,R9:10k,R10:15k,R11:4.7"
+RESISTORS = ",".join(f"R{i}" for i in range(1, 12))
 
 
 def pcbdraw(out, *extra):

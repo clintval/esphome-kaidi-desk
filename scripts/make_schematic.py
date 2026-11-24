@@ -112,6 +112,7 @@ SYMBOLS = {
     "Connector_Generic:Conn_01x06": embed("Connector_Generic", "Conn_01x06"),
     "kaidi:B0505S-2WR3": converter_symbol(),
     "74xx:74AHCT125": embed("74xx", "74LS125", "74AHCT125"),
+    "Connector_Generic:Conn_01x02": embed("Connector_Generic", "Conn_01x02"),
     "Connector_Generic:Conn_01x10": embed("Connector_Generic", "Conn_01x10"),
     "power:+5V": embed("power", "+5V"),
     "power:GND": embed("power", "GND"),
@@ -130,7 +131,9 @@ FOOTPRINTS = {
     "U3": "kaidi:Converter_DCDC_Mornsun_B_S-2WR3_SIP",
     "C2": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
     "C3": "Capacitor_THT:CP_Radial_D5.0mm_P2.00mm",
+    "C4": "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm",
     "D1": "Diode_THT:D_DO-41_SOD81_P5.08mm_Vertical_AnodeUp",
+    "JP1": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
 }
 
 out = []
@@ -368,7 +371,7 @@ for top, bottom, a, mid, x in (("R7", "R8", "HEIGHT", "RX", 190.5), ("R9", "R10"
     net(((x1, jy), (1, 0)), mid)
     net(pb("2"), "GND")
 
-text("ESP32-C3 SuperMini (5V from the isolated input)", 233.68, 27.94)
+text("ESP32-C3 SuperMini", 233.68, 27.94)
 p = place(
     "kaidi:ESP32-C3_SuperMini",
     "U1",
@@ -386,7 +389,7 @@ for num in map(str, range(1, 17)):
     else:
         no_connect(p(num))
 
-text("Isolated USB-C power input: the charger never shares a ground with the desk", 22.86, 170.18, 1.5)
+text("Optional USB-C power, isolated from the desk", 22.86, 170.18, 1.5)
 p = place(
     "Connector_Generic:Conn_01x06",
     "J3",
@@ -457,6 +460,59 @@ net(p("1"), "ESP_5V")
 for ref, name, x in (("#FLG03", "VIN_ISO", 48.26), ("#FLG04", "GND_ISO", 58.42), ("#FLG05", "ESP_5V", 142.24)):
     flag = place("power:PWR_FLAG", ref, "PWR_FLAG", x, 190.5, hide_val=True)
     net(flag("1"), name)
+
+text("Desk 5 V supply (default): pull JP1 to run from USB-C only", 220.98, 104.14, 1.5)
+p = place(
+    "Connector_Generic:Conn_01x02",
+    "JP1",
+    "Desk power",
+    243.84,
+    121.92,
+    mirror=True,
+    footprint=FOOTPRINTS["JP1"],
+    ref_at=(0, -5.08),
+    val_at=(0, 6.35),
+)
+net(p("1"), "+5V")
+net(p("2"), "DESK_SW")
+p = place(
+    "Device:R",
+    "R11",
+    "4.7",
+    266.7,
+    127.0,
+    footprint=FOOTPRINTS["R"],
+    ref_at=(2.54, -1.27),
+    val_at=(2.54, 1.27),
+    justify="left",
+)
+net(p("1"), "DESK_SW")
+net(p("2"), "DESK_LIM")
+p = place(
+    "Device:D_Schottky",
+    "D2",
+    "1N5819",
+    287.02,
+    121.92,
+    footprint=FOOTPRINTS["D1"],
+    ref_at=(0, -2.54),
+    val_at=(0, 2.54),
+)
+net(p("2"), "DESK_LIM")
+net(p("1"), "ESP_5V")
+p = place(
+    "Device:C_Polarized",
+    "C4",
+    "1000u",
+    287.02,
+    154.94,
+    footprint=FOOTPRINTS["C4"],
+    ref_at=(2.54, -1.27),
+    val_at=(2.54, 1.27),
+    justify="left",
+)
+net(p("1"), "ESP_5V")
+net(p("2"), "GND")
 
 body = "\n".join(out)
 lib = "\n".join(SYMBOLS.values())
