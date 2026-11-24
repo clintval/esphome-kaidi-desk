@@ -1,10 +1,9 @@
 """Build a two-part 3D-printable box around the dongle PCB from hardware/board.json.
 
 The base holds the board on four posts (two with M3 heat-set inserts) and has openings for the keypad
-jack on one end, the desk jack on the other and the USB-C power input on the bottom side. The C3's own
-USB-C gets no opening: it is only for the first flash, with the board out of the box. The lid screws down
-through two bosses that clamp the board and is engraved KEYPAD and DESK at the matching ends, with
-chevrons between them. Nothing metal sits near the C3's antenna: the screws are at the far corners.
+jack on one end, the desk jack on the other and USB-C on the bottom side. The lid screws down through
+two bosses that clamp the board and is engraved KEYPAD and DESK at the matching ends, with chevrons
+between them. Nothing metal sits near the ESP's antenna: the screws are at the far corners.
 Models are written in KiCad's 3D frame (origin at the board's top-left, Y up, Z = 0 on the board's
 top face) so they drop straight into KiCad renders.
 
@@ -33,13 +32,14 @@ from build123d import (
     export_stl,
     extrude,
 )
+from dimensions import BOX_GAP, BOX_WALL
 
 HW = Path(sys.argv[1])
 geo = json.loads((HW / "board.json").read_text())
 b = geo["board"]
 X0, Y0, W, H, R, T = b["x"], b["y"], b["w"], b["h"], b["radius"], b["thickness"]
 
-GAP, WALL, FLOOR, STANDOFF, LID = 0.5, 2.2, 2.0, 4.0, 2.0
+GAP, WALL, FLOOR, STANDOFF, LID = BOX_GAP, BOX_WALL, 2.0, 4.0, 2.0
 INSERT_HOLE, INSERT_LENGTH = 4.0, 5.7
 SCREW_CLEARANCE, HEAD_DIAMETER, HEAD_HEIGHT, SCREW_LENGTH = 3.4, 5.5, 3.0, 20.0
 BOSS = 3.8

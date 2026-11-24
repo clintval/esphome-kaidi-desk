@@ -1,25 +1,5 @@
 """Dimensions in millimeters shared by the footprints, the 3D models, the board geometry and the enclosure."""
 
-SOCKET_STRIP = 2.79
-PIN_STRIP = 2.79
-C3_BOTTOM = SOCKET_STRIP + PIN_STRIP
-C3_THICKNESS = 1.0
-C3_LENGTH = 22.52
-C3_WIDTH = 18.0
-C3_PIN1_INSET = 1.3
-C3_USB_OVERHANG = 1.0
-C3_USB_LENGTH = 7.35
-
-# Cermant USB-C female breakout, ESTIMATED from listing photos; measure the real board and correct these.
-USBC_BREAKOUT_WIDTH = 18.5
-USBC_BREAKOUT_DEPTH = 13.5
-USBC_BREAKOUT_PIN_INSET = 1.6
-USBC_BREAKOUT_THICKNESS = 1.6
-USBC_BREAKOUT_STANDOFF = 2.54
-USBC_RECEPTACLE_WIDTH = 8.94
-USBC_RECEPTACLE_HEIGHT = 3.26
-USBC_RECEPTACLE_DEPTH = 7.35
-
 # Mornsun B0505S-2WR3 SIP from its datasheet; the pin row's offset from the body face is ESTIMATED.
 B0505S_LENGTH = 19.65
 B0505S_THICKNESS = 7.05
@@ -27,3 +7,8 @@ B0505S_HEIGHT = 10.16
 B0505S_STANDOFF = 0.5
 B0505S_PIN1_INSET = 2.21
 B0505S_PIN_ROW_INSET = 1.5
+
+# The box wall and its gap to the board, so the jacks' faces sit flush with the outside of the box.
+BOX_GAP = 0.5
+BOX_WALL = 2.2
+JACK_OVERHANG = BOX_GAP + BOX_WALL

@@ -44,32 +44,6 @@ def embed(lib, name, as_name=None):
     return block
 
 
-def module_symbol():
-    left = ["5V", "GND", "3V3", "GPIO4", "GPIO3", "GPIO2", "GPIO1", "GPIO0"]
-    right = ["GPIO5", "GPIO6", "GPIO7", "GPIO8", "GPIO9", "GPIO10", "GPIO20", "GPIO21"]
-    pins = []
-    for i, name in enumerate(left):
-        kind = {"5V": "power_in", "GND": "power_in", "3V3": "power_out"}.get(name, "bidirectional")
-        pins.append((kind, -12.7, 8.89 - i * GRID, 0, name, str(i + 1)))
-    for i, name in enumerate(right):
-        pins.append(("bidirectional", 12.7, 8.89 - i * GRID, 180, name, str(i + 9)))
-    body = "".join(
-        f'(pin {k} line (at {x} {y} {a}) (length 3.81) (name "{n}" (effects (font (size 1.27 1.27)))) '
-        f'(number "{num}" (effects (font (size 1.27 1.27)))))'
-        for k, x, y, a, n, num in pins
-    )
-    return (
-        '(symbol "kaidi:ESP32-C3_SuperMini" (pin_names (offset 1.016)) (exclude_from_sim no) (in_bom yes) (on_board yes)'
-        '(property "Reference" "U" (at 0 13.97 0) (effects (font (size 1.27 1.27))))'
-        '(property "Value" "ESP32-C3_SuperMini" (at 0 -13.97 0) (effects (font (size 1.27 1.27))))'
-        '(property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))'
-        '(property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))'
-        '(symbol "ESP32-C3_SuperMini_0_1" (rectangle (start -8.89 11.43) (end 8.89 -11.43) '
-        "(stroke (width 0.254) (type default)) (fill (type background))))"
-        f'(symbol "ESP32-C3_SuperMini_1_1" {body}))'
-    )
-
-
 def converter_symbol():
     pins = [
         ("power_in", -10.16, 2.54, 0, "Vin", "1"),
@@ -109,29 +83,34 @@ SYMBOLS = {
     "Device:C": embed("Device", "C"),
     "Device:C_Polarized": embed("Device", "C_Polarized"),
     "Device:D_Schottky": embed("Device", "D_Schottky"),
-    "Connector_Generic:Conn_01x06": embed("Connector_Generic", "Conn_01x06"),
+    "Device:D_TVS": embed("Device", "D_TVS"),
+    "Device:LED": embed("Device", "LED"),
+    "Device:Polyfuse": embed("Device", "Polyfuse"),
+    "Switch:SW_Push": embed("Switch", "SW_Push"),
+    "Connector:TestPoint": embed("Connector", "TestPoint"),
+    "Connector:USB_C_Receptacle_USB2.0_16P": embed("Connector", "USB_C_Receptacle_USB2.0_16P"),
+    "Interface_USB:ADUM3160": embed("Interface_USB", "ADUM4160", "ADUM3160"),
+    "Power_Protection:USBLC6-2SC6": embed("Power_Protection", "USBLC6-2P6", "USBLC6-2SC6"),
+    "Power_Protection:SRV05-4": embed("Power_Protection", "SRV05-4"),
+    "Regulator_Linear:AP2112K-3.3": embed("Regulator_Linear", "AP2204K-1.5", "AP2112K-3.3"),
+    "RF_Module:ESP32-C3-WROOM-02": embed("RF_Module", "ESP32-C3-WROOM-02"),
     "kaidi:B0505S-2WR3": converter_symbol(),
     "74xx:74AHCT125": embed("74xx", "74LS125", "74AHCT125"),
-    "Connector_Generic:Conn_01x10": embed("Connector_Generic", "Conn_01x10"),
+    "74xGxx:74LVC1G66": embed("74xGxx", "74LVC1G66"),
+    "Transistor_FET:2N7002": embed("Transistor_FET", "Q_NMOS_GSD", "2N7002"),
+    "Connector_Generic:Conn_01x02": embed("Connector_Generic", "Conn_01x02"),
+    "Connector_Generic_Shielded:Conn_01x10_Shielded": embed("Connector_Generic_Shielded", "Conn_01x10_Shielded"),
     "power:+5V": embed("power", "+5V"),
     "power:GND": embed("power", "GND"),
     "power:PWR_FLAG": embed("power", "PWR_FLAG"),
-    "kaidi:ESP32-C3_SuperMini": module_symbol(),
 }
 PINS = {name: pins_of(block) for name, block in SYMBOLS.items()}
 
-FOOTPRINTS = {
-    "R": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal",
-    "C": "Capacitor_THT:C_Disc_D3.0mm_W1.6mm_P2.50mm",
-    "U2": "Package_DIP:DIP-14_W7.62mm_Socket",
-    "U1": "kaidi:ESP32-C3_SuperMini",
-    "J": "kaidi:RJ50_Amphenol_54602-910_Horizontal",
-    "J3": "kaidi:USB-C_Breakout_Cermant_1x06",
-    "U3": "kaidi:Converter_DCDC_Mornsun_B_S-2WR3_SIP",
-    "C2": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
-    "C3": "Capacitor_THT:CP_Radial_D5.0mm_P2.00mm",
-    "D1": "Diode_THT:D_DO-41_SOD81_P5.08mm_Vertical_AnodeUp",
-}
+R0603, R1206 = "Resistor_SMD:R_0603_1608Metric", "Resistor_SMD:R_1206_3216Metric"
+C0603, C0805, C1206 = (f"Capacitor_SMD:C_{s}" for s in ("0603_1608Metric", "0805_2012Metric", "1206_3216Metric"))
+FUSE, SMA = "Fuse:Fuse_1206_3216Metric", "Diode_SMD:D_SMA"
+SOT6 = "Package_TO_SOT_SMD:SOT-23-6"
+JACK = "kaidi:RJ50_TE_5558067-1_Horizontal"
 
 out = []
 instances = []
@@ -219,68 +198,81 @@ def text(s, x, y, size=1.8):
     )
 
 
-text("Keypad and desk", 22.86, 27.94)
-for ref, label, y in (("J1", "Keypad (RJ50)", 55.88), ("J2", "Desk (RJ50)", 116.84)):
-    p = place(
-        "Connector_Generic:Conn_01x10",
+def part(
+    lib_id, ref, value, x, y, footprint, nets, mirror=False, ref_at=(2.54, -1.27), val_at=(2.54, 1.27), stubs=None
+):
+    side = "left" if ref_at[0] else ""
+    p = place(lib_id, ref, value, x, y, mirror=mirror, footprint=footprint, ref_at=ref_at, val_at=val_at, justify=side)
+    seen = set()
+    for num, name in nets.items():
+        at = p(num)
+        if at[0] in seen:
+            continue
+        seen.add(at[0])
+        no_connect(at) if name is None else net(at, name, (stubs or {}).get(num, STUB))
+
+
+def resistor(ref, value, x, y, a, b, footprint=R0603):
+    part("Device:R", ref, value, x, y, footprint, {"1": a, "2": b})
+
+
+def capacitor(ref, value, x, y, a, b="GND", footprint=C0603, symbol="Device:C"):
+    part(symbol, ref, value, x, y, footprint, {"1": a, "2": b})
+
+
+def across(lib_id, ref, value, x, y, footprint, nets, offset=3.81):
+    part(lib_id, ref, value, x, y, footprint, nets, ref_at=(0, -offset), val_at=(0, offset))
+
+
+text("Keypad and desk jacks", 22.86, 27.94)
+for ref, label, side, y in (("J1", "Keypad (RJ50)", "KEYPAD", 55.88), ("J2", "Desk (RJ50)", "DESK", 106.68)):
+    nets = {num: f"THRU_{num}" for num in ("1", "4", "5", "6", "9")}
+    nets |= {"2": "+5V", "3": "GND", "7": f"CMD_{side}", "8": "HEIGHT", "10": f"WAKE_{side}", "SH": "GND"}
+    part(
+        "Connector_Generic_Shielded:Conn_01x10_Shielded",
         ref,
         label,
         38.1,
         y,
-        mirror=True,
-        footprint=FOOTPRINTS["J"],
-        ref_at=(0, -15.24),
-        val_at=(0, -12.7),
+        JACK,
+        nets,
+        True,
+        (0, -15.24),
+        (0, -12.7),
+        stubs={"2": 17.78, "3": 17.78},
     )
-    side = "KEYPAD" if ref == "J1" else "DESK"
-    for num in ("1", "4", "5", "6", "9"):
-        no_connect(p(num))
-    net(p("2"), "+5V")
-    net(p("3"), "GND")
-    net(p("7"), f"CMD_{side}")
-    net(p("8"), "HEIGHT")
-    net(p("10"), f"WAKE_{side}")
-flag = place("power:PWR_FLAG", "#FLG01", "PWR_FLAG", 25.4, 160.02)
-net(flag("1"), "+5V")
-flag = place("power:PWR_FLAG", "#FLG02", "PWR_FLAG", 45.72, 160.02)
-net(flag("1"), "GND")
+for ref, name, x in (("#FLG01", "+5V", 73.66), ("#FLG02", "GND", 93.98)):
+    net(place("power:PWR_FLAG", ref, "PWR_FLAG", x, 139.7, hide_val=True)("1"), name)
 
-text("Keypad path: 1k in series, so the buffer overrides it only while sending", 76.2, 27.94, 1.5)
-for ref, a, b, x in (("R1", "CMD_KEYPAD", "CMD_DESK", 96.52), ("R2", "WAKE_KEYPAD", "WAKE_DESK", 132.08)):
-    p = place(
-        "Device:R",
+text("Surge clamps at both jacks", 73.66, 27.94)
+for ref, side, y in (("U6", "KEYPAD", 55.88), ("U5", "DESK", 106.68)):
+    part(
+        "Power_Protection:SRV05-4",
         ref,
-        "1k",
-        x,
-        63.5,
-        footprint=FOOTPRINTS["R"],
-        ref_at=(2.54, -1.27),
-        val_at=(2.54, 1.27),
-        justify="left",
+        "SRV05-4",
+        96.52,
+        y,
+        SOT6,
+        {"1": f"CMD_{side}", "2": "GND", "3": f"WAKE_{side}", "4": "HEIGHT", "5": "+5V", "6": None},
+        ref_at=(5.08, -15.24),
+        val_at=(5.08, -12.7),
     )
-    net(p("1"), a)
-    net(p("2"), b)
 
-text("74AHCT125 on desk 5 V: gates A-B drive the desk; C-D hold them off unless the ESP asks", 76.2, 101.6, 1.5)
+text("Keypad path: closed unless the ESP opens U9, with 1k in series for the buffer to override", 129.54, 27.94)
+resistor("R1", "1k", 139.7, 55.88, "CMD_SW", "CMD_DESK")
+resistor("R2", "1k", 167.64, 55.88, "WAKE_KEYPAD", "WAKE_DESK")
+
+text("74AHCT125 on desk 5 V: gates A-B drive the desk; C-D hold them off unless the ESP asks", 129.54, 81.28)
 gates = [
-    (1, 116.84, 124.46, "TX", "OE_TX", "CMD_DESK"),
-    (2, 154.94, 124.46, "+5V", "OE_WAKE", "WAKE_DESK"),
-    (3, 116.84, 152.4, "+5V", "EN_TX", "OE_TX"),
-    (4, 154.94, 152.4, "+5V", "EN_WAKE", "OE_WAKE"),
+    (1, 149.86, 101.6, "TX", "OE_TX", "CMD_DRV"),
+    (2, 190.5, 101.6, "+5V", "OE_WAKE", "WAKE_DRV"),
+    (3, 149.86, 129.54, "+5V", "EN_TX", "OE_TX"),
+    (4, 190.5, 129.54, "+5V", "EN_WAKE", "OE_WAKE"),
 ]
 ab = {1: ("2", "1", "3"), 2: ("5", "4", "6"), 3: ("9", "10", "8"), 4: ("12", "13", "11")}
+SOIC14 = "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
 for unit, x, y, a, oe, yy in gates:
-    p = place(
-        "74xx:74AHCT125",
-        "U2",
-        "74AHCT125",
-        x,
-        y,
-        unit=unit,
-        footprint=FOOTPRINTS["U2"],
-        ref_at=(0, -5.08),
-        hide_val=True,
-    )
+    p = place("74xx:74AHCT125", "U2", "74AHCT125", x, y, unit=unit, footprint=SOIC14, ref_at=(0, -5.08), hide_val=True)
     pa, poe, py = ab[unit]
     net(p(pa), a)
     net(p(poe), oe)
@@ -289,179 +281,258 @@ p = place(
     "74xx:74AHCT125",
     "U2",
     "74AHCT125",
-    91.44,
-    137.16,
+    223.52,
+    50.8,
     unit=5,
-    footprint=FOOTPRINTS["U2"],
-    ref_at=(5.08, -1.27),
-    val_at=(5.08, 1.27),
+    footprint=SOIC14,
+    ref_at=(7.62, -1.27),
+    val_at=(7.62, 1.27),
     justify="left",
 )
 net(p("14"), "+5V")
 net(p("7"), "GND")
-p = place(
-    "Device:C",
-    "C1",
-    "100n",
-    78.74,
-    137.16,
-    footprint=FOOTPRINTS["C"],
-    ref_at=(-2.54, -1.27),
-    val_at=(-2.54, 1.27),
-    justify="right",
-)
-net(p("1"), "+5V")
-net(p("2"), "GND")
+capacitor("C1", "100n", 246.38, 50.8, "+5V")
+resistor("R12", "47", 218.44, 109.22, "CMD_DRV", "CMD_DESK")
+resistor("R13", "47", 246.38, 109.22, "WAKE_DRV", "WAKE_DESK")
+text("Everything off by default", 129.54, 147.32)
+for ref, value, name, x in (("R3", "10k", "OE_TX", 139.7), ("R4", "10k", "OE_WAKE", 162.56)):
+    resistor(ref, value, x, 167.64, name, "GND")
+for ref, value, name, x in (("R5", "4.7k", "EN_TX", 185.42), ("R6", "100k", "EN_WAKE", 208.28)):
+    resistor(ref, value, x, 167.64, name, "GND")
 
-text("Fail-safe defaults", 185.42, 104.14)
-for ref, value, a, x, y in (
-    ("R3", "10k", "OE_TX", 190.5, 124.46),
-    ("R4", "10k", "OE_WAKE", 213.36, 124.46),
-    ("R5", "10k", "EN_TX", 190.5, 157.48),
-    ("R6", "100k", "EN_WAKE", 213.36, 157.48),
+text("Keypad cutoff: closed by default, and JP2 bypasses it", 182.88, 351.79)
+SOT5 = "Package_TO_SOT_SMD:SOT-23-5"
+p = place("74xGxx:74LVC1G66", "U9", "74LVC1G66", 309.88, 370.84, footprint=SOT5, ref_at=(0, -7.62), val_at=(0, 12.7))
+net(p("1"), "CMD_KEYPAD")
+net(p("2"), "CMD_SW")
+net(p("4"), "KP_ON")
+p = place(
+    "74xGxx:74LVC1G66", "U9", "74LVC1G66", 220.98, 370.84, unit=2, footprint=SOT5, ref_at=(10.16, 0), hide_val=True
+)
+net(p("5"), "+5V")
+net(p("3"), "GND")
+part(
+    "Connector_Generic:Conn_01x02",
+    "JP2",
+    "Keypad always on",
+    190.5,
+    370.84,
+    "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
+    {"1": "CMD_KEYPAD", "2": "CMD_SW"},
+    True,
+    (0, -5.08),
+    (0, 6.35),
+)
+resistor("R26", "10k", 347.98, 370.84, "+5V", "KP_ON")
+part(
+    "Transistor_FET:2N7002",
+    "Q1",
+    "2N7002",
+    378.46,
+    370.84,
+    "Package_TO_SOT_SMD:SOT-23",
+    {"1": "KP_OFF", "2": "GND", "3": "KP_ON"},
+    ref_at=(5.08, -1.27),
+    val_at=(5.08, 1.27),
+)
+resistor("R27", "100k", 403.86, 370.84, "KP_OFF", "GND")
+capacitor("C14", "100n", 259.08, 370.84, "+5V")
+capacitor("C13", "10u", 269.24, 50.8, "+5V", footprint=C0805)
+
+text("Dividers (5 V to 3.0 V); the keypad's is light, since nothing but a pull-up may hold its line", 22.86, 149.86)
+for top, bottom, a, mid, x, scale in (
+    ("R7", "R8", "HEIGHT", "RX", 30.48, ""),
+    ("R9", "R10", "CMD_KEYPAD", "SENSE", 58.42, "0"),
 ):
-    p = place(
-        "Device:R",
-        ref,
-        value,
-        x,
-        y,
-        footprint=FOOTPRINTS["R"],
-        ref_at=(2.54, -1.27),
-        val_at=(2.54, 1.27),
-        justify="left",
-    )
-    net(p("1"), a)
-    net(p("2"), "GND")
+    resistor(top, f"10{scale}k", x, 172.72, a, mid)
+    resistor(bottom, f"15{scale}k", x, 203.2, mid, "GND")
 
-text("Dividers (5 V to 3.0 V)", 182.88, 27.94)
-for top, bottom, a, mid, x in (("R7", "R8", "HEIGHT", "RX", 190.5), ("R9", "R10", "CMD_KEYPAD", "SENSE", 210.82)):
-    pt = place(
-        "Device:R",
-        top,
-        "10k",
-        x,
-        53.34,
-        footprint=FOOTPRINTS["R"],
-        ref_at=(2.54, -1.27),
-        val_at=(2.54, 1.27),
-        justify="left",
-    )
-    pb = place(
-        "Device:R",
-        bottom,
-        "15k",
-        x,
-        71.12,
-        footprint=FOOTPRINTS["R"],
-        ref_at=(2.54, -1.27),
-        val_at=(2.54, 1.27),
-        justify="left",
-    )
-    net(pt("1"), a)
-    (x1, y1), _ = pt("2")
-    (x2, y2), _ = pb("1")
-    wire((x1, y1), (x2, y2))
-    jy = round((y1 + y2) / 2, 2)
-    jy = round(round(jy / 1.27) * 1.27, 2)
-    out.append(f'(junction (at {x1} {jy}) (diameter 0) (color 0 0 0 0) (uuid "{uid()}"))')
-    net(((x1, jy), (1, 0)), mid)
-    net(pb("2"), "GND")
-
-text("ESP32-C3 SuperMini (5V from the isolated input)", 233.68, 27.94)
-p = place(
-    "kaidi:ESP32-C3_SuperMini",
+text("ESP32-C3 module", 287.02, 27.94)
+part(
+    "RF_Module:ESP32-C3-WROOM-02",
     "U1",
-    "ESP32-C3 SuperMini",
-    254.0,
-    63.5,
-    footprint=FOOTPRINTS["U1"],
-    ref_at=(0, -13.97),
-    val_at=(0, 13.97),
+    "ESP32-C3-WROOM-02-N4",
+    330.2,
+    76.2,
+    "RF_Module:ESP32-C3-WROOM-02",
+    {
+        "1": "3V3",
+        "2": "EN",
+        "18": None,
+        "17": "KP_OFF",
+        "16": "IO2",
+        "15": "SENSE",
+        "3": "RX",
+        "4": "LED",
+        "5": "EN_TX",
+        "6": "TX",
+        "7": "IO8",
+        "8": "IO9",
+        "10": "EN_WAKE",
+        "13": "USB_DM",
+        "14": "USB_DP",
+        "11": None,
+        "12": None,
+        "9": "GND",
+        "19": "GND",
+    },
+    ref_at=(5.08, -25.4),
+    val_at=(5.08, 25.4),
 )
-uses = {"1": "ESP_5V", "2": "GND", "4": "RX", "5": "SENSE", "10": "EN_TX", "11": "TX", "14": "EN_WAKE"}
-for num in map(str, range(1, 17)):
-    if num in uses:
-        net(p(num), uses[num], stub=10.16 if num in ("4", "5") else STUB)
-    else:
-        no_connect(p(num))
+for ref, name, x in (("R21", "EN", 287.02), ("R24", "IO2", 309.88), ("R23", "IO8", 332.74), ("R22", "IO9", 355.6)):
+    resistor(ref, "10k", x, 132.08, "3V3", name)
+capacitor("C8", "1u", 378.46, 132.08, "EN")
+capacitor("C7", "100n", 365.76, 76.2, "3V3")
+capacitor("C12", "10u", 386.08, 76.2, "3V3", footprint=C0805)
+for ref, value, name, x in (("SW1", "RESET", "EN", 297.18), ("SW2", "BOOT", "IO9", 335.28)):
+    across(
+        "Switch:SW_Push", ref, value, x, 162.56, "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A", {"1": name, "2": "GND"}
+    )
+resistor("R25", "1k", 365.76, 165.1, "LED", "LED_A")
+across("Device:LED", "D3", "STATUS", 388.62, 165.1, "LED_SMD:LED_0603_1608Metric", {"2": "LED_A", "1": "GND"})
 
-text("Isolated USB-C power input: the charger never shares a ground with the desk", 22.86, 170.18, 1.5)
-p = place(
-    "Connector_Generic:Conn_01x06",
-    "J3",
-    "USB-C breakout",
-    38.1,
-    185.42,
-    mirror=True,
-    footprint=FOOTPRINTS["J3"],
+text("Desk 5 V supply (default): pull JP1 to run from USB-C only", 238.76, 182.88)
+part(
+    "Connector_Generic:Conn_01x02",
+    "JP1",
+    "Desk power",
+    256.54,
+    205.74,
+    "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
+    {"1": "+5V", "2": "DESK_SW"},
+    True,
+    (0, -5.08),
+    (0, 6.35),
+)
+part("Device:Polyfuse", "F1", "500mA", 279.4, 208.28, FUSE, {"1": "DESK_SW", "2": "DESK_FUSED"})
+resistor("R11", "1", 302.26, 208.28, "DESK_FUSED", "DESK_LIM", R1206)
+across("Device:D_Schottky", "D2", "SS14", 330.2, 205.74, SMA, {"2": "DESK_LIM", "1": "ESP_5V"})
+
+text("3.3 V for the ESP", 238.76, 231.14)
+capacitor(
+    "C4", "1000u", 251.46, 254.0, "ESP_5V", footprint="Capacitor_SMD:CP_Elec_10x10.5", symbol="Device:C_Polarized"
+)
+capacitor("C5", "10u", 276.86, 254.0, "ESP_5V", footprint=C0805)
+part(
+    "Regulator_Linear:AP2112K-3.3",
+    "U4",
+    "AP2112K-3.3",
+    314.96,
+    254.0,
+    "Package_TO_SOT_SMD:SOT-23-5",
+    {"1": "ESP_5V", "3": "ESP_5V", "2": "GND", "4": None, "5": "3V3"},
     ref_at=(0, -10.16),
     val_at=(0, -7.62),
 )
-net(p("1"), "VIN_ISO")
-net(p("2"), "GND_ISO")
-for num in ("3", "4", "5", "6"):
-    no_connect(p(num))
-p = place(
-    "Device:C_Polarized",
-    "C3",
-    "10u",
-    63.5,
-    187.96,
-    footprint=FOOTPRINTS["C3"],
-    ref_at=(2.54, -1.27),
-    val_at=(2.54, 1.27),
-    justify="left",
+capacitor("C6", "22u", 353.06, 254.0, "3V3", footprint=C0805)
+
+text("USB-C: power and data both isolated from the desk", 22.86, 218.44)
+usb = {"A1": "GND_ISO", "B1": "GND_ISO", "A12": "GND_ISO", "B12": "GND_ISO", "SH": "GND_ISO"}
+usb |= dict.fromkeys(("A4", "A9", "B4", "B9"), "VBUS") | {"A5": "CC1", "B5": "CC2", "A8": None, "B8": None}
+usb |= {"A6": "USBC_DP", "B6": "USBC_DP", "A7": "USBC_DM", "B7": "USBC_DM"}
+part(
+    "Connector:USB_C_Receptacle_USB2.0_16P",
+    "J3",
+    "USB-C",
+    45.72,
+    248.92,
+    "Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12",
+    usb,
+    ref_at=(-10.16, -22.86),
+    val_at=(-10.16, -20.32),
 )
-net(p("1"), "VIN_ISO")
-net(p("2"), "GND_ISO")
-p = place(
+resistor("R15", "5.1k", 81.28, 233.68, "CC1", "GND_ISO")
+resistor("R16", "5.1k", 101.6, 233.68, "CC2", "GND_ISO")
+part("Device:Polyfuse", "F2", "1A", 124.46, 233.68, FUSE, {"1": "VBUS", "2": "VIN_ISO"})
+capacitor("C3", "10u", 144.78, 233.68, "VIN_ISO", "GND_ISO", C0805)
+across("Device:D_TVS", "D4", "SMAJ5.0CA", 170.18, 233.68, SMA, {"1": "VIN_ISO", "2": "GND_ISO"})
+part(
+    "Power_Protection:USBLC6-2SC6",
+    "U8",
+    "USBLC6-2SC6",
+    93.98,
+    281.94,
+    SOT6,
+    {"1": "USBC_DP", "6": "USBC_DP", "3": "USBC_DM", "4": "USBC_DM", "5": "VBUS", "2": "GND_ISO"},
+    ref_at=(7.62, -10.16),
+    val_at=(7.62, -7.62),
+)
+resistor("R17", "24", 124.46, 281.94, "USBC_DM", "UDM")
+resistor("R18", "24", 144.78, 281.94, "USBC_DP", "UDP")
+part(
+    "Interface_USB:ADUM3160",
+    "U7",
+    "ADUM3160",
+    185.42,
+    281.94,
+    "Package_SO:SOIC-16W_7.5x10.3mm_P1.27mm",
+    {
+        "1": "VIN_ISO",
+        "2": "GND_ISO",
+        "8": "GND_ISO",
+        "3": "VDD1",
+        "4": "VDD1",
+        "5": "VDD1",
+        "6": "UDM",
+        "7": "UDP",
+        "16": "3V3",
+        "14": "3V3",
+        "12": "3V3",
+        "13": "3V3",
+        "9": "GND",
+        "15": "GND",
+        "11": "DDM",
+        "10": "DDP",
+    },
+    ref_at=(10.16, -17.78),
+    val_at=(10.16, -15.24),
+)
+resistor("R19", "24", 218.44, 281.94, "DDM", "USB_DM")
+resistor("R20", "24", 243.84, 281.94, "DDP", "USB_DP")
+capacitor("C9", "100n", 368.3, 208.28, "VIN_ISO", "GND_ISO")
+capacitor("C10", "100n", 393.7, 208.28, "VDD1", "GND_ISO")
+capacitor("C11", "100n", 386.08, 254.0, "3V3")
+
+text("Isolated supply, with a preload for the converter's minimum load", 22.86, 314.96)
+across(
     "kaidi:B0505S-2WR3",
     "U3",
     "B0505S-2WR3",
-    96.52,
-    185.42,
-    footprint=FOOTPRINTS["U3"],
-    ref_at=(0, -7.62),
-    val_at=(0, 7.62),
+    58.42,
+    330.2,
+    "kaidi:Converter_DCDC_Mornsun_B_S-2WR3_SIP",
+    {"1": "VIN_ISO", "2": "GND_ISO", "6": "VOUT", "4": "GND"},
+    7.62,
 )
-net(p("1"), "VIN_ISO")
-net(p("2"), "GND_ISO")
-net(p("6"), "VOUT")
-net(p("4"), "GND")
-p = place(
-    "Device:C_Polarized",
-    "C2",
-    "220u",
-    127.0,
-    187.96,
-    footprint=FOOTPRINTS["C2"],
-    ref_at=(2.54, -1.27),
-    val_at=(2.54, 1.27),
-    justify="left",
-)
-net(p("1"), "VOUT")
-net(p("2"), "GND")
-p = place(
-    "Device:D_Schottky",
-    "D1",
-    "1N5819",
-    157.48,
-    182.88,
-    footprint=FOOTPRINTS["D1"],
-    ref_at=(0, -2.54),
-    val_at=(0, 2.54),
-)
-net(p("2"), "VOUT")
-net(p("1"), "ESP_5V")
-for ref, name, x in (("#FLG03", "VIN_ISO", 48.26), ("#FLG04", "GND_ISO", 58.42), ("#FLG05", "ESP_5V", 142.24)):
-    flag = place("power:PWR_FLAG", ref, "PWR_FLAG", x, 190.5, hide_val=True)
-    net(flag("1"), name)
+capacitor("C2", "22u", 99.06, 332.74, "VOUT", footprint=C1206)
+resistor("R14", "220", 119.38, 332.74, "VOUT", "GND", R1206)
+across("Device:D_Schottky", "D1", "SS14", 149.86, 330.2, SMA, {"2": "VOUT", "1": "ESP_5V"})
+for ref, name, x in (
+    ("#FLG03", "VIN_ISO", 182.88),
+    ("#FLG04", "GND_ISO", 200.66),
+    ("#FLG05", "ESP_5V", 218.44),
+    ("#FLG06", "VDD1", 236.22),
+):
+    net(place("power:PWR_FLAG", ref, "PWR_FLAG", x, 332.74, hide_val=True)("1"), name)
+
+text("Test points", 264.16, 314.96)
+for i, name in enumerate(("+5V", "GND", "ESP_5V", "3V3", "TX", "RX", "VIN_ISO", "GND_ISO")):
+    part(
+        "Connector:TestPoint",
+        f"TP{i + 1}",
+        name,
+        269.24 + i * 17.78,
+        330.2,
+        "TestPoint:TestPoint_Pad_D1.5mm",
+        {"1": name},
+        ref_at=(0, -7.62),
+        val_at=(0, -5.08),
+    )
 
 body = "\n".join(out)
 lib = "\n".join(SYMBOLS.values())
-sch = f"""(kicad_sch (version 20250114) (generator "eeschema") (generator_version "9.0") (uuid "{root}") (paper "A4")
-(title_block (title "Kaidi Desk Dongle") (date "2026-11-21") (company "esphome-kaidi-desk")
+sch = f"""(kicad_sch (version 20250114) (generator "eeschema") (generator_version "9.0") (uuid "{root}") (paper "A2")
+(title_block (title "Kaidi Desk Dongle") (date "2026-11-24") (company "esphome-kaidi-desk")
  (comment 1 "Inline between the keypad and a Kaidi KDDY094 control box") (comment 2 "github.com/clintval/esphome-kaidi-desk"))
 (lib_symbols {lib})
 {body}
