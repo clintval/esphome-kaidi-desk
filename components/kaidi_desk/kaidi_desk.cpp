@@ -28,6 +28,8 @@ static const uint32_t START_TIMEOUT_MS = 2500;
 static const uint32_t STALL_MS = 1500;
 static const float MOVED_CM = 0.5f;
 static const float MAX_STEP_CM = 2.0f;
+static const uint8_t SAVE_COMMANDS[] = {COMMAND_SAVE_PRESET_1, COMMAND_SAVE_PRESET_2, COMMAND_SAVE_PRESET_3,
+                                        COMMAND_SAVE_PRESET_4};
 
 void KaidiDesk::setup() {
   if (this->tx_enable_pin_ != nullptr) {
@@ -156,6 +158,25 @@ void KaidiDesk::step_action_(uint32_t now) {
         return;
       }
       this->send_(COMMAND_PRESET_1 + this->preset_ - 1);
+      return;
+    }
+    case Action::SAVE_PRESET: {
+      if (this->box_mode_ != BOX_MODE_HEIGHT || now - this->height_ms_ > HEIGHT_STALE_MS) {
+        this->release_("Not saved, the box was not ready");
+        return;
+      }
+      if (now - this->motion_ms_ > STALL_MS) {
+        char reason[32];
+        snprintf(reason, sizeof(reason), "Sent save for preset %u", this->preset_);
+        this->send_(SAVE_COMMANDS[this->preset_ - 1]);
+        this->release_(reason);
+        return;
+      }
+      if (elapsed > START_TIMEOUT_MS) {
+        this->release_("Not saved, the desk was moving");
+        return;
+      }
+      this->send_(COMMAND_IDLE);
       return;
     }
     case Action::NUDGE_UP:
@@ -387,6 +408,15 @@ void KaidiDesk::preset(uint8_t number) {
   this->begin_(Action::PRESET);
 }
 
+void KaidiDesk::save_preset(uint8_t number) {
+  if (this->state_ != State::IDLE) {
+    ESP_LOGW(TAG, "Preset %u not saved; the desk is busy", number);
+    return;
+  }
+  this->preset_ = number;
+  this->begin_(Action::SAVE_PRESET);
+}
+
 void KaidiDesk::apply_wake_pin_() {
   if (this->wake_pin_ == nullptr)
     return;
@@ -453,8 +483,18 @@ void KaidiButton::press_action() {
     case ButtonAction::RESET:
       this->parent_->reset();
       break;
-    default:
+    case ButtonAction::PRESET_1:
+    case ButtonAction::PRESET_2:
+    case ButtonAction::PRESET_3:
+    case ButtonAction::PRESET_4:
       this->parent_->preset(static_cast<uint8_t>(this->action_) - static_cast<uint8_t>(ButtonAction::PRESET_1) + 1);
+      break;
+    case ButtonAction::SAVE_PRESET_1:
+    case ButtonAction::SAVE_PRESET_2:
+    case ButtonAction::SAVE_PRESET_3:
+    case ButtonAction::SAVE_PRESET_4:
+      this->parent_->save_preset(static_cast<uint8_t>(this->action_) -
+                                 static_cast<uint8_t>(ButtonAction::SAVE_PRESET_1) + 1);
       break;
   }
 }

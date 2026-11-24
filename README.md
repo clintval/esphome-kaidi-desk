@@ -66,11 +66,12 @@ A complete config with every entity is in [`example/kaidi-desk.yaml`](example/ka
 | --- | --- | --- |
 | `sensor` | `height` | Height above the desk's lowest point, in cm (Home Assistant converts units) |
 | `text_sensor` | `status` | `Ready`, `Reset Needed` (E04), `Resetting`, `Keypad Settings`, or `Asleep` |
-| `text_sensor` | `last_stop` | Why the last move ended, such as `Reached target`, `Reached preset 2`, `Stopped`, `Stopped short at a limit or obstruction` or `Lost the height` |
+| `text_sensor` | `last_stop` | Why the last move ended, such as `Reached target`, `Reached preset 2`, `Stopped`, `Stopped short at a limit or obstruction` or `Lost the height`; also the result of a preset save |
 | `number` | `target_height` | Move to a height; follows the real height while idle, in `cm` or `in` |
 | `button` | `nudge_up`, `nudge_down` | Move briefly up or down, about half an inch |
 | `button` | `stop` | Stop any move |
 | `button` | `preset_1` to `preset_4` | Go to a position saved on the keypad; the box drives there and stops by itself |
+| `button` | `save_preset_1` to `save_preset_4` | Replace a preset with the current height, once the desk is still; the box sends no confirmation, and presets can't be read back |
 | `button` | `reset` | Hold Up and Down until the box re-zeros, which clears E04; it ignores other moves until it finishes, and may clear the keypad's presets |
 | `switch` | `keep_awake` | Hold the wake line high and send an Idle frame every 4 s, inside the box's 10 to 12 s sleep timer, so the box stays awake, height streams live and moves start at once |
 
@@ -187,7 +188,8 @@ Each frame is 7 bytes, `0x68 0x01 <mode> <hi> <lo> <checksum> 0x16`, where the c
 | Keypad to box | `0x02` | Down |
 | Keypad to box | `0x03` | Idle |
 | Keypad to box | `0x04` | Up and Down held (reset) |
-| Keypad to box | `0x06` to `0x09` | Go to preset 1 to 4, repeated until the box stops |
+| Keypad to box | `0x06` to `0x09` | Go to preset 1 to 4, repeated until the box stops; the height bytes are zero |
+| Keypad to box | `0x0A`, `0x0B`, `0x0C`, `0x17` | Save the current height as preset 1 to 4, sent once |
 | Box to keypad | `0x00` | Height in 0.1 cm |
 | Box to keypad | `0x30` | Reset needed (E04); the value counts down during the reset |
 | Box to keypad | `0x04` | Reset rebound in progress |

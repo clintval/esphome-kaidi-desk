@@ -19,6 +19,10 @@ enum Command : uint8_t {
   COMMAND_IDLE = 0x03,
   COMMAND_RESET = 0x04,
   COMMAND_PRESET_1 = 0x06,
+  COMMAND_SAVE_PRESET_1 = 0x0A,
+  COMMAND_SAVE_PRESET_2 = 0x0B,
+  COMMAND_SAVE_PRESET_3 = 0x0C,
+  COMMAND_SAVE_PRESET_4 = 0x17,
 };
 
 enum BoxMode : uint8_t {
@@ -29,7 +33,7 @@ enum BoxMode : uint8_t {
   BOX_MODE_NONE = 0xFF,
 };
 
-enum class Action : uint8_t { NONE, MOVE, NUDGE_UP, NUDGE_DOWN, RESET, PRESET };
+enum class Action : uint8_t { NONE, MOVE, NUDGE_UP, NUDGE_DOWN, RESET, PRESET, SAVE_PRESET };
 
 enum class State : uint8_t { IDLE, WAKING, ACTING, RELEASING };
 
@@ -62,6 +66,7 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   void move_to(float cm);
   void nudge(bool up);
   void preset(uint8_t number);
+  void save_preset(uint8_t number);
   void reset();
   void stop();
   void set_keep_awake(bool keep_awake);
@@ -151,7 +156,20 @@ class KaidiKeepAwakeSwitch : public switch_::Switch, public Parented<KaidiDesk> 
   void write_state(bool state) override;
 };
 
-enum class ButtonAction : uint8_t { NUDGE_UP, NUDGE_DOWN, STOP, RESET, PRESET_1, PRESET_2, PRESET_3, PRESET_4 };
+enum class ButtonAction : uint8_t {
+  NUDGE_UP,
+  NUDGE_DOWN,
+  STOP,
+  RESET,
+  PRESET_1,
+  PRESET_2,
+  PRESET_3,
+  PRESET_4,
+  SAVE_PRESET_1,
+  SAVE_PRESET_2,
+  SAVE_PRESET_3,
+  SAVE_PRESET_4,
+};
 
 class KaidiButton : public button::Button, public Parented<KaidiDesk> {
  public:
