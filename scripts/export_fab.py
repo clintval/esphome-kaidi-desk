@@ -4,6 +4,7 @@ Run with: python scripts/export_fab.py
 """
 
 import csv
+import json
 import os
 import subprocess
 import tempfile
@@ -31,9 +32,10 @@ with tempfile.TemporaryDirectory() as tmp:
     )
     rows = {row["Ref"]: row for row in csv.DictReader(positions.open())}
 
+centers = json.loads((ROOT / "hardware/board.json").read_text())["centers"]
 fitted = {ref: lcsc for refs, (_, lcsc) in PARTS.items() for ref in refs.split()}
-by_hand = {ref for ref in rows if ref not in fitted and not ref.startswith(("TP", "REF"))}
-assert by_hand == {"J1", "J2"}, f"parts with no LCSC number: {sorted(by_hand)}"
+missing = {ref for ref in rows if ref not in fitted and not ref.startswith(("TP", "REF"))}
+assert not missing, f"parts with no LCSC number: {sorted(missing)}"
 assert not set(fitted) - set(rows), f"parts not on the board: {sorted(set(fitted) - set(rows))}"
 
 with (ROOT / "hardware/kaidi-desk-bom.csv").open("w", newline="") as out:
@@ -46,6 +48,6 @@ with (ROOT / "hardware/kaidi-desk-positions.csv").open("w", newline="") as out:
     writer = csv.writer(out, lineterminator="\n")
     writer.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
     for ref in sorted(fitted):
-        row = rows[ref]
-        writer.writerow([ref, f"{row['PosX']}mm", f"{row['PosY']}mm", "Top", row["Rot"]])
+        x, y = centers[ref]
+        writer.writerow([ref, f"{x:.3f}mm", f"{-y:.3f}mm", "Top", rows[ref]["Rot"]])
 print("wrote the Gerber zip, the parts list and the positions into hardware/")

@@ -18,7 +18,7 @@ CLI = os.environ["KICAD_CLI"]
 SCH, PCB = ROOT / "hardware/kaidi-desk.kicad_sch", ROOT / "hardware/kaidi-desk.kicad_pcb"
 EXPECTED = {
     "+5V": "C1.1 J1.2 J2.2 JP1.1 TP1.1 U2.12 U2.14 U2.5 U2.9 U5.5 U6.5",
-    "GND": "C1.2 C11.2 C12.2 C2.2 C4.2 C5.2 C6.2 C7.2 C8.2 D3.1 J1.3 J2.3 R10.2 R14.2 R3.2 R4.2 R5.2 R6.2 R8.2 "
+    "GND": "C1.2 C11.2 C12.2 C2.2 C4.2 C5.2 C6.2 C7.2 C8.2 D3.1 J1.3 J1.SH J2.3 J2.SH R10.2 R14.2 R3.2 R4.2 R5.2 R6.2 R8.2 "
     "SW1.2 SW2.2 TP2.1 U1.19 U1.9 U2.7 U3.4 U4.2 U5.2 U6.2 U7.15 U7.9",
     "/3V3": "C11.1 C12.1 C6.1 C7.1 R21.1 R22.1 R23.1 R24.1 TP4.1 U1.1 U4.5 U7.12 U7.13 U7.14 U7.16",
     "/CC1": "J3.A5 R15.1",
@@ -46,6 +46,11 @@ EXPECTED = {
     "/OE_WAKE": "R4.1 U2.11 U2.4",
     "/RX": "R7.2 R8.1 TP6.1 U1.3",
     "/SENSE": "R10.1 R9.2 U1.15",
+    "/THRU_1": "J1.1 J2.1",
+    "/THRU_4": "J1.4 J2.4",
+    "/THRU_5": "J1.5 J2.5",
+    "/THRU_6": "J1.6 J2.6",
+    "/THRU_9": "J1.9 J2.9",
     "/TX": "TP5.1 U1.6 U2.2",
     "/UDM": "R17.2 U7.6",
     "/UDP": "R18.2 U7.7",

@@ -7,3 +7,8 @@ B0505S_HEIGHT = 10.16
 B0505S_STANDOFF = 0.5
 B0505S_PIN1_INSET = 2.21
 B0505S_PIN_ROW_INSET = 1.5
+
+# The box wall and its gap to the board, so the jacks' faces sit flush with the outside of the box.
+BOX_GAP = 0.5
+BOX_WALL = 2.2
+JACK_OVERHANG = BOX_GAP + BOX_WALL

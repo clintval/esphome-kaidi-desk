@@ -10,6 +10,7 @@ Comment,Designator,Footprint,LCSC Part #
 "SMAJ5.0CA surge clamp, SMA",D4,D_SMA,C83324
 "250 mA resettable fuse 1206, 1206L025/30NR",F1,Fuse_1206_3216Metric,C7542936
 "1 A resettable fuse 1206, 1206L100/24NR",F2,Fuse_1206_3216Metric,C7542957
+"Shielded 10P10C jack, TE 5558067-1","J1,J2",RJ50_TE_5558067-1_Horizontal,C306018
 "USB-C receptacle, TYPE-C-31-M-12",J3,USB_C_Receptacle_HRO_TYPE-C-31-M-12,C165948
 "1 x 2 pin header 2.54 mm, PZ254V-11-02P",JP1,PinHeader_1x02_P2.54mm_Vertical,C492401
 1 k 1% 0603,"R1,R2,R25",R_0603_1608Metric,C21190

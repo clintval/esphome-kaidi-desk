@@ -14,6 +14,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pcbnew
+from dimensions import JACK_OVERHANG
 
 FP = Path(os.environ.get("KICAD_SHARE", "/Applications/KiCad/KiCad.app/Contents/SharedSupport")) / "footprints"
 CLI = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli")
@@ -142,10 +143,11 @@ bottom = Y0 + H
 
 jack_lib = ROOT / "hardware/kaidi.pretty"
 models = "${KIPRJMOD}/kaidi.3dshapes"
-JACKS = (("J1", X0 + 13.97, YC - 5.715, -90, "left"), ("J2", X0 + W - 13.97, YC + 5.715, 90, "right"))
+JACK_INSET = 16.77 - JACK_OVERHANG
+JACKS = (("J1", X0 + JACK_INSET, YC, -90, "left"), ("J2", X0 + W - JACK_INSET, YC, 90, "right"))
 for ref, x, y, angle, _ in JACKS:
-    fp = place(jack_lib, "RJ50_Amphenol_54602-910_Horizontal", ref, x, y, angle=angle)
-    model(fp, f"{models}/RJ50_Amphenol_54602-910_Horizontal.wrl")
+    fp = place(jack_lib, "RJ50_TE_5558067-1_Horizontal", ref, x, y, angle=angle)
+    model(fp, f"{models}/RJ50_TE_5558067-1_Horizontal.step")
 silk("KEYPAD", X0 + 8.9, YC - 9.6, 1.4, bold=True)
 silk("DESK", X0 + W - 8.9, YC - 9.6, 1.4, bold=True)
 
@@ -177,7 +179,7 @@ PLACEMENTS = {
     "U4": (("Package_TO_SOT_SMD", "SOT-23-5"), 25.4, 26.8, 0),
     "C5": (C0805, 21.2, 27.4, 90),
     "C6": (C0805, 29.4, 27.4, 90),
-    "U6": (SOT6, 21.2, 20.6, 0),
+    "U6": (SOT6, 21.7, 20.6, 0),
     "R1": (R0603, 25.6, 19.4, 90),
     "R2": (R0603, 25.6, 23.0, 90),
     "R9": (R0603, 22.5, 17.5, 0),
@@ -213,7 +215,7 @@ PLACEMENTS = {
     "R18": (R0603, 43.8, 41.4, 90),
     "C9": (C0603, 33.2, 38.2, 90),
     "C10": (C0603, 37.6, 41.0, 0),
-    "U3": (("kaidi", "Converter_DCDC_Mornsun_B_S-2WR3_SIP"), 31.0, 47.5, 180),
+    "U3": (("kaidi", "Converter_DCDC_Mornsun_B_S-2WR3_SIP"), 24.65, 47.5, 180),
     "C2": (C1206, 18.6, 38.0, 90),
     "R14": (R1206, 14.6, 38.0, 90),
     "D1": (SMA, 9.0, 38.4, 90),
@@ -236,7 +238,7 @@ for ref, (footprint, x, y, angle) in PLACEMENTS.items():
                 pad.SetSize(mm(0.6, 0.6))
     if ref in MODELS:
         fp.Models().clear()
-        model(fp, f"{models}/{MODELS[ref]}.wrl")
+        model(fp, f"{models}/{MODELS[ref]}.step")
 
 HOLES = [(X0 + 3.6, Y0 + 3.6), (X0 + W - 3.6, Y0 + 3.6), (X0 + 3.6, Y0 + H - 3.6), (X0 + W - 3.6, Y0 + H - 3.6)]
 for x, y in HOLES:
@@ -272,10 +274,10 @@ for layer in COPPER:
     layers.AddLayer(layer)
 
 
-def rule_area(name, rect, tracks=True, fills=True):
+def rule_area(name, rect, tracks=True, fills=True, on=layers):
     zone = pcbnew.ZONE(board)
     zone.SetIsRuleArea(True)
-    zone.SetLayerSet(layers)
+    zone.SetLayerSet(on)
     zone.SetDoNotAllowTracks(tracks)
     zone.SetDoNotAllowVias(tracks)
     zone.SetDoNotAllowZoneFills(fills)
@@ -296,6 +298,12 @@ for moat in (
     (ix2, iy1, ix2 + 3.0, bottom),
 ):
     rule_area("ISOLATION_MOAT", moat)
+
+# The jacks' grounded shells rest on the board, so no signal runs under them on the top layer.
+top = pcbnew.LSET()
+top.AddLayer(pcbnew.F_Cu)
+for x1, x2 in ((X0, X0 + 18.4), (X0 + W - 18.4, X0 + W)):
+    rule_area("JACK_SHELL", (x1, YC - 8.0, x2, YC + 8.0), fills=False, on=top)
 
 inset = 0.65
 for band in (
@@ -348,16 +356,25 @@ classes["classes"] = [signal, power]
 classes["netclass_patterns"] = [{"netclass": "Power", "pattern": name} for name in POWER]
 project.write_text(json.dumps(config, indent=2) + "\n")
 
+centers = {}
+for fp in board.GetFootprints():
+    pads = [pad.GetPosition() for pad in fp.Pads() if pad.GetNumber()]
+    if pads:
+        centers[fp.GetReference()] = [
+            round(pcbnew.ToMM(min(axis) + max(axis)) / 2, 3) for axis in ([p.x for p in pads], [p.y for p in pads])
+        ]
+
 geometry = {
+    "centers": centers,
     "board": {"x": X0, "y": Y0, "w": W, "h": H, "radius": RADIUS, "thickness": 1.6},
     "mounting_holes": [list(h) for h in HOLES],
     "screw_holes": [list(HOLES[0]), list(HOLES[3])],
     "jacks": [
-        {"ref": ref, "side": side, "y1": YC - 7.65, "y2": YC + 7.65, "height": 13.0} for ref, _, _, _, side in JACKS
+        {"ref": ref, "side": side, "y1": YC - 7.935, "y2": YC + 7.935, "height": 13.7} for ref, _, _, _, side in JACKS
     ],
     "usb": {"side": "bottom", "center_x": X0 + PLACEMENTS["J3"][1], "z": 1.63},
     "island": list(ISLAND),
-    "tallest": 13.0,
+    "tallest": 13.7,
 }
 (OUT.parent / "board.json").write_text(json.dumps(geometry, indent=2) + "\n")
 print("placed", len(board.GetFootprints()), "footprints,", len(nets), "nets")

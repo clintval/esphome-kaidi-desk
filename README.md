@@ -22,7 +22,7 @@ To check your desk, look for a `KAIDI` label and a `KDDY` model number on the co
 | --- | --- | --- |
 | ApexDesk K Series 3-stage dual-motor desk base | `KDDY094` | Tested |
 | Other desks with a `KDDY094` box (variants S500, S650 and S663) | `KDDY094` | Expected to work |
-| Lazy Maisons desk (2021) with a `KDH170-311` keypad | `KDDY094`, S440 | Expected to work: [`yog18r/kaidi-desk-esphome`](https://github.com/yog18r/kaidi-desk-esphome) measured the same contacts and frames, but this dongle hasn't been tried on it |
+| Lazy Maisons desk (2021) with a `KDH170-311` keypad | `KDDY094`, S440, `DY094-409/000838A 06-V2.5` | Expected to work: [`yog18r/kaidi-desk-esphome`](https://github.com/yog18r/kaidi-desk-esphome) measured the same contacts and frames, but this dongle hasn't been tried on it; set the target height's `max_value` to 44 cm (17.3 in) |
 | Desks with a `KDDY041` box and `KD1869A` keypad | `KDDY041` | Same protocol, but an 8-pin cable, so the dongle won't fit |
 
 If your desk works, please open an issue or pull request to add it.
@@ -78,7 +78,7 @@ A complete config with every entity is in [`example/kaidi-desk.yaml`](example/ka
 ## Hardware
 
 > [!WARNING]
-> This board is untested: none has been built yet, and the desk-power test and the RJ50 jack fit check are still pending, so don't order boards from it yet.
+> This board is untested: none has been built yet, and the desk-power test and a check of the jacks' contact order are still pending, so don't order boards from it yet.
 > The [protoboard build](#build-without-a-pcb) is tested and works.
 
 The dongle sits inline: the keypad plugs into one end, and a short cable runs from the other end to the control box.
@@ -106,9 +106,10 @@ Power comes from the desk by default. USB-C is for flashing and for desks that c
 | 7 | Command, keypad to box | Keypad through 1 kΩ; gate A drives the box side through 47 Ω from GPIO7 when GPIO6 is high |
 | 8 | Height, box to keypad | Straight through; 10 kΩ over 15 kΩ to GPIO4 |
 | 10 | Wake, keypad to box | Keypad through 1 kΩ; gate B drives the box side high through 47 Ω when GPIO10 is high |
+| 1, 4, 5, 6, 9 | Unused by this dongle | Straight through |
 
 The board is an 84 × 50 mm, four-layer KiCad design in [`hardware/`](hardware), made to be assembled by a board house.
-Only the two RJ50 jacks are soldered by hand.
+Every part is fitted by the board house, including the jacks, whose metal shells are tied to the desk's ground and sit flush with the box.
 
 | Situation | Protection |
 | --- | --- |
@@ -141,9 +142,8 @@ Print it in MJF nylon or, at home, PETG; resin tends to crack around the inserts
 
 | Qty | Part | Where to order |
 | --- | --- | --- |
-| 1 | PCB, 84 × 50 mm, 4 layers, 1.6 mm, assembled on the top side | [JLCPCB](https://jlcpcb.com/): upload [`kaidi-desk-gerbers.zip`](hardware/kaidi-desk-gerbers.zip), then [`kaidi-desk-bom.csv`](hardware/kaidi-desk-bom.csv) and [`kaidi-desk-positions.csv`](hardware/kaidi-desk-positions.csv) |
+| 1 | PCB, 84 × 50 mm, 4 layers, 1.6 mm, all parts fitted on the top side | [JLCPCB](https://jlcpcb.com/): upload [`kaidi-desk-gerbers.zip`](hardware/kaidi-desk-gerbers.zip), then [`kaidi-desk-bom.csv`](hardware/kaidi-desk-bom.csv) and [`kaidi-desk-positions.csv`](hardware/kaidi-desk-positions.csv) |
 | 1 | Enclosure base and lid, MJF nylon (PA12) | [JLCPCB 3D printing](https://jlcpcb.com/3d-printing): upload [`base.stl`](hardware/enclosure/base.stl) and [`lid.stl`](hardware/enclosure/lid.stl) |
-| 2 | Amphenol/FCI 54602-910LF, 10P10C right-angle jack (J1, J2), soldered by hand | [DigiKey](https://www.digikey.com/en/products/detail/amphenol-cs-fci/54602-910LF/1001361) |
 | 1 | Jumper shunt, 2.54 mm (JP1) | Any |
 | 1 | RJ50 (10P10C) cable, about 1 ft, wired straight through, dongle to control box | [Winford CBM10R1TS-1](https://www.winford.com/products/cbm10.php) (US) or [Delock 80185](https://www.delock.com/produkt/80185/merkmale.html) (EU) |
 | 2 | M3 × 20 mm socket-head cap screw, ISO 4762 | [Amazon](https://www.amazon.com/s?k=M3x20+socket+head+cap+screw+ISO+4762+stainless) |

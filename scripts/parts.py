@@ -1,4 +1,4 @@
-"""LCSC part numbers for the parts a board house fits; J1 and J2 are soldered by hand."""
+"""LCSC part numbers for the parts a board house fits, which is all of them."""
 
 PARTS = {
     "C1 C7 C9 C10 C11": ("100 nF 50 V X7R 0603", "C14663"),
@@ -12,6 +12,7 @@ PARTS = {
     "D4": ("SMAJ5.0CA surge clamp, SMA", "C83324"),
     "F1": ("250 mA resettable fuse 1206, 1206L025/30NR", "C7542936"),
     "F2": ("1 A resettable fuse 1206, 1206L100/24NR", "C7542957"),
+    "J1 J2": ("Shielded 10P10C jack, TE 5558067-1", "C306018"),
     "J3": ("USB-C receptacle, TYPE-C-31-M-12", "C165948"),
     "JP1": ("1 x 2 pin header 2.54 mm, PZ254V-11-02P", "C492401"),
     "R1 R2 R25": ("1 k 1% 0603", "C21190"),

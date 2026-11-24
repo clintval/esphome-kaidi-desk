@@ -97,7 +97,7 @@ SYMBOLS = {
     "kaidi:B0505S-2WR3": converter_symbol(),
     "74xx:74AHCT125": embed("74xx", "74LS125", "74AHCT125"),
     "Connector_Generic:Conn_01x02": embed("Connector_Generic", "Conn_01x02"),
-    "Connector_Generic:Conn_01x10": embed("Connector_Generic", "Conn_01x10"),
+    "Connector_Generic_Shielded:Conn_01x10_Shielded": embed("Connector_Generic_Shielded", "Conn_01x10_Shielded"),
     "power:+5V": embed("power", "+5V"),
     "power:GND": embed("power", "GND"),
     "power:PWR_FLAG": embed("power", "PWR_FLAG"),
@@ -108,7 +108,7 @@ R0603, R1206 = "Resistor_SMD:R_0603_1608Metric", "Resistor_SMD:R_1206_3216Metric
 C0603, C0805, C1206 = (f"Capacitor_SMD:C_{s}" for s in ("0603_1608Metric", "0805_2012Metric", "1206_3216Metric"))
 FUSE, SMA = "Fuse:Fuse_1206_3216Metric", "Diode_SMD:D_SMA"
 SOT6 = "Package_TO_SOT_SMD:SOT-23-6"
-JACK = "kaidi:RJ50_Amphenol_54602-910_Horizontal"
+JACK = "kaidi:RJ50_TE_5558067-1_Horizontal"
 
 out = []
 instances = []
@@ -196,7 +196,9 @@ def text(s, x, y, size=1.8):
     )
 
 
-def part(lib_id, ref, value, x, y, footprint, nets, mirror=False, ref_at=(2.54, -1.27), val_at=(2.54, 1.27)):
+def part(
+    lib_id, ref, value, x, y, footprint, nets, mirror=False, ref_at=(2.54, -1.27), val_at=(2.54, 1.27), stubs=None
+):
     side = "left" if ref_at[0] else ""
     p = place(lib_id, ref, value, x, y, mirror=mirror, footprint=footprint, ref_at=ref_at, val_at=val_at, justify=side)
     seen = set()
@@ -205,7 +207,7 @@ def part(lib_id, ref, value, x, y, footprint, nets, mirror=False, ref_at=(2.54, 
         if at[0] in seen:
             continue
         seen.add(at[0])
-        no_connect(at) if name is None else net(at, name)
+        no_connect(at) if name is None else net(at, name, (stubs or {}).get(num, STUB))
 
 
 def resistor(ref, value, x, y, a, b, footprint=R0603):
@@ -222,9 +224,21 @@ def across(lib_id, ref, value, x, y, footprint, nets, offset=3.81):
 
 text("Keypad and desk jacks", 22.86, 27.94)
 for ref, label, side, y in (("J1", "Keypad (RJ50)", "KEYPAD", 55.88), ("J2", "Desk (RJ50)", "DESK", 106.68)):
-    nets = dict.fromkeys(("1", "4", "5", "6", "9"))
-    nets |= {"2": "+5V", "3": "GND", "7": f"CMD_{side}", "8": "HEIGHT", "10": f"WAKE_{side}"}
-    part("Connector_Generic:Conn_01x10", ref, label, 38.1, y, JACK, nets, True, (0, -15.24), (0, -12.7))
+    nets = {num: f"THRU_{num}" for num in ("1", "4", "5", "6", "9")}
+    nets |= {"2": "+5V", "3": "GND", "7": f"CMD_{side}", "8": "HEIGHT", "10": f"WAKE_{side}", "SH": "GND"}
+    part(
+        "Connector_Generic_Shielded:Conn_01x10_Shielded",
+        ref,
+        label,
+        38.1,
+        y,
+        JACK,
+        nets,
+        True,
+        (0, -15.24),
+        (0, -12.7),
+        stubs={"2": 17.78, "3": 17.78},
+    )
 for ref, name, x in (("#FLG01", "+5V", 73.66), ("#FLG02", "GND", 93.98)):
     net(place("power:PWR_FLAG", ref, "PWR_FLAG", x, 139.7, hide_val=True)("1"), name)
 
