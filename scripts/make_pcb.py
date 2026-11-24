@@ -258,7 +258,7 @@ silk("KEYPAD ALWAYS ON", X0 + 8.2, Y0 + 13.4, 0.7)
 silk("STATUS", X0 + 9.2, Y0 + 5.8, 0.9)
 silk("USB-C, isolated", X0 + 51.0, Y0 + 40.4, 0.7)
 silk("esphome-kaidi-desk", X0 + 57.6, Y0 + 3.4, 1.2, bold=True, left=True)
-silk("Kaidi KDDY094 dongle", X0 + 57.6, Y0 + 5.4, 0.9, left=True)
+silk("github.com/clintval", X0 + 57.6, Y0 + 5.4, 0.9, left=True)
 for ref, label in zip(("TP1", "TP2", "TP3", "TP5", "TP6"), ("5V", "GND", "ESP5V", "TX", "RX")):
     at = PLACEMENTS[ref]
     silk(label, X0 + at[1], Y0 + at[2] - 1.5, 0.7)
