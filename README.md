@@ -37,14 +37,20 @@ external_components:
     components: [kaidi_desk]
 
 uart:
-  rx_pin: GPIO4
-  tx_pin: GPIO7
-  baud_rate: 9600
+  - id: desk_uart
+    rx_pin: GPIO4
+    tx_pin: GPIO7
+    baud_rate: 9600
+  - id: keypad_uart
+    rx_pin: GPIO3
+    baud_rate: 9600
 
 kaidi_desk:
+  uart_id: desk_uart
+  keypad_uart_id: keypad_uart
   tx_enable_pin: GPIO6
   wake_pin: GPIO10
-  keypad_sense_pin: GPIO3
+  keypad_cutoff_pin: GPIO1
 
 sensor:
   - platform: kaidi_desk
@@ -59,6 +65,7 @@ number:
 ```
 
 A complete config with every entity is in [`example/kaidi-desk.yaml`](example/kaidi-desk.yaml).
+It encrypts the Home Assistant connection and Wi-Fi updates with one key, and puts a password on the fallback hotspot. Add `wifi_ssid`, `wifi_password`, `ap_password` and `api_encryption_key` to your `secrets.yaml`; the `openssl rand -base64 32` command makes a key.
 
 ## Entities
 
@@ -66,7 +73,8 @@ A complete config with every entity is in [`example/kaidi-desk.yaml`](example/ka
 | --- | --- | --- |
 | `sensor` | `height` | Height above the desk's lowest point, in cm (Home Assistant converts units) |
 | `text_sensor` | `status` | `Ready`, `Reset Needed` (E04), `Resetting`, `Keypad Settings`, or `Asleep` |
-| `text_sensor` | `last_stop` | Why the last move ended, such as `Reached target`, `Reached preset 2`, `Stopped`, `Stopped short at a limit or obstruction` or `Lost the height`; also the result of a preset save |
+| `text_sensor` | `last_stop` | Why the last move ended, such as `Reached target`, `Reached preset 2`, `Stopped`, `Stopped short at a limit or obstruction` `Keypad took over` or `Lost the height`; also the result of a preset save, and what the keypad did, such as `Keypad moved the desk up`, `Keypad went to preset 2` or `Keypad saved preset 3` |
+| `text_sensor` | `keypad` | What the keypad is doing: `Asleep`, `Awake`, `Up`, `Down`, `Preset 1` to `Preset 4`, or `Reset`; needs `keypad_uart_id` |
 | `number` | `target_height` | Move to a height; follows the real height while idle, in `cm` or `in` |
 | `button` | `nudge_up`, `nudge_down` | Move briefly up or down, about half an inch |
 | `button` | `stop` | Stop any move |
@@ -79,10 +87,11 @@ A complete config with every entity is in [`example/kaidi-desk.yaml`](example/ka
 
 > [!WARNING]
 > This board is untested: none has been built yet, and the desk-power test and a check of the jacks' contact order are still pending, so don't order boards from it yet.
-> The [protoboard build](#build-without-a-pcb) is tested and works.
+> The protoboard build, under "Build without a PCB" below, is tested and works.
 
 The dongle sits inline: the keypad plugs into one end, and a short cable runs from the other end to the control box.
 A 74AHCT125 drives the box only while the ESP is sending, so the keypad keeps working if the ESP is unpowered, resetting or unplugged.
+The ESP also decodes what the keypad sends, and keeps listening while it cuts the keypad off, so a keypad press takes over from a Home Assistant move at once.
 Power comes from the desk by default. USB-C is for flashing and for desks that can't supply the ESP, and it is isolated, so any charger or computer can stay plugged in.
 
 <p align="center">
@@ -125,6 +134,23 @@ Every part is fitted by the board house, including the jacks, whose metal shells
 It can't protect against a fault in the control box, the keypad or the cable, and it relies on the box's own anti-collision stop.
 The isolation keeps grounds apart; it is not a safety barrier against mains.
 
+<details>
+<summary>Build without a PCB</summary>
+
+The protoboard build is the same circuit hand-built on a 1.5 × 2 in EPLZON solderable breadboard, with a Bipom BRK10P10CSJ breakout for the keypad and a cut 10P10C cable to the desk.
+
+> [!IMPORTANT]
+> Power the protoboard build from a grounded (three-prong) USB charger, a computer's USB port or a power bank.
+> It has no isolated power input, so a two-prong charger leaks a little mains AC onto the desk's ground and touch-sensitive keypads barely register a press.
+
+<p align="center">
+  <img src="docs/protoboard.svg" width="100%" alt="Protoboard build guide">
+</p>
+
+On this build, configure `tx_enable_pin: GPIO6`, `wake_pin: GPIO0` and `rx_pin: GPIO3`, and leave out `keypad_uart_id`, `keypad_cutoff_pin` and the second uart.
+
+</details>
+
 ## Enclosure
 
 A two-part, 89 × 55 × 24 mm box is in [`hardware/enclosure/`](hardware/enclosure) as STEP and STL, sized to sit in the desk's cable tray beside the control box.
@@ -153,20 +179,6 @@ The parts the board house fits are listed in [`scripts/parts.py`](scripts/parts.
 In the assembly preview, check the rotation of every chip, diode, LED and C4 before ordering: board houses often rotate parts differently from KiCad.
 
 The cable must be wired straight through; flat telephone-style 10P10C cables are often reversed.
-
-## Build Without a PCB
-
-The protoboard build is the same circuit hand-built on a 1.5 × 2 in EPLZON solderable breadboard, with a Bipom BRK10P10CSJ breakout for the keypad and a cut 10P10C cable to the desk.
-
-> [!IMPORTANT]
-> Power the protoboard build from a grounded (three-prong) USB charger, a computer's USB port or a power bank.
-> It has no isolated power input, so a two-prong charger leaks a little mains AC onto the desk's ground and touch-sensitive keypads barely register a press.
-
-<p align="center">
-  <img src="docs/protoboard.svg" width="100%" alt="Protoboard build guide">
-</p>
-
-On this build, configure `tx_enable_pin: GPIO6`, `wake_pin: GPIO0` and `rx_pin: GPIO3`, and leave out `keypad_sense_pin`.
 
 ## Protocol
 

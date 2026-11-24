@@ -10,6 +10,8 @@
 #include "esphome/core/hal.h"
 #include "esphome/core/helpers.h"
 
+#include <array>
+
 namespace esphome {
 namespace kaidi_desk {
 
@@ -37,6 +39,34 @@ enum class Action : uint8_t { NONE, MOVE, NUDGE_UP, NUDGE_DOWN, RESET, PRESET, S
 
 enum class State : uint8_t { IDLE, WAKING, ACTING, RELEASING };
 
+class FrameReader {
+ public:
+  bool feed(uint8_t byte);
+  uint8_t mode() const { return this->mode_; }
+  uint16_t value() const { return this->value_; }
+
+ protected:
+  uint8_t buffer_[7]{};
+  uint8_t length_{0};
+  uint8_t mode_{0};
+  uint16_t value_{0};
+};
+
+// The ESP's own frames can come back on the keypad's side of the line, so each one sent excuses one received.
+class EchoFilter {
+ public:
+  void sent(uint8_t command, uint32_t now);
+  bool is_echo(uint8_t command, uint32_t now);
+
+ protected:
+  struct Sent {
+    uint8_t command{0};
+    uint32_t at{0};
+  };
+  std::array<Sent, 8> sent_{};
+  uint8_t next_{0};
+};
+
 class KaidiDesk : public Component, public uart::UARTDevice {
  public:
   void setup() override;
@@ -46,10 +76,12 @@ class KaidiDesk : public Component, public uart::UARTDevice {
 
   void set_tx_enable_pin(GPIOPin *pin) { this->tx_enable_pin_ = pin; }
   void set_wake_pin(GPIOPin *pin) { this->wake_pin_ = pin; }
-  void set_keypad_sense_pin(InternalGPIOPin *pin) { this->keypad_sense_pin_ = pin; }
+  void set_keypad_cutoff_pin(GPIOPin *pin) { this->keypad_cutoff_pin_ = pin; }
+  void set_keypad_uart(uart::UARTComponent *uart) { this->keypad_uart_ = uart; }
   void set_height_sensor(sensor::Sensor *sensor) { this->height_sensor_ = sensor; }
   void set_status_sensor(text_sensor::TextSensor *sensor) { this->status_sensor_ = sensor; }
   void set_last_stop_sensor(text_sensor::TextSensor *sensor) { this->last_stop_sensor_ = sensor; }
+  void set_keypad_sensor(text_sensor::TextSensor *sensor) { this->keypad_sensor_ = sensor; }
   void set_target_number(number::Number *number, float units_per_cm) {
     this->target_number_ = number;
     this->units_per_cm_ = units_per_cm;
@@ -89,17 +121,21 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   bool box_awake_(uint32_t now) const;
   void keep_alive_(uint32_t now);
   void apply_wake_pin_();
-  void abort_for_keypad_();
-  static void keypad_isr_(KaidiDesk *desk);
+  void read_keypad_(uint32_t now);
+  void handle_keypad_frame_(uint8_t command, uint32_t now);
+  void end_keypad_press_(uint32_t now);
+  bool keypad_awake_(uint32_t now) const;
+  void apply_keypad_cutoff_();
+  void publish_keypad_(uint8_t command);
 
   GPIOPin *tx_enable_pin_{nullptr};
   GPIOPin *wake_pin_{nullptr};
-  InternalGPIOPin *keypad_sense_pin_{nullptr};
-  volatile bool transmitting_{false};
-  volatile bool keypad_edge_{false};
+  GPIOPin *keypad_cutoff_pin_{nullptr};
+  uart::UARTComponent *keypad_uart_{nullptr};
   sensor::Sensor *height_sensor_{nullptr};
   text_sensor::TextSensor *status_sensor_{nullptr};
   text_sensor::TextSensor *last_stop_sensor_{nullptr};
+  text_sensor::TextSensor *keypad_sensor_{nullptr};
   number::Number *target_number_{nullptr};
   float units_per_cm_{1.0f};
 
@@ -118,8 +154,20 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   float furthest_{NAN};
   uint8_t preset_{0};
 
-  uint8_t buffer_[7]{};
-  uint8_t buffer_len_{0};
+  FrameReader box_reader_;
+
+  FrameReader keypad_reader_;
+  EchoFilter echoes_;
+  bool keypad_cut_off_{false};
+  bool keypad_seen_{false};
+  uint32_t keypad_ms_{0};
+  uint8_t keypad_command_{0};
+  uint8_t keypad_repeats_{0};
+  uint8_t keypad_press_{0};
+  uint32_t keypad_press_ms_{0};
+  float keypad_press_height_{NAN};
+  bool keypad_took_over_{false};
+  uint8_t keypad_published_{0xFF};
 
   float height_{NAN};
   float published_height_{NAN};
