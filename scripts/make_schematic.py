@@ -297,7 +297,7 @@ resistor("R13", "47", 246.38, 109.22, "WAKE_DRV", "WAKE_DESK")
 text("Everything off by default", 129.54, 147.32)
 for ref, value, name, x in (("R3", "10k", "OE_TX", 139.7), ("R4", "10k", "OE_WAKE", 162.56)):
     resistor(ref, value, x, 167.64, name, "GND")
-for ref, value, name, x in (("R5", "4.7k", "EN_TX", 185.42), ("R6", "100k", "EN_WAKE", 208.28)):
+for ref, value, name, x in (("R5", "4.7k", "EN_TX", 185.42), ("R6", "10k", "EN_WAKE", 208.28)):
     resistor(ref, value, x, 167.64, name, "GND")
 
 text("Keypad cutoff: closed by default, and JP2 bypasses it", 182.88, 351.79)
@@ -335,17 +335,14 @@ part(
     ref_at=(5.08, -1.27),
     val_at=(5.08, 1.27),
 )
-resistor("R27", "100k", 403.86, 370.84, "KP_OFF", "GND")
+resistor("R27", "10k", 403.86, 370.84, "KP_OFF", "GND")
 capacitor("C14", "100n", 259.08, 370.84, "+5V")
 capacitor("C13", "10u", 269.24, 50.8, "+5V", footprint=C0805)
 
-text("Dividers (5 V to 3.0 V); the keypad's is light, since nothing but a pull-up may hold its line", 22.86, 149.86)
-for top, bottom, a, mid, x, scale in (
-    ("R7", "R8", "HEIGHT", "RX", 30.48, ""),
-    ("R9", "R10", "CMD_KEYPAD", "SENSE", 58.42, "0"),
-):
-    resistor(top, f"10{scale}k", x, 172.72, a, mid)
-    resistor(bottom, f"15{scale}k", x, 203.2, mid, "GND")
+text("Dividers (5 V to 3.0 V), too light to power a dead ESP", 22.86, 149.86)
+for top, bottom, a, mid, x in (("R7", "R8", "HEIGHT", "RX", 30.48), ("R9", "R10", "CMD_KEYPAD", "SENSE", 58.42)):
+    resistor(top, "100k", x, 172.72, a, mid)
+    resistor(bottom, "150k", x, 203.2, mid, "GND")
 
 text("ESP32-C3 module", 287.02, 27.94)
 part(
