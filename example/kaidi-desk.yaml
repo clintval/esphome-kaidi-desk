@@ -36,6 +36,9 @@ wifi:
 
 captive_portal:
 
+status_led:
+  pin: GPIO5
+
 uart:
   rx_pin: GPIO4
   tx_pin: GPIO7

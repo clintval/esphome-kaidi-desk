@@ -1,4 +1,4 @@
-"""Write simple VRML 3D models for the RJ50 jack, the ESP32-C3 SuperMini, the USB-C breakout and the B0505S, for KiCad's 3D renders.
+"""Write simple VRML 3D models for the RJ50 jack, the B0505S, the USB-C receptacle and the buttons, for KiCad's 3D renders.
 
 Coordinates are in footprint millimetres (x right, y down the footprint, z up) and are converted to
 KiCad's VRML units (2.54 mm, y flipped). Run with: python3 scripts/make_models.py hardware/kaidi.3dshapes
@@ -14,22 +14,6 @@ from dimensions import (
     B0505S_PIN_ROW_INSET,
     B0505S_STANDOFF,
     B0505S_THICKNESS,
-    C3_BOTTOM,
-    C3_LENGTH,
-    C3_PIN1_INSET,
-    C3_THICKNESS,
-    C3_USB_LENGTH,
-    C3_USB_OVERHANG,
-    C3_WIDTH,
-    SOCKET_STRIP,
-    USBC_BREAKOUT_DEPTH,
-    USBC_BREAKOUT_PIN_INSET,
-    USBC_BREAKOUT_STANDOFF,
-    USBC_BREAKOUT_THICKNESS,
-    USBC_BREAKOUT_WIDTH,
-    USBC_RECEPTACLE_DEPTH,
-    USBC_RECEPTACLE_HEIGHT,
-    USBC_RECEPTACLE_WIDTH,
 )
 
 OUT = Path(sys.argv[1])
@@ -64,59 +48,6 @@ for n in range(10):
     jack.append(box(x - 0.2, 10.5, 8.6, x + 0.2, 13.9, 9.4, GOLD, 0.6))
 write("RJ50_Amphenol_54602-910_Horizontal.wrl", jack)
 
-z0, z1 = C3_BOTTOM, C3_BOTTOM + C3_THICKNESS
-blue = (0.05, 0.12, 0.28)
-edge, end = -C3_PIN1_INSET, C3_LENGTH - C3_PIN1_INSET
-usb = edge - C3_USB_OVERHANG
-module = [box(7.62 - C3_WIDTH / 2, edge, z0, 7.62 + C3_WIDTH / 2, end, z1, blue, 0.3)]
-module.append(box(3.12, usb, z1, 12.12, usb + C3_USB_LENGTH, z1 + 3.2, SILVER, 0.8))
-module.append(box(5.12, 8.0, z1, 10.12, 13.0, z1 + 0.9, BLACK, 0.3))
-module.append(box(9.6, end - 2.6, z1, 13.8, end - 0.8, z1 + 0.9, (0.82, 0.2, 0.2), 0.2))
-for x in (1.2, 12.4):
-    module.append(box(x, 7.0, z1, x + 2.6, 9.8, z1 + 1.4, (0.7, 0.7, 0.7), 0.4))
-    module.append(box(x + 0.6, 7.6, z1 + 1.4, x + 2.0, 9.2, z1 + 1.9, BLACK, 0.2))
-socketed = C3_BOTTOM > SOCKET_STRIP
-for x in (0.0, 15.24):
-    if socketed:
-        module.append(box(x - 1.27, -1.27, 0.0, x + 1.27, 19.05, SOCKET_STRIP, BLACK, 0.15))
-        module.append(box(x - 1.2, -1.2, SOCKET_STRIP, x + 1.2, 18.98, z0, BLACK, 0.15))
-    for i in range(8):
-        if socketed:
-            module.append(
-                box(x - 0.45, i * 2.54 - 0.45, SOCKET_STRIP, x + 0.45, i * 2.54 + 0.45, SOCKET_STRIP + 0.01, GOLD, 0.6)
-            )
-        module.append(
-            box(x - 0.25, i * 2.54 - 0.25, z0 if socketed else 0.0, x + 0.25, i * 2.54 + 0.25, z1 + 0.8, GOLD, 0.6)
-        )
-        module.append(box(x - 0.75, i * 2.54 - 0.75, z1, x + 0.75, i * 2.54 + 0.75, z1 + 0.25, GOLD, 0.7))
-write("ESP32-C3_SuperMini.wrl", module)
-
-RED = (0.78, 0.12, 0.1)
-cx = 2.5 * 2.54
-b0, b1 = USBC_BREAKOUT_STANDOFF, USBC_BREAKOUT_STANDOFF + USBC_BREAKOUT_THICKNESS
-end = USBC_BREAKOUT_DEPTH - USBC_BREAKOUT_PIN_INSET
-breakout = [
-    box(cx - USBC_BREAKOUT_WIDTH / 2, -USBC_BREAKOUT_PIN_INSET, b0, cx + USBC_BREAKOUT_WIDTH / 2, end, b1, RED, 0.3)
-]
-breakout.append(
-    box(
-        cx - USBC_RECEPTACLE_WIDTH / 2,
-        end - USBC_RECEPTACLE_DEPTH,
-        b1,
-        cx + USBC_RECEPTACLE_WIDTH / 2,
-        end,
-        b1 + USBC_RECEPTACLE_HEIGHT,
-        SILVER,
-        0.8,
-    )
-)
-breakout.append(box(cx - 3.6, end - 0.2, b1 + 1.0, cx + 3.6, end + 0.01, b1 + 2.26, BLACK, 0.1))
-breakout.append(box(-1.27, -1.27, 0.0, 6 * 2.54 - 1.27, 1.27, USBC_BREAKOUT_STANDOFF, BLACK, 0.15))
-for i in range(6):
-    x = i * 2.54
-    breakout.append(box(x - 0.32, -0.32, -1.5, x + 0.32, 0.32, b1 + 0.8, GOLD, 0.6))
-write("USB-C_Breakout_Cermant_1x06.wrl", breakout)
-
 z0 = B0505S_STANDOFF
 converter = [
     box(
@@ -133,3 +64,8 @@ converter = [
 for x in (0.0, 2.54, 7.62, 12.7):
     converter.append(box(x - 0.25, -0.25, -1.5, x + 0.25, 0.25, z0 + 0.5, SILVER, 0.6))
 write("Converter_DCDC_Mornsun_B_S-2WR3_SIP.wrl", converter)
+
+usb = [box(-4.47, -3.65, 0, 4.47, 3.65, 3.26, SILVER, 0.8), box(-3.6, 3.5, 0.9, 3.6, 3.67, 2.3, BLACK, 0.1)]
+write("USB-C_HRO_TYPE-C-31-M-12.wrl", usb)
+button = [box(-2.55, -2.55, 0, 2.55, 2.55, 1.0, SILVER, 0.6), box(-1.2, -1.2, 1.0, 1.2, 1.2, 1.5, BLACK, 0.2)]
+write("Button_TS-1187A.wrl", button)

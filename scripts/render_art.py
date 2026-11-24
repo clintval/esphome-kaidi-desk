@@ -1,4 +1,4 @@
-"""Draw the PCB with PcbDraw (resistors only, assembled and underside) and raytrace both sides with KiCad.
+"""Raytrace both sides of the PCB with KiCad.
 
 Run with: python scripts/render_art.py
 """
@@ -9,36 +9,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PCB = ROOT / "hardware/kaidi-desk.kicad_pcb"
-VALUES = "R1:1k,R2:1k,R3:10k,R4:10k,R5:10k,R6:100k,R7:10k,R8:15k,R9:10k,R10:15k,R11:4.7"
-RESISTORS = ",".join(f"R{i}" for i in range(1, 12))
-
-
-def pcbdraw(out, *extra):
-    env = dict(os.environ, PYTHONPATH=os.environ["KICAD_SITE"])
-    subprocess.run(
-        [
-            os.environ["KICAD_PYTHON"],
-            "-m",
-            "pcbdraw.ui",
-            "plot",
-            "--style",
-            "set-blue-enig",
-            "--libs",
-            f"{ROOT / 'hardware/pcbdraw'},KiCAD-base",
-            "--resistor-values",
-            VALUES,
-            *extra,
-            str(PCB),
-            str(out),
-        ],
-        check=True,
-        env=env,
-        capture_output=True,
-    )
-
-
-pcbdraw(ROOT / "docs/board-resistors.svg", "--filter", RESISTORS)
-pcbdraw(ROOT / "docs/board-back.svg", "--side", "back")
 
 
 def render(out, side, rotate, zoom, *lights):

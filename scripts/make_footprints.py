@@ -1,4 +1,4 @@
-"""Write the custom footprints: the RJ50 jack, the C3 SuperMini socket, the USB-C breakout and the B0505S converter.
+"""Write the custom footprints: the RJ50 jack and the B0505S converter.
 
 The jack follows FCI drawing C-BMJ-0101 rev F (10 pol shallow latch, PCB layout view): pin 1 at the
 origin in line with one locating peg, odd pins on the row 8.89 mm from the pegs, even pins on the row
@@ -14,21 +14,7 @@ import uuid
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from dimensions import (
-    B0505S_LENGTH,
-    B0505S_PIN1_INSET,
-    B0505S_PIN_ROW_INSET,
-    B0505S_THICKNESS,
-    C3_LENGTH,
-    C3_PIN1_INSET,
-    C3_USB_OVERHANG,
-    C3_WIDTH,
-    USBC_BREAKOUT_DEPTH,
-    USBC_BREAKOUT_PIN_INSET,
-    USBC_BREAKOUT_WIDTH,
-    USBC_RECEPTACLE_DEPTH,
-    USBC_RECEPTACLE_WIDTH,
-)
+from dimensions import B0505S_LENGTH, B0505S_PIN1_INSET, B0505S_PIN_ROW_INSET, B0505S_THICKNESS
 
 LIB = sys.argv[1]
 
@@ -99,54 +85,6 @@ Path(f"{LIB}/RJ50_Amphenol_54602-910_Horizontal.kicad_mod").write_text(
     footprint(
         "RJ50_Amphenol_54602-910_Horizontal",
         "10P10C right-angle shallow latch modular jack, Amphenol/FCI 54602-x10LF, drawing C-BMJ-0101 rev F",
-        body,
-    )
-)
-
-pins = ""
-for i in range(8):
-    pins += pad(str(i + 1), 15.24, round(i * 2.54, 2), "rect" if i == 0 else "circle", 1.7, 1.0)
-    pins += pad(str(i + 9), 0, round(i * 2.54, 2), "circle", 1.7, 1.0)
-w0, w1 = 7.62 - C3_WIDTH / 2, 7.62 + C3_WIDTH / 2
-h0, h1 = -C3_PIN1_INSET, C3_LENGTH - C3_PIN1_INSET
-body = (
-    text("Reference", "U**", 7.62, h1 + 2, "F.SilkS")
-    + text("Value", "ESP32-C3_SuperMini", 7.62, 8.9, "F.Fab")
-    + pins
-    + line(w0, h0, w1, h0, "F.SilkS", 0.12)
-    + line(w0, h0, w0, 12.0, "F.SilkS", 0.12)
-    + line(w1, h0, w1, 12.0, "F.SilkS", 0.12)
-    + rect(w0, h0, w1, h1, "F.Fab", 0.1)
-    + line(3.12, h0, 3.12, h0 - C3_USB_OVERHANG, "F.SilkS", 0.12)
-    + line(12.12, h0, 12.12, h0 - C3_USB_OVERHANG, "F.SilkS", 0.12)
-    + rect(w0 - 0.5, h0 - C3_USB_OVERHANG, w1 + 0.5, h1 + 0.5, "F.CrtYd", 0.05)
-)
-Path(f"{LIB}/ESP32-C3_SuperMini.kicad_mod").write_text(
-    footprint(
-        "ESP32-C3_SuperMini",
-        "ESP32-C3 SuperMini plugged into two 1x8 round-pin socket strips, component side up, USB-C toward -Y, antenna toward +Y; pins 1-8 (right) 5V GND 3V3 4 3 2 1 0, pins 9-16 (left) GPIO5 6 7 8 9 10 20 21",
-        body,
-    )
-)
-
-pins = "".join(pad(str(i + 1), round(i * 2.54, 2), 0, "rect" if i == 0 else "circle", 1.7, 1.0) for i in range(6))
-cx = 2.5 * 2.54
-w0, w1 = round(cx - USBC_BREAKOUT_WIDTH / 2, 3), round(cx + USBC_BREAKOUT_WIDTH / 2, 3)
-h0, h1 = -USBC_BREAKOUT_PIN_INSET, round(USBC_BREAKOUT_DEPTH - USBC_BREAKOUT_PIN_INSET, 3)
-r0, r1 = round(cx - USBC_RECEPTACLE_WIDTH / 2, 3), round(cx + USBC_RECEPTACLE_WIDTH / 2, 3)
-body = (
-    text("Reference", "J**", cx, h0 - 1.4, "F.SilkS")
-    + text("Value", "USB-C breakout", cx, h1 - 3.0, "F.Fab")
-    + pins
-    + rect(w0, h0, w1, h1, "F.Fab", 0.1)
-    + rect(r0, round(h1 - USBC_RECEPTACLE_DEPTH, 3), r1, h1, "F.Fab", 0.1)
-    + rect(w0 - 0.11, h0 - 0.11, w1 + 0.11, h1, "F.SilkS", 0.12)
-    + rect(w0 - 0.5, h0 - 0.5, w1 + 0.5, h1 + 0.5, "F.CrtYd", 0.05)
-)
-Path(f"{LIB}/USB-C_Breakout_Cermant_1x06.kicad_mod").write_text(
-    footprint(
-        "USB-C_Breakout_Cermant_1x06",
-        "Cermant USB-C female breakout (5.1k on CC) on a 1x6 2.54 mm header, receptacle up, mouth toward +Y; pins VBUS GND CC1 D- D+ CC2; outline estimated",
         body,
     )
 )

@@ -1,25 +1,5 @@
 """Dimensions in millimeters shared by the footprints, the 3D models, the board geometry and the enclosure."""
 
-SOCKET_STRIP = 2.79
-PIN_STRIP = 2.79
-C3_BOTTOM = SOCKET_STRIP + PIN_STRIP
-C3_THICKNESS = 1.0
-C3_LENGTH = 22.52
-C3_WIDTH = 18.0
-C3_PIN1_INSET = 1.3
-C3_USB_OVERHANG = 1.0
-C3_USB_LENGTH = 7.35
-
-# Cermant USB-C female breakout, ESTIMATED from listing photos; measure the real board and correct these.
-USBC_BREAKOUT_WIDTH = 18.5
-USBC_BREAKOUT_DEPTH = 13.5
-USBC_BREAKOUT_PIN_INSET = 1.6
-USBC_BREAKOUT_THICKNESS = 1.6
-USBC_BREAKOUT_STANDOFF = 2.54
-USBC_RECEPTACLE_WIDTH = 8.94
-USBC_RECEPTACLE_HEIGHT = 3.26
-USBC_RECEPTACLE_DEPTH = 7.35
-
 # Mornsun B0505S-2WR3 SIP from its datasheet; the pin row's offset from the body face is ESTIMATED.
 B0505S_LENGTH = 19.65
 B0505S_THICKNESS = 7.05

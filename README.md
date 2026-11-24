@@ -78,21 +78,15 @@ A complete config with every entity is in [`example/kaidi-desk.yaml`](example/ka
 ## Hardware
 
 > [!WARNING]
-> This board revision is untested. The desk-power test, the isolation test, the measurements of the USB-C breakout and the B0505S-2WR3, and the RJ50 jack fit check are still pending, so don't order boards from it yet.
-> In an early test without D2 and C4, the C3 reset whenever the desk's motors started, so desk power may not work on every box.
+> This board is untested: none has been built yet, and the desk-power test and the RJ50 jack fit check are still pending, so don't order boards from it yet.
 > The [protoboard build](#build-without-a-pcb) is tested and works.
 
 The dongle sits inline: the keypad plugs into one end, and a short cable runs from the other end to the control box.
-A 74AHCT125 drives the box only while the ESP is sending, so the keypad keeps working if the ESP is unplugged or dead.
-Power comes from the desk by default, or from the board's own USB-C through an optional isolated converter.
+A 74AHCT125 drives the box only while the ESP is sending, so the keypad keeps working if the ESP is unpowered, resetting or unplugged.
+Power comes from the desk by default. USB-C is for flashing and for desks that can't supply the ESP, and it is isolated, so any charger or computer can stay plugged in.
 
 <p align="center">
-  <img src="docs/board-resistors.svg" width="49%" alt="The dongle PCB with only its resistors fitted">
   <img src="docs/board-3d-top.png" width="49%" alt="3D render of the top of the assembled dongle PCB">
-</p>
-
-<p align="center">
-  <img src="docs/board-back.svg" width="49%" alt="The underside of the dongle PCB with its bottom-layer traces">
   <img src="docs/board-3d-bottom.png" width="49%" alt="3D render of the underside of the dongle PCB">
 </p>
 
@@ -107,32 +101,33 @@ Power comes from the desk by default, or from the board's own USB-C through an o
 
 | RJ50 contact | Signal | Path |
 | --- | --- | --- |
-| 2 | +5 V | Straight through; also powers the 74AHCT125 and, through JP1, the C3 |
+| 2 | +5 V | Straight through; also powers the 74AHCT125 and, through JP1, the ESP |
 | 3 | Ground | Straight through |
-| 7 | Command, keypad to box | Keypad through 1 kΩ; gate A drives the box side from GPIO7 when GPIO6 is high |
+| 7 | Command, keypad to box | Keypad through 1 kΩ; gate A drives the box side through 47 Ω from GPIO7 when GPIO6 is high |
 | 8 | Height, box to keypad | Straight through; 10 kΩ over 15 kΩ to GPIO4 |
-| 10 | Wake, keypad to box | Keypad through 1 kΩ; gate B drives the box side high when GPIO10 is high |
+| 10 | Wake, keypad to box | Keypad through 1 kΩ; gate B drives the box side high through 47 Ω when GPIO10 is high |
 
-The board is an 84 × 50 mm, two-layer, all through-hole KiCad design in [`hardware/`](hardware).
-The C3's 5V pin has two supplies, each behind its own 1N5819 Schottky diode, so neither can feed back into the other:
+The board is an 84 × 50 mm, four-layer KiCad design in [`hardware/`](hardware), made to be assembled by a board house.
+Only the two RJ50 jacks are soldered by hand.
 
-- **Desk power, the default:** contact 2's 5 V, through the JP1 shunt, R11 and D2. R11 limits the inrush into C4, a 1000 µF reserve that covers Wi-Fi bursts; run the C3 at 80 MHz (`cpu_frequency: 80MHz`).
-- **Isolated USB-C, optional:** a USB-C breakout (J3) standing on a 1 × 6 header at the board's bottom edge, then a Mornsun B0505S-2WR3 isolated converter (U3) and D1. Leave out J3, U3, C2, C3 and D1 if you only use desk power.
+| Situation | Protection |
+| --- | --- |
+| Two-prong charger or noisy dock leaking mains AC, which makes touch keypads barely register a press | USB-C power (B0505S-2WR3) and data (ADuM3160) both cross isolation barriers, with a 3 mm moat on all four layers |
+| Weak desk 5 V | 1000 µF reserve; otherwise pull JP1 and use USB-C |
+| Desk and USB-C connected together | One Schottky diode each, so neither feeds back into the other |
+| Short circuit on the board | Resettable fuses on the desk (F1) and USB-C (F2) supplies; F1 doesn't cover the keypad's own straight-through 5 V |
+| USB hot-plug spikes and converter light load, which the B0505S-2WR3 isn't rated for | Surge clamp D4 at its input and preload R14 at its output |
+| Static on the cables | SRV05-4 clamps at both jacks and a USBLC6-2 at USB-C |
+| ESP crash, reset or power loss | Pull-downs turn the drivers off, and ESPHome's watchdog restarts a hung ESP |
+| ESP and keypad driving the box at once | 1 kΩ from the keypad and 47 Ω from the buffer limit the current |
 
-With both connected, the higher voltage supplies the C3. If your box can't supply it, pull JP1 and use USB-C.
-
-The converter keeps the charger's ground apart from the desk's, so any USB charger works, two-prong ones included.
-Without it, a two-prong charger leaks a little mains AC onto the desk's ground, which upsets touch-sensitive keypads: they barely register a press and the desk creeps a millimeter at a time.
-The charger side of the board (J3, the input capacitor C3 and the converter's pins 1 and 2) has its own copper, with no ground pour and a moat no other trace crosses.
-The ESP32-C3 SuperMini plugs into two round-pin socket strips, so it can be pulled out.
-Its own USB-C is only for the first flash, with the board out of the box, and ESPHome updates over Wi-Fi after that. D1 and D2 keep it from feeding the converter or the desk. Don't leave it plugged in: unlike J3, it shares the desk's ground.
-The breakout's outline is estimated from photos, so check it against your part in [`scripts/dimensions.py`](scripts/dimensions.py) before ordering.
-To solder the C3 flat instead, set `C3_BOTTOM = 0.2` in the same file and run `pixi run hardware`.
+It can't protect against a fault in the control box, the keypad or the cable, and it relies on the box's own anti-collision stop.
+The isolation keeps grounds apart; it is not a safety barrier against mains.
 
 ## Enclosure
 
 A two-part, 89 × 55 × 24 mm box is in [`hardware/enclosure/`](hardware/enclosure) as STEP and STL, sized to sit in the desk's cable tray beside the control box.
-Its only USB-C opening lines up with the power breakout; the C3's own port stays inside.
+The USB-C opening is on the long side. RESET, BOOT and JP1 are inside.
 
 <p align="center">
   <img src="docs/enclosure-open.png" width="49%" alt="The dongle in its box with the lid lifted">
@@ -146,31 +141,16 @@ Print it in MJF nylon or, at home, PETG; resin tends to crack around the inserts
 
 | Qty | Part | Where to order |
 | --- | --- | --- |
-| 1 | PCB, 84 × 50 mm, 2 layers, 1.6 mm | [JLCPCB](https://jlcpcb.com/): upload [`hardware/kaidi-desk-gerbers.zip`](hardware/kaidi-desk-gerbers.zip) |
+| 1 | PCB, 84 × 50 mm, 4 layers, 1.6 mm, assembled on the top side | [JLCPCB](https://jlcpcb.com/): upload [`kaidi-desk-gerbers.zip`](hardware/kaidi-desk-gerbers.zip), then [`kaidi-desk-bom.csv`](hardware/kaidi-desk-bom.csv) and [`kaidi-desk-positions.csv`](hardware/kaidi-desk-positions.csv) |
 | 1 | Enclosure base and lid, MJF nylon (PA12) | [JLCPCB 3D printing](https://jlcpcb.com/3d-printing): upload [`base.stl`](hardware/enclosure/base.stl) and [`lid.stl`](hardware/enclosure/lid.stl) |
-| 2 | Amphenol/FCI 54602-910LF, 10P10C right-angle jack (J1, J2) | [DigiKey](https://www.digikey.com/en/products/detail/amphenol-cs-fci/54602-910LF/1001361) |
-| 1 | SN74AHCT125N quad buffer, DIP-14 (U2) | [DigiKey](https://www.digikey.com/en/products/result?keywords=SN74AHCT125N) |
-| 1 | DIP-14 socket, 0.3 in (optional) | [DigiKey](https://www.digikey.com/en/products/result?keywords=DIP-14%20socket%200.3) |
-| 1 | ESP32-C3 SuperMini (U1) | [Amazon](https://www.amazon.com/s?k=ESP32-C3+SuperMini) or [AliExpress](https://www.aliexpress.us/w/wholesale-esp32-c3-supermini.html) |
-| 2 | Mill-Max 310-43-108-41-001000, 8-pin round socket strip (U1) | [DigiKey ED6264-08-ND](https://www.digikey.com/en/products/result?keywords=310-43-108-41-001000) |
-| 2 | Mill-Max 350-10-108-00-006000, 8-pin round male strip, soldered to the C3 (U1) | [DigiKey ED6864-08-ND](https://www.digikey.com/en/products/result?keywords=350-10-108-00-006000) |
-| 2 | 1 kΩ, 1/4 W (R1, R2) | [DigiKey CF14JT1K00](https://www.digikey.com/en/products/result?keywords=CF14JT1K00) |
-| 5 | 10 kΩ, 1/4 W (R3, R4, R5, R7, R9) | [DigiKey CF14JT10K0](https://www.digikey.com/en/products/result?keywords=CF14JT10K0) |
-| 1 | 100 kΩ, 1/4 W (R6) | [DigiKey CF14JT100K](https://www.digikey.com/en/products/result?keywords=CF14JT100K) |
-| 2 | 15 kΩ, 1/4 W (R8, R10) | [DigiKey CF14JT15K0](https://www.digikey.com/en/products/result?keywords=CF14JT15K0) |
-| 1 | 100 nF ceramic, 2.5 mm lead pitch (C1) | [DigiKey](https://www.digikey.com/en/products/result?keywords=100nF%2050V%20ceramic%20radial%202.5mm) |
-| 1 | 4.7 Ω, 1/4 W (R11) | [DigiKey CF14JT4R70](https://www.digikey.com/en/products/result?keywords=CF14JT4R70) |
-| 1 | 1000 µF 16 V electrolytic, 10 mm wide, at most 12.5 mm tall, 5 mm lead pitch (C4) | [DigiKey Rubycon 16PX1000MEFC10X12.5](https://www.digikey.com/en/products/result?keywords=16PX1000MEFC10X12.5) |
-| 1 | 1 × 2 male pin header, 2.54 mm, and a jumper shunt (JP1) | Any |
-| 1 | Cermant USB-C female breakout with 5.1 kΩ on CC (J3, optional) | [Amazon](https://www.amazon.com/s?k=Cermant+Type-C+female+breakout+16P) |
-| 1 | 1 × 6 male pin header, 2.54 mm, for the breakout (J3, optional) | Any header strip, cut to length |
-| 1 | Mornsun B0505S-2WR3 isolated 5 V to 5 V converter, 2 W, SIP (U3, optional) | [DigiKey](https://www.digikey.com/en/products/result?keywords=B0505S-2WR3) or [Amazon](https://www.amazon.com/s?k=B0505S-2WR3) |
-| 1 | 220 µF 16 V electrolytic, 6.3 mm, 2.5 mm lead pitch (C2, optional) | [DigiKey](https://www.digikey.com/en/products/result?keywords=220uF%2016V%20radial%206.3mm) |
-| 1 | 10 µF 16 V electrolytic, 5 mm, 2 mm lead pitch (C3, converter input, optional) | [DigiKey](https://www.digikey.com/en/products/result?keywords=10uF%2016V%20radial%205mm) |
-| 2 | 1N5819 Schottky diode, DO-41, mounted standing (D2, and D1 for USB-C) | [DigiKey](https://www.digikey.com/en/products/result?keywords=1N5819) |
+| 2 | Amphenol/FCI 54602-910LF, 10P10C right-angle jack (J1, J2), soldered by hand | [DigiKey](https://www.digikey.com/en/products/detail/amphenol-cs-fci/54602-910LF/1001361) |
+| 1 | Jumper shunt, 2.54 mm (JP1) | Any |
 | 1 | RJ50 (10P10C) cable, about 1 ft, wired straight through, dongle to control box | [Winford CBM10R1TS-1](https://www.winford.com/products/cbm10.php) (US) or [Delock 80185](https://www.delock.com/produkt/80185/merkmale.html) (EU) |
 | 2 | M3 × 20 mm socket-head cap screw, ISO 4762 | [Amazon](https://www.amazon.com/s?k=M3x20+socket+head+cap+screw+ISO+4762+stainless) |
 | 2 | M3 heat-set insert, 5.7 mm long, 4.0 mm hole (ruthex M3) | [Amazon](https://www.amazon.com/s?k=ruthex+M3+heat+set+inserts) |
+
+The parts the board house fits are listed in [`scripts/parts.py`](scripts/parts.py) with their LCSC numbers.
+In the assembly preview, check the rotation of every chip, diode, LED and C4 before ordering: board houses often rotate parts differently from KiCad.
 
 The cable must be wired straight through; flat telephone-style 10P10C cables are often reversed.
 

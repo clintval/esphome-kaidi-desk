@@ -13,10 +13,10 @@ kicad-tools = { cmd = "test -f $KICAD_SITE/pcbdraw/__init__.py || $KICAD_PYTHON 
 freerouting = { cmd = "python scripts/fetch_freerouting.py $FREEROUTING", description = "Download the pinned Freerouting autorouter" }
 
 schematic = { cmd = "python scripts/make_schematic.py hardware/kaidi-desk.kicad_sch && python scripts/render_schematic.py", description = "Write the schematic and render it" }
-footprints = { cmd = "python scripts/make_footprints.py hardware/kaidi.pretty && python scripts/make_models.py hardware/kaidi.3dshapes && python scripts/make_pcbdraw_parts.py hardware/pcbdraw", description = "Write custom footprints, 3D models and part drawings" }
+footprints = { cmd = "python scripts/make_footprints.py hardware/kaidi.pretty && python scripts/make_models.py hardware/kaidi.3dshapes", description = "Write custom footprints and 3D models" }
 pcb = { cmd = "$KICAD_PYTHON scripts/make_pcb.py hardware/kaidi-desk.kicad_sch hardware/kaidi-desk.kicad_pcb && $KICAD_PYTHON scripts/route_pcb.py hardware/kaidi-desk.kicad_pcb $FREEROUTING $JAVA_HOME/bin/java", depends-on = ["schematic", "footprints", "freerouting"], description = "Place and autoroute the PCB" }
-fab = { cmd = "python scripts/export_fab.py", depends-on = ["pcb"], description = "Export the Gerber zip" }
-art = { cmd = "python scripts/render_art.py", depends-on = ["pcb", "kicad-tools"], description = "Draw and render the PCB" }
+fab = { cmd = "python scripts/export_fab.py", depends-on = ["pcb"], description = "Export the Gerbers, parts list and positions" }
+art = { cmd = "python scripts/render_art.py", depends-on = ["pcb"], description = "Draw and render the PCB" }
 enclosure = { cmd = "python scripts/make_enclosure.py hardware && $KICAD_PYTHON scripts/render_enclosure.py hardware docs", depends-on = ["pcb"], description = "Build and render the 3D-printable box" }
 protoboard = { cmd = "python scripts/protoboard.py && python scripts/render_protoboard.py", depends-on = ["kicad-tools"], description = "Check and draw the protoboard build" }
 hardware = { depends-on = ["fab", "art", "enclosure", "protoboard"], description = "Regenerate the whole hardware design" }
