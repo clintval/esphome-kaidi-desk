@@ -21,7 +21,8 @@ To check your desk, look for a `KAIDI` label and a `KDDY` model number on the co
 | Desk | Control box | Status |
 | --- | --- | --- |
 | ApexDesk K Series 3-stage dual-motor desk base | `KDDY094` | Tested |
-| Desks with a `KDDY094` box (variants S440, S500, S650 and S663) | `KDDY094` | Expected to work |
+| Other desks with a `KDDY094` box (variants S500, S650 and S663) | `KDDY094` | Expected to work |
+| Lazy Maisons desk (2021) with a `KDH170-311` keypad | `KDDY094`, S440 | Expected to work: [`yog18r/kaidi-desk-esphome`](https://github.com/yog18r/kaidi-desk-esphome) measured the same contacts and frames, but this dongle hasn't been tried on it |
 | Desks with a `KDDY041` box and `KD1869A` keypad | `KDDY041` | Same protocol, but an 8-pin cable, so the dongle won't fit |
 
 If your desk works, please open an issue or pull request to add it.
@@ -64,13 +65,13 @@ A complete config with every entity is in [`example/kaidi-desk.yaml`](example/ka
 | Platform | Key | Purpose |
 | --- | --- | --- |
 | `sensor` | `height` | Height above the desk's lowest point, in cm (Home Assistant converts units) |
-| `text_sensor` | `status` | `Ready`, `Reset Needed` (E04), `Resetting`, or `Asleep` |
+| `text_sensor` | `status` | `Ready`, `Reset Needed` (E04), `Resetting`, `Keypad Settings`, or `Asleep` |
 | `text_sensor` | `last_stop` | Why the last move ended, such as `Reached target`, `Reached preset 2`, `Stopped`, `Stopped short at a limit or obstruction` or `Lost the height` |
 | `number` | `target_height` | Move to a height; follows the real height while idle, in `cm` or `in` |
 | `button` | `nudge_up`, `nudge_down` | Move briefly up or down, about half an inch |
 | `button` | `stop` | Stop any move |
 | `button` | `preset_1` to `preset_4` | Go to a position saved on the keypad; the box drives there and stops by itself |
-| `button` | `reset` | Hold Up and Down until the box re-zeros, which clears E04 |
+| `button` | `reset` | Hold Up and Down until the box re-zeros, which clears E04; it ignores other moves until it finishes, and may clear the keypad's presets |
 | `switch` | `keep_awake` | Hold the wake line high and send a few Idle frames every 10 s, so the box never sleeps, height streams live and moves start at once |
 
 ## Hardware
@@ -190,9 +191,11 @@ Each frame is 7 bytes, `0x68 0x01 <mode> <hi> <lo> <checksum> 0x16`, where the c
 | Box to keypad | `0x00` | Height in 0.1 cm |
 | Box to keypad | `0x30` | Reset needed (E04); the value counts down during the reset |
 | Box to keypad | `0x04` | Reset rebound in progress |
+| Box to keypad | `0x62` | Keypad settings open; the value is the setting, not a height |
 
 The keypad sends a frame every 14 ms while awake, and the box needs about 1.5 s after waking before it accepts a move.
-E04 means a reset was released before the rebound.
+The box sends a height about every 22 ms while awake and for 10 to 12 s after the wake line drops.
+E04 means a reset was released before the rebound. Releasing one early can damage the motor, so leave it to finish.
 
 ## Development and Testing
 

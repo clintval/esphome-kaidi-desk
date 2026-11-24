@@ -4,6 +4,7 @@
 #include <cinttypes>
 #include <cmath>
 #include <cstdio>
+#include <cstring>
 
 #include "esphome/core/log.h"
 
@@ -26,6 +27,7 @@ static const uint32_t KEEPALIVE_AFTER_MOTION_MS = 3000;
 static const uint32_t START_TIMEOUT_MS = 2500;
 static const uint32_t STALL_MS = 1500;
 static const float MOVED_CM = 0.5f;
+static const float MAX_STEP_CM = 2.0f;
 
 void KaidiDesk::setup() {
   if (this->tx_enable_pin_ != nullptr) {
@@ -218,14 +220,19 @@ void KaidiDesk::read_frames_() {
     this->buffer_[this->buffer_len_++] = byte;
     if (this->buffer_len_ < sizeof(this->buffer_))
       continue;
-    this->buffer_len_ = 0;
     const uint8_t *p = this->buffer_;
     uint8_t checksum = p[1] + p[2] + p[3] + p[4];
-    if (p[1] != FRAME_ADDRESS || p[5] != checksum || p[6] != FRAME_END) {
-      ESP_LOGV(TAG, "Dropped malformed frame");
+    if (p[1] == FRAME_ADDRESS && p[5] == checksum && p[6] == FRAME_END) {
+      this->buffer_len_ = 0;
+      this->handle_frame_(p[2], (p[3] << 8) | p[4]);
       continue;
     }
-    this->handle_frame_(p[2], (p[3] << 8) | p[4]);
+    ESP_LOGV(TAG, "Dropped malformed frame");
+    uint8_t next = 1;
+    while (next < sizeof(this->buffer_) && this->buffer_[next] != FRAME_START)
+      next++;
+    this->buffer_len_ = sizeof(this->buffer_) - next;
+    memmove(this->buffer_, this->buffer_ + next, this->buffer_len_);
   }
 }
 
@@ -247,6 +254,9 @@ void KaidiDesk::handle_frame_(uint8_t mode, uint16_t value) {
       case BOX_MODE_REBOUND:
         this->publish_status_("Resetting");
         break;
+      case BOX_MODE_SETTINGS:
+        this->publish_status_("Keypad Settings");
+        break;
       default:
         ESP_LOGD(TAG, "Unknown box mode 0x%02X", mode);
         this->publish_status_("Unknown");
@@ -257,6 +267,11 @@ void KaidiDesk::handle_frame_(uint8_t mode, uint16_t value) {
     return;
 
   float height = value / 10.0f;
+  float previous = this->candidate_;
+  this->candidate_ = height;
+  if (!std::isnan(this->height_) && std::fabs(height - this->height_) > MAX_STEP_CM &&
+      !(std::fabs(height - previous) <= MAX_STEP_CM))
+    return;
   if (height != this->height_)
     this->motion_ms_ = now;
   this->height_ = height;
@@ -294,6 +309,10 @@ void KaidiDesk::send_(uint8_t command) {
 }
 
 void KaidiDesk::begin_(Action action) {
+  if (this->action_ == Action::RESET && this->state_ != State::IDLE) {
+    ESP_LOGW(TAG, "Ignored while the box resets; only Stop can end a reset early");
+    return;
+  }
   this->action_ = action;
   this->state_ = State::WAKING;
   this->state_since_ms_ = millis();
@@ -321,7 +340,8 @@ void KaidiDesk::finish_() {
 }
 
 bool KaidiDesk::box_awake_(uint32_t now) const {
-  return now - this->last_rx_ms_ < AWAKE_FRESH_MS && now - this->awake_since_ms_ >= this->wake_settle_;
+  return now - this->last_rx_ms_ < AWAKE_FRESH_MS && now - this->awake_since_ms_ >= this->wake_settle_ &&
+         now - this->wake_high_since_ms_ >= this->wake_settle_;
 }
 
 void KaidiDesk::publish_status_(const char *status) {
@@ -346,6 +366,11 @@ void KaidiDesk::sync_target_() {
 }
 
 void KaidiDesk::move_to(float cm) {
+  if (this->action_ == Action::RESET && this->state_ != State::IDLE) {
+    ESP_LOGW(TAG, "Ignored while the box resets; only Stop can end a reset early");
+    this->sync_target_();
+    return;
+  }
   this->target_ = cm;
   this->moving_up_ = std::isnan(this->height_) || this->height_ < cm;
   if (this->state_ == State::ACTING && this->action_ == Action::MOVE) {
@@ -357,13 +382,19 @@ void KaidiDesk::move_to(float cm) {
 }
 
 void KaidiDesk::preset(uint8_t number) {
-  this->preset_ = number;
+  if (this->action_ != Action::RESET)
+    this->preset_ = number;
   this->begin_(Action::PRESET);
 }
 
 void KaidiDesk::apply_wake_pin_() {
-  if (this->wake_pin_ != nullptr)
-    this->wake_pin_->digital_write(this->keep_awake_ || this->state_ != State::IDLE);
+  if (this->wake_pin_ == nullptr)
+    return;
+  bool high = this->keep_awake_ || this->state_ != State::IDLE;
+  if (high && !this->wake_high_)
+    this->wake_high_since_ms_ = millis();
+  this->wake_high_ = high;
+  this->wake_pin_->digital_write(high);
 }
 
 void KaidiDesk::set_keep_awake(bool keep_awake) {

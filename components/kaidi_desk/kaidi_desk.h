@@ -25,6 +25,7 @@ enum BoxMode : uint8_t {
   BOX_MODE_HEIGHT = 0x00,
   BOX_MODE_REBOUND = 0x04,
   BOX_MODE_RESET_NEEDED = 0x30,
+  BOX_MODE_SETTINGS = 0x62,
   BOX_MODE_NONE = 0xFF,
 };
 
@@ -117,6 +118,7 @@ class KaidiDesk : public Component, public uart::UARTDevice {
 
   float height_{NAN};
   float published_height_{NAN};
+  float candidate_{NAN};
   uint32_t height_ms_{0};
   uint32_t last_rx_ms_{0};
   uint32_t awake_since_ms_{0};
@@ -131,6 +133,8 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   uint32_t last_tx_ms_{0};
   uint8_t release_frames_{0};
   bool keep_awake_{false};
+  bool wake_high_{false};
+  uint32_t wake_high_since_ms_{0};
   uint8_t keepalive_frames_{0};
   uint32_t motion_ms_{0};
 
