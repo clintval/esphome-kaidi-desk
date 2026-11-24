@@ -117,7 +117,7 @@ Power comes from the desk by default. USB-C is for flashing and for desks that c
 | 2 | +5 V | Straight through; also powers the 74AHCT125 and, through JP1, the ESP |
 | 3 | Ground | Straight through |
 | 7 | Command, keypad to box | Keypad through switch U9 and 1 kΩ; gate A drives the box side through 47 Ω from GPIO7 when GPIO6 is high. GPIO1 high opens U9 and cuts the keypad off; a shunt on JP2 bypasses U9 |
-| 8 | Height, box to keypad | Straight through; 10 kΩ over 15 kΩ to GPIO4 |
+| 8 | Height, box to keypad | Straight through; 100 kΩ over 150 kΩ to GPIO4 |
 | 10 | Wake, keypad to box | Keypad through 1 kΩ; gate B drives the box side high through 47 Ω when GPIO10 is high |
 | 1, 4, 5, 6, 9 | Unused by this dongle | Straight through |
 
