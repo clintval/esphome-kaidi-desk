@@ -25,14 +25,18 @@ dashboard_import:
 logger:
 
 api:
+  encryption:
+    key: !secret api_encryption_key
 
 ota:
   - platform: esphome
+    encryption:
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   ap:
+    password: !secret ap_password
 
 captive_portal:
 
@@ -40,14 +44,19 @@ status_led:
   pin: GPIO5
 
 uart:
-  rx_pin: GPIO4
-  tx_pin: GPIO7
-  baud_rate: 9600
+  - id: desk_uart
+    rx_pin: GPIO4
+    tx_pin: GPIO7
+    baud_rate: 9600
+  - id: keypad_uart
+    rx_pin: GPIO3
+    baud_rate: 9600
 
 kaidi_desk:
+  uart_id: desk_uart
+  keypad_uart_id: keypad_uart
   tx_enable_pin: GPIO6
   wake_pin: GPIO10
-  keypad_sense_pin: GPIO3
 
 sensor:
   - platform: kaidi_desk
@@ -60,6 +69,8 @@ text_sensor:
       name: Status
     last_stop:
       name: Last Stop
+    keypad:
+      name: Keypad
 
 number:
   - platform: kaidi_desk
