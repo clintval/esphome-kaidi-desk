@@ -32,6 +32,8 @@ with tempfile.TemporaryDirectory() as tmp:
     )
     rows = {row["Ref"]: row for row in csv.DictReader(positions.open())}
 
+JLCPCB_ROTATION = {"U2": -90, "U4": -90, "U7": -90, "U8": -90, "U9": 180, "Q1": 180, "JP1": 90, "JP2": 90}
+
 centers = json.loads((ROOT / "hardware/board.json").read_text())["centers"]
 fitted = {ref: lcsc for refs, (_, lcsc) in PARTS.items() for ref in refs.split()}
 missing = {ref for ref in rows if ref not in fitted and not ref.startswith(("TP", "REF"))}
@@ -49,5 +51,13 @@ with (ROOT / "hardware/kaidi-desk-positions.csv").open("w", newline="") as out:
     writer.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
     for ref in sorted(fitted):
         x, y = centers[ref]
-        writer.writerow([ref, f"{x:.3f}mm", f"{-y:.3f}mm", "Top", rows[ref]["Rot"]])
+        writer.writerow(
+            [
+                ref,
+                f"{x:.3f}mm",
+                f"{-y:.3f}mm",
+                "Top",
+                f"{(float(rows[ref]['Rot']) + JLCPCB_ROTATION.get(ref, 0)) % 360:.6f}",
+            ]
+        )
 print("wrote the Gerber zip, the parts list and the positions into hardware/")
