@@ -1,0 +1,89 @@
+substitutions:
+  version: "0.1.0"
+
+esphome:
+  project:
+    name: clintval.esphome-kaidi-desk
+    version: ${version}
+
+esp32:
+  board: esp32-c3-devkitm-1
+  cpu_frequency: 80MHz
+  framework:
+    type: esp-idf
+
+external_components:
+  - source: github://clintval/esphome-kaidi-desk@main
+    components: [kaidi_desk]
+
+logger:
+
+status_led:
+  pin: GPIO5
+
+uart:
+  - id: desk_uart
+    rx_pin: GPIO4
+    tx_pin: GPIO7
+    baud_rate: 9600
+  - id: keypad_uart
+    rx_pin: GPIO3
+    baud_rate: 9600
+
+kaidi_desk:
+  uart_id: desk_uart
+  keypad_uart_id: keypad_uart
+  tx_enable_pin: GPIO6
+  wake_pin: GPIO10
+
+sensor:
+  - platform: kaidi_desk
+    height:
+      name: Height
+
+text_sensor:
+  - platform: kaidi_desk
+    status:
+      name: Status
+    last_stop:
+      name: Last Stop
+    keypad:
+      name: Keypad
+
+number:
+  - platform: kaidi_desk
+    target_height:
+      name: Target Height
+      unit_of_measurement: in
+
+button:
+  - platform: kaidi_desk
+    nudge_up:
+      name: Nudge Up
+    nudge_down:
+      name: Nudge Down
+    stop:
+      name: Stop
+    reset:
+      name: Reset
+    preset_1:
+      name: Preset 1
+    preset_2:
+      name: Preset 2
+    preset_3:
+      name: Preset 3
+    preset_4:
+      name: Preset 4
+    save_preset_1:
+      name: Save Preset 1
+    save_preset_2:
+      name: Save Preset 2
+    save_preset_3:
+      name: Save Preset 3
+    save_preset_4:
+      name: Save Preset 4
+
+switch:
+  - platform: kaidi_desk
+    keep_awake:
+      name: Keep Awake
