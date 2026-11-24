@@ -50,6 +50,7 @@ kaidi_desk:
   keypad_uart_id: keypad_uart
   tx_enable_pin: GPIO6
   wake_pin: GPIO10
+  keypad_cutoff_pin: GPIO1
 
 sensor:
   - platform: kaidi_desk
@@ -90,7 +91,7 @@ It encrypts the Home Assistant connection and Wi-Fi updates with one key, and pu
 
 The dongle sits inline: the keypad plugs into one end, and a short cable runs from the other end to the control box.
 A 74AHCT125 drives the box only while the ESP is sending, so the keypad keeps working if the ESP is unpowered, resetting or unplugged.
-The ESP also decodes what the keypad sends, so a keypad press takes over from a Home Assistant move. A press in the direction the desk is already moving may only take over once that move ends.
+The ESP also decodes what the keypad sends, and keeps listening while it cuts the keypad off, so a keypad press takes over from a Home Assistant move at once.
 Power comes from the desk by default. USB-C is for flashing and for desks that can't supply the ESP, and it is isolated, so any charger or computer can stay plugged in.
 
 <p align="center">
@@ -146,7 +147,7 @@ The protoboard build is the same circuit hand-built on a 1.5 × 2 in EPLZON sold
   <img src="docs/protoboard.svg" width="100%" alt="Protoboard build guide">
 </p>
 
-On this build, configure `tx_enable_pin: GPIO6`, `wake_pin: GPIO0` and `rx_pin: GPIO3`, and leave out `keypad_uart_id` and the second uart.
+On this build, configure `tx_enable_pin: GPIO6`, `wake_pin: GPIO0` and `rx_pin: GPIO3`, and leave out `keypad_uart_id`, `keypad_cutoff_pin` and the second uart.
 
 </details>
 

@@ -76,6 +76,7 @@ class KaidiDesk : public Component, public uart::UARTDevice {
 
   void set_tx_enable_pin(GPIOPin *pin) { this->tx_enable_pin_ = pin; }
   void set_wake_pin(GPIOPin *pin) { this->wake_pin_ = pin; }
+  void set_keypad_cutoff_pin(GPIOPin *pin) { this->keypad_cutoff_pin_ = pin; }
   void set_keypad_uart(uart::UARTComponent *uart) { this->keypad_uart_ = uart; }
   void set_height_sensor(sensor::Sensor *sensor) { this->height_sensor_ = sensor; }
   void set_status_sensor(text_sensor::TextSensor *sensor) { this->status_sensor_ = sensor; }
@@ -124,10 +125,12 @@ class KaidiDesk : public Component, public uart::UARTDevice {
   void handle_keypad_frame_(uint8_t command, uint32_t now);
   void end_keypad_press_(uint32_t now);
   bool keypad_awake_(uint32_t now) const;
+  void apply_keypad_cutoff_();
   void publish_keypad_(uint8_t command);
 
   GPIOPin *tx_enable_pin_{nullptr};
   GPIOPin *wake_pin_{nullptr};
+  GPIOPin *keypad_cutoff_pin_{nullptr};
   uart::UARTComponent *keypad_uart_{nullptr};
   sensor::Sensor *height_sensor_{nullptr};
   text_sensor::TextSensor *status_sensor_{nullptr};
@@ -155,6 +158,7 @@ class KaidiDesk : public Component, public uart::UARTDevice {
 
   FrameReader keypad_reader_;
   EchoFilter echoes_;
+  bool keypad_cut_off_{false};
   bool keypad_seen_{false};
   uint32_t keypad_ms_{0};
   uint8_t keypad_command_{0};

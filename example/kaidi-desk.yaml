@@ -57,6 +57,7 @@ kaidi_desk:
   keypad_uart_id: keypad_uart
   tx_enable_pin: GPIO6
   wake_pin: GPIO10
+  keypad_cutoff_pin: GPIO1
 
 sensor:
   - platform: kaidi_desk
