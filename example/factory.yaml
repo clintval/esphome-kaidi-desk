@@ -18,6 +18,7 @@ provisioning:
 improv_serial:
 
 wifi:
+  output_power: 8.5dB
 
 http_request:
   verify_ssl: true
