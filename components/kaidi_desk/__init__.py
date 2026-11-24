@@ -14,6 +14,7 @@ CONF_TX_ENABLE_PIN = "tx_enable_pin"
 CONF_WAKE_PIN = "wake_pin"
 CONF_KEYPAD_SENSE_PIN = "keypad_sense_pin"
 CONF_KEYPAD_UART_ID = "keypad_uart_id"
+CONF_KEYPAD_CUTOFF_PIN = "keypad_cutoff_pin"
 CONF_FRAME_INTERVAL = "frame_interval"
 CONF_WAKE_SETTLE = "wake_settle"
 CONF_WAKE_TIMEOUT = "wake_timeout"
@@ -33,6 +34,7 @@ CONFIG_SCHEMA = (
             cv.Optional(CONF_TX_ENABLE_PIN): pins.gpio_output_pin_schema,
             cv.Optional(CONF_WAKE_PIN): pins.gpio_output_pin_schema,
             cv.Optional(CONF_KEYPAD_UART_ID): cv.use_id(uart.UARTComponent),
+            cv.Optional(CONF_KEYPAD_CUTOFF_PIN): pins.gpio_output_pin_schema,
             cv.Optional(CONF_KEYPAD_SENSE_PIN): cv.invalid(
                 "keypad_sense_pin is now the rx_pin of a second 9600 baud uart, given as keypad_uart_id"
             ),
@@ -54,6 +56,11 @@ FRAME_FORMAT = {"baud_rate": 9600, "require_rx": True, "data_bits": 8, "parity":
 
 
 def final_validate(config):
+    if CONF_KEYPAD_CUTOFF_PIN in config and CONF_KEYPAD_UART_ID not in config:
+        raise cv.Invalid(
+            "Cutting the keypad off needs keypad_uart_id, so a press can still stop the desk",
+            path=[CONF_KEYPAD_CUTOFF_PIN],
+        )
     uart.final_validate_device_schema("kaidi_desk", require_tx=True, **FRAME_FORMAT)(config)
     if CONF_KEYPAD_UART_ID in config:
         if config[CONF_KEYPAD_UART_ID] == config[uart.CONF_UART_ID]:
@@ -75,6 +82,8 @@ async def to_code(config):
         cg.add(var.set_wake_pin(await cg.gpio_pin_expression(config[CONF_WAKE_PIN])))
     if CONF_KEYPAD_UART_ID in config:
         cg.add(var.set_keypad_uart(await cg.get_variable(config[CONF_KEYPAD_UART_ID])))
+    if CONF_KEYPAD_CUTOFF_PIN in config:
+        cg.add(var.set_keypad_cutoff_pin(await cg.gpio_pin_expression(config[CONF_KEYPAD_CUTOFF_PIN])))
     cg.add(var.set_frame_interval(config[CONF_FRAME_INTERVAL]))
     cg.add(var.set_wake_settle(config[CONF_WAKE_SETTLE]))
     cg.add(var.set_wake_timeout(config[CONF_WAKE_TIMEOUT]))

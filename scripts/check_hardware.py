@@ -17,15 +17,16 @@ ROOT = Path(__file__).resolve().parent.parent
 CLI = os.environ["KICAD_CLI"]
 SCH, PCB = ROOT / "hardware/kaidi-desk.kicad_sch", ROOT / "hardware/kaidi-desk.kicad_pcb"
 EXPECTED = {
-    "+5V": "C1.1 J1.2 J2.2 JP1.1 TP1.1 U2.12 U2.14 U2.5 U2.9 U5.5 U6.5",
-    "GND": "C1.2 C11.2 C12.2 C2.2 C4.2 C5.2 C6.2 C7.2 C8.2 D3.1 J1.3 J1.SH J2.3 J2.SH R10.2 R14.2 R3.2 R4.2 R5.2 R6.2 R8.2 "
-    "SW1.2 SW2.2 TP2.1 U1.19 U1.9 U2.7 U3.4 U4.2 U5.2 U6.2 U7.15 U7.9",
+    "+5V": "C1.1 C13.1 C14.1 J1.2 J2.2 JP1.1 R26.1 TP1.1 U2.12 U2.14 U2.5 U2.9 U5.5 U6.5 U9.5",
+    "GND": "C1.2 C11.2 C12.2 C13.2 C14.2 C2.2 C4.2 C5.2 C6.2 C7.2 C8.2 D3.1 J1.3 J1.SH J2.3 J2.SH R10.2 R14.2 R3.2 R4.2 R5.2 R6.2 R8.2 "
+    "Q1.2 R27.2 SW1.2 SW2.2 TP2.1 U1.19 U1.9 U2.7 U3.4 U4.2 U5.2 U6.2 U7.15 U7.9 U9.3",
     "/3V3": "C11.1 C12.1 C6.1 C7.1 R21.1 R22.1 R23.1 R24.1 TP4.1 U1.1 U4.5 U7.12 U7.13 U7.14 U7.16",
     "/CC1": "J3.A5 R15.1",
     "/CC2": "J3.B5 R16.1",
     "/CMD_DESK": "J2.7 R1.2 R12.2 U5.1",
     "/CMD_DRV": "R12.1 U2.3",
-    "/CMD_KEYPAD": "J1.7 R1.1 R9.1 U6.1",
+    "/CMD_KEYPAD": "J1.7 JP2.1 R9.1 U6.1 U9.1",
+    "/CMD_SW": "JP2.2 R1.1 U9.2",
     "/DDM": "R19.1 U7.11",
     "/DDP": "R20.1 U7.10",
     "/DESK_FUSED": "F1.2 R11.1",
@@ -40,6 +41,8 @@ EXPECTED = {
     "/IO2": "R24.2 U1.16",
     "/IO8": "R23.2 U1.7",
     "/IO9": "R22.2 SW2.1 U1.8",
+    "/KP_OFF": "Q1.1 R27.1 U1.17",
+    "/KP_ON": "Q1.3 R26.2 U9.4",
     "/LED": "R25.1 U1.4",
     "/LED_A": "D3.2 R25.2",
     "/OE_TX": "R3.1 U2.1 U2.8",

@@ -46,6 +46,10 @@ void KaidiDesk::setup() {
     this->wake_pin_->setup();
     this->wake_pin_->digital_write(false);
   }
+  if (this->keypad_cutoff_pin_ != nullptr) {
+    this->keypad_cutoff_pin_->setup();
+    this->keypad_cutoff_pin_->digital_write(false);
+  }
   if (this->keypad_uart_ != nullptr)
     this->publish_keypad_(KEYPAD_ASLEEP);
 }
@@ -54,6 +58,7 @@ void KaidiDesk::dump_config() {
   ESP_LOGCONFIG(TAG, "Kaidi Desk:");
   LOG_PIN("  TX Enable Pin: ", this->tx_enable_pin_);
   LOG_PIN("  Wake Pin: ", this->wake_pin_);
+  LOG_PIN("  Keypad Cutoff Pin: ", this->keypad_cutoff_pin_);
   ESP_LOGCONFIG(TAG, "  Keypad UART: %s", YESNO(this->keypad_uart_ != nullptr));
   ESP_LOGCONFIG(TAG, "  Frame Interval: %" PRIu32 " ms", this->frame_interval_);
   ESP_LOGCONFIG(TAG, "  Wake Settle: %" PRIu32 " ms", this->wake_settle_);
@@ -296,7 +301,8 @@ void KaidiDesk::read_keypad_(uint32_t now) {
     if (!this->keypad_reader_.feed(byte))
       continue;
     uint8_t command = this->keypad_reader_.mode();
-    if (!this->echoes_.is_echo(command, now))
+    // Cut off, the keypad's side of the line carries only the keypad.
+    if (this->keypad_cut_off_ || !this->echoes_.is_echo(command, now))
       this->handle_keypad_frame_(command, now);
   }
   if (this->keypad_press_ != 0 && now - this->keypad_press_ms_ > KEYPAD_RELEASE_MS)
@@ -312,8 +318,10 @@ void KaidiDesk::handle_keypad_frame_(uint8_t command, uint32_t now) {
   this->keypad_seen_ = true;
   this->keypad_ms_ = now;
 
-  // A save is a single frame, and the box acts on it whatever the ESP is doing.
+  // A save is a single frame, and the box acts on it whatever the ESP is doing, unless it never arrives.
   if (uint8_t preset = saved_preset(command)) {
+    if (this->keypad_cut_off_)
+      return;
     char reason[32];
     snprintf(reason, sizeof(reason), "Keypad saved preset %u", preset);
     this->publish_last_stop_(reason);
@@ -482,6 +490,7 @@ void KaidiDesk::begin_(Action action) {
   this->state_ = State::WAKING;
   this->state_since_ms_ = millis();
   this->apply_wake_pin_();
+  this->apply_keypad_cutoff_();
   this->high_freq_.start();
 }
 
@@ -495,6 +504,7 @@ void KaidiDesk::finish_() {
   this->state_ = State::IDLE;
   this->action_ = Action::NONE;
   this->apply_wake_pin_();
+  this->apply_keypad_cutoff_();
   this->high_freq_.stop();
   this->sync_target_();
 }
@@ -564,6 +574,13 @@ void KaidiDesk::apply_wake_pin_() {
     this->wake_high_since_ms_ = millis();
   this->wake_high_ = high;
   this->wake_pin_->digital_write(high);
+}
+
+void KaidiDesk::apply_keypad_cutoff_() {
+  if (this->keypad_cutoff_pin_ == nullptr)
+    return;
+  this->keypad_cut_off_ = this->state_ != State::IDLE;
+  this->keypad_cutoff_pin_->digital_write(this->keypad_cut_off_);
 }
 
 void KaidiDesk::set_keep_awake(bool keep_awake) {

@@ -53,6 +53,7 @@ kaidi_desk:
   keypad_uart_id: keypad_uart
   tx_enable_pin: GPIO6
   wake_pin: GPIO10
+  keypad_cutoff_pin: GPIO1
 
 sensor:
   - platform: kaidi_desk
@@ -93,7 +94,7 @@ It encrypts the Home Assistant connection and Wi-Fi updates with one key, and pu
 
 The dongle sits inline: the keypad plugs into one end, and a short cable runs from the other end to the control box.
 A 74AHCT125 drives the box only while the ESP is sending, so the keypad keeps working if the ESP is unpowered, resetting or unplugged.
-The ESP also decodes what the keypad sends, so a keypad press takes over from a Home Assistant move. A press in the direction the desk is already moving may only take over once that move ends.
+The ESP also decodes what the keypad sends, and keeps listening while it cuts the keypad off, so a keypad press takes over from a Home Assistant move at once.
 Power comes from the desk by default. USB-C is for flashing and for desks that can't supply the ESP, and it is isolated, so any charger or computer can stay plugged in.
 
 <p align="center">
@@ -114,7 +115,7 @@ Power comes from the desk by default. USB-C is for flashing and for desks that c
 | --- | --- | --- |
 | 2 | +5 V | Straight through; also powers the 74AHCT125 and, through JP1, the ESP |
 | 3 | Ground | Straight through |
-| 7 | Command, keypad to box | Keypad through 1 kΩ; gate A drives the box side through 47 Ω from GPIO7 when GPIO6 is high |
+| 7 | Command, keypad to box | Keypad through switch U9 and 1 kΩ; gate A drives the box side through 47 Ω from GPIO7 when GPIO6 is high. GPIO1 high opens U9 and cuts the keypad off; a shunt on JP2 bypasses U9 |
 | 8 | Height, box to keypad | Straight through; 10 kΩ over 15 kΩ to GPIO4 |
 | 10 | Wake, keypad to box | Keypad through 1 kΩ; gate B drives the box side high through 47 Ω when GPIO10 is high |
 | 1, 4, 5, 6, 9 | Unused by this dongle | Straight through |
@@ -130,8 +131,8 @@ Every part is fitted by the board house, including the jacks, whose metal shells
 | Short circuit on the board | Resettable fuses on the desk (F1) and USB-C (F2) supplies; F1 doesn't cover the keypad's own straight-through 5 V |
 | USB hot-plug spikes and converter light load, which the B0505S-2WR3 isn't rated for | Surge clamp D4 at its input and preload R14 at its output |
 | Static on the cables | SRV05-4 clamps at both jacks and a USBLC6-2 at USB-C |
-| ESP crash, reset or power loss | Pull-downs turn the drivers off, and ESPHome's watchdog restarts a hung ESP |
-| ESP and keypad driving the box at once | 1 kΩ from the keypad and 47 Ω from the buffer limit the current |
+| ESP crash, reset or power loss | Pull-downs turn the drivers off and reconnect the keypad, and ESPHome's watchdog restarts a hung ESP |
+| ESP and keypad driving the box at once | U9 cuts the keypad off during a move, and the ESP still listens to it; 1 kΩ and 47 Ω limit the current otherwise |
 
 It can't protect against a fault in the control box, the keypad or the cable, and it relies on the box's own anti-collision stop.
 The isolation keeps grounds apart; it is not a safety barrier against mains.
@@ -149,7 +150,7 @@ The protoboard build is the same circuit hand-built on a 1.5 × 2 in EPLZON sold
   <img src="docs/protoboard.svg" width="100%" alt="Protoboard build guide">
 </p>
 
-On this build, configure `tx_enable_pin: GPIO6`, `wake_pin: GPIO0` and `rx_pin: GPIO3`, and leave out `keypad_uart_id` and the second uart.
+On this build, configure `tx_enable_pin: GPIO6`, `wake_pin: GPIO0` and `rx_pin: GPIO3`, and leave out `keypad_uart_id`, `keypad_cutoff_pin` and the second uart.
 
 </details>
 

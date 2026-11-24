@@ -186,6 +186,13 @@ PLACEMENTS = {
     "R10": (R0603, 28.0, 23.0, 90),
     "U2": (("Package_SO", "SOIC-14_3.9x8.7mm_P1.27mm"), 58.2, 24.6, 0),
     "C1": (C0603, 60.6, 18.0, 0),
+    "U9": (("Package_TO_SOT_SMD", "SOT-23-5"), 35.6, 24.6, 0),
+    "JP2": (("Connector_PinHeader_2.54mm", "PinHeader_1x02_P2.54mm_Vertical"), 7.0, 8.6, 0),
+    "R26": (R0603, 32.8, 24.2, 90),
+    "C14": (C0603, 35.6, 21.4, 0),
+    "Q1": (("Package_TO_SOT_SMD", "SOT-23"), 40.4, 24.5, 0),
+    "R27": (R0603, 40.4, 21.4, 0),
+    "C13": (C0805, 56.4, 17.8, 0),
     "R12": (R0603, 63.6, 22.4, 90),
     "R13": (R0603, 63.6, 26.0, 90),
     "U5": (SOT6, 62.9, 31.6, 90),
@@ -247,10 +254,11 @@ for x, y in HOLES:
 silk("DESK PWR", X0 + 62.6, Y0 + 34.4, 0.7)
 silk("RESET", X0 + 20.5, Y0 + 4.2, 0.9)
 silk("BOOT", X0 + 14.6, Y0 + 13.6, 0.8)
+silk("KEYPAD ALWAYS ON", X0 + 8.2, Y0 + 13.4, 0.7)
 silk("STATUS", X0 + 9.2, Y0 + 5.8, 0.9)
 silk("USB-C, isolated", X0 + 51.0, Y0 + 40.4, 0.7)
 silk("esphome-kaidi-desk", X0 + 57.6, Y0 + 3.4, 1.2, bold=True, left=True)
-silk("Kaidi KDDY094 dongle", X0 + 57.6, Y0 + 5.4, 0.9, left=True)
+silk("github.com/clintval", X0 + 57.6, Y0 + 5.4, 0.9, left=True)
 for ref, label in zip(("TP1", "TP2", "TP3", "TP5", "TP6"), ("5V", "GND", "ESP5V", "TX", "RX")):
     at = PLACEMENTS[ref]
     silk(label, X0 + at[1], Y0 + at[2] - 1.5, 0.7)
