@@ -96,6 +96,8 @@ SYMBOLS = {
     "RF_Module:ESP32-C3-WROOM-02": embed("RF_Module", "ESP32-C3-WROOM-02"),
     "kaidi:B0505S-2WR3": converter_symbol(),
     "74xx:74AHCT125": embed("74xx", "74LS125", "74AHCT125"),
+    "74xGxx:74LVC1G66": embed("74xGxx", "74LVC1G66"),
+    "Transistor_FET:2N7002": embed("Transistor_FET", "Q_NMOS_GSD", "2N7002"),
     "Connector_Generic:Conn_01x02": embed("Connector_Generic", "Conn_01x02"),
     "Connector_Generic_Shielded:Conn_01x10_Shielded": embed("Connector_Generic_Shielded", "Conn_01x10_Shielded"),
     "power:+5V": embed("power", "+5V"),
@@ -256,8 +258,8 @@ for ref, side, y in (("U6", "KEYPAD", 55.88), ("U5", "DESK", 106.68)):
         val_at=(5.08, -12.7),
     )
 
-text("Keypad path: 1k in series, so the buffer overrides it only while sending", 129.54, 27.94)
-resistor("R1", "1k", 139.7, 55.88, "CMD_KEYPAD", "CMD_DESK")
+text("Keypad path: closed unless the ESP opens U9, with 1k in series for the buffer to override", 129.54, 27.94)
+resistor("R1", "1k", 139.7, 55.88, "CMD_SW", "CMD_DESK")
 resistor("R2", "1k", 167.64, 55.88, "WAKE_KEYPAD", "WAKE_DESK")
 
 text("74AHCT125 on desk 5 V: gates A-B drive the desk; C-D hold them off unless the ESP asks", 129.54, 81.28)
@@ -298,10 +300,52 @@ for ref, value, name, x in (("R3", "10k", "OE_TX", 139.7), ("R4", "10k", "OE_WAK
 for ref, value, name, x in (("R5", "4.7k", "EN_TX", 185.42), ("R6", "100k", "EN_WAKE", 208.28)):
     resistor(ref, value, x, 167.64, name, "GND")
 
-text("Dividers (5 V to 3.0 V)", 22.86, 149.86)
-for top, bottom, a, mid, x in (("R7", "R8", "HEIGHT", "RX", 30.48), ("R9", "R10", "CMD_KEYPAD", "SENSE", 58.42)):
-    resistor(top, "10k", x, 172.72, a, mid)
-    resistor(bottom, "15k", x, 203.2, mid, "GND")
+text("Keypad cutoff: closed by default, and JP2 bypasses it", 182.88, 351.79)
+SOT5 = "Package_TO_SOT_SMD:SOT-23-5"
+p = place("74xGxx:74LVC1G66", "U9", "74LVC1G66", 309.88, 370.84, footprint=SOT5, ref_at=(0, -7.62), val_at=(0, 12.7))
+net(p("1"), "CMD_KEYPAD")
+net(p("2"), "CMD_SW")
+net(p("4"), "KP_ON")
+p = place(
+    "74xGxx:74LVC1G66", "U9", "74LVC1G66", 220.98, 370.84, unit=2, footprint=SOT5, ref_at=(10.16, 0), hide_val=True
+)
+net(p("5"), "+5V")
+net(p("3"), "GND")
+part(
+    "Connector_Generic:Conn_01x02",
+    "JP2",
+    "Keypad always on",
+    190.5,
+    370.84,
+    "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical",
+    {"1": "CMD_KEYPAD", "2": "CMD_SW"},
+    True,
+    (0, -5.08),
+    (0, 6.35),
+)
+resistor("R26", "10k", 347.98, 370.84, "+5V", "KP_ON")
+part(
+    "Transistor_FET:2N7002",
+    "Q1",
+    "2N7002",
+    378.46,
+    370.84,
+    "Package_TO_SOT_SMD:SOT-23",
+    {"1": "KP_OFF", "2": "GND", "3": "KP_ON"},
+    ref_at=(5.08, -1.27),
+    val_at=(5.08, 1.27),
+)
+resistor("R27", "100k", 403.86, 370.84, "KP_OFF", "GND")
+capacitor("C14", "100n", 259.08, 370.84, "+5V")
+capacitor("C13", "10u", 269.24, 50.8, "+5V", footprint=C0805)
+
+text("Dividers (5 V to 3.0 V); the keypad's is light, since nothing but a pull-up may hold its line", 22.86, 149.86)
+for top, bottom, a, mid, x, scale in (
+    ("R7", "R8", "HEIGHT", "RX", 30.48, ""),
+    ("R9", "R10", "CMD_KEYPAD", "SENSE", 58.42, "0"),
+):
+    resistor(top, f"10{scale}k", x, 172.72, a, mid)
+    resistor(bottom, f"15{scale}k", x, 203.2, mid, "GND")
 
 text("ESP32-C3 module", 287.02, 27.94)
 part(
@@ -315,7 +359,7 @@ part(
         "1": "3V3",
         "2": "EN",
         "18": None,
-        "17": None,
+        "17": "KP_OFF",
         "16": "IO2",
         "15": "SENSE",
         "3": "RX",
@@ -360,8 +404,8 @@ part(
     (0, -5.08),
     (0, 6.35),
 )
-part("Device:Polyfuse", "F1", "250mA", 279.4, 208.28, FUSE, {"1": "DESK_SW", "2": "DESK_FUSED"})
-resistor("R11", "4.7", 302.26, 208.28, "DESK_FUSED", "DESK_LIM", R1206)
+part("Device:Polyfuse", "F1", "500mA", 279.4, 208.28, FUSE, {"1": "DESK_SW", "2": "DESK_FUSED"})
+resistor("R11", "1", 302.26, 208.28, "DESK_FUSED", "DESK_LIM", R1206)
 across("Device:D_Schottky", "D2", "SS14", 330.2, 205.74, SMA, {"2": "DESK_LIM", "1": "ESP_5V"})
 
 text("3.3 V for the ESP", 238.76, 231.14)
