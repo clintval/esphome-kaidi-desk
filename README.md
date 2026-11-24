@@ -29,7 +29,10 @@ If your desk works, please open an issue or pull request to add it.
 
 ## Quick Start
 
-Add the component to an ESPHome config and wire the dongle as in [Hardware](#hardware):
+With an assembled board, open the [browser installer](https://clintval.github.io/esphome-kaidi-desk/) in Chrome or Edge, plug in its USB-C and follow the steps. It goes live with the first release.
+The prebuilt firmware holds no secrets: Wi-Fi is set over USB, Home Assistant sets the encryption key within 15 minutes of power-up, and updates only come over HTTPS from this repository's releases.
+
+To build your own firmware instead, use the component in an ESPHome config, wired as in [Hardware](#hardware):
 
 ```yaml
 external_components:
@@ -64,7 +67,7 @@ number:
       unit_of_measurement: in
 ```
 
-A complete config with every entity is in [`example/kaidi-desk.yaml`](example/kaidi-desk.yaml).
+A complete config is in [`example/kaidi-desk.yaml`](example/kaidi-desk.yaml), which takes the board and every entity from [`example/desk.yaml`](example/desk.yaml).
 It encrypts the Home Assistant connection and Wi-Fi updates with one key, and puts a password on the fallback hotspot. Add `wifi_ssid`, `wifi_password`, `ap_password` and `api_encryption_key` to your `secrets.yaml`; the `openssl rand -base64 32` command makes a key.
 
 ## Entities

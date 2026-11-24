@@ -1,0 +1,31 @@
+# The prebuilt firmware for the browser installer. It holds no secrets: Wi-Fi is set over USB, Home Assistant
+# sets the encryption key when it first connects, and updates only come over HTTPS.
+esphome:
+  name: kaidi-desk
+  friendly_name: Standing Desk
+  name_add_mac_suffix: true
+  build_path: build/kaidi-desk-factory
+
+packages:
+  desk: !include desk.yaml
+
+api:
+  encryption:
+
+provisioning:
+  timeout: 15min
+
+improv_serial:
+
+wifi:
+
+http_request:
+  verify_ssl: true
+
+ota:
+  - platform: http_request
+
+update:
+  - platform: http_request
+    name: Firmware
+    source: https://clintval.github.io/esphome-kaidi-desk/firmware/manifest.json

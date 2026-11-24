@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kaidi Desk Installer</title>
+<meta name="description" content="Install the esphome-kaidi-desk firmware from your browser.">
+<script type="module" src="https://unpkg.com/esp-web-tools@10.4.0/dist/web/install-button.js?module"></script>
+<style>
+:root { --bg: #f6f7f6; --fg: #1c201e; --muted: #5d6762; --card: #fff; --line: #dfe4e1; --accent: #12653c; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #121513; --fg: #e8ece9; --muted: #9aa59f; --card: #1b1f1d; --line: #2c322f; --accent: #58c78d; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 system-ui, sans-serif; }
+main { max-width: 680px; margin: 0 auto; padding: 40px 16px 64px; }
+img { display: block; width: 100%; height: auto; }
+h1 { font-size: 2rem; line-height: 1.15; margin: 8px 0; }
+h2 { font-size: 1.1rem; margin: 32px 0 8px; }
+p, li { color: var(--fg); }
+.lead, .note { color: var(--muted); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin: 24px 0; }
+button { font: inherit; font-weight: 600; color: #fff; background: #12653c; border: 0; border-radius: 10px; padding: 12px 22px; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+<img src="board.png" alt="The assembled dongle board" width="1800" height="1150">
+<h1>Kaidi Desk Installer</h1>
+<p class="lead">Put the firmware on an assembled esphome-kaidi-desk board and join it to your Wi-Fi. It takes about two minutes.</p>
+
+<div class="card">
+<esp-web-install-button manifest="firmware/manifest.json">
+<button type="button" slot="activate">Connect and install</button>
+<p slot="unsupported">This browser can't reach USB devices. Use Chrome or Edge on a computer.</p>
+<p slot="not-allowed">This page needs to be opened over HTTPS.</p>
+</esp-web-install-button>
+<p class="note" id="version"></p>
+</div>
+
+<h2>Steps</h2>
+<ol>
+<li>Plug the board's USB-C into your computer with a data cable. The port is isolated, so the desk can stay connected.</li>
+<li>Press the button above and choose the port, usually "USB JTAG/serial debug unit".</li>
+<li>Install, then enter your Wi-Fi name and password when asked.</li>
+<li>In Home Assistant, accept the discovered device within 15 minutes. Home Assistant sets its encryption key then; if you miss the window, unplug the board and plug it back in.</li>
+</ol>
+
+<h2>If it doesn't connect</h2>
+<p>Hold BOOT on the board, press RESET, then let go of BOOT and try again.</p>
+
+<h2>Good to know</h2>
+<ul>
+<li>Only for the assembled board. The protoboard build uses different pins.</li>
+<li>Home Assistant offers new versions as an update; each one restarts the board, so install it while the desk is still.</li>
+<li>To change Wi-Fi later, come back here with the USB cable.</li>
+</ul>
+<p><a href="https://github.com/clintval/esphome-kaidi-desk">Source and documentation</a></p>
+</main>
+<script>
+fetch("firmware/manifest.json")
+  .then((response) => response.json())
+  .then((manifest) => { document.getElementById("version").textContent = `Version ${manifest.version}`; })
+  .catch(() => {});
+</script>
+</body>
+</html>

@@ -40,3 +40,4 @@ jobs:
         with:
           cache: true
       - run: pixi run compile
+      - run: pixi run site
