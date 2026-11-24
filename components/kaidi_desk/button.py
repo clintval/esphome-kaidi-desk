@@ -17,7 +17,9 @@ BUTTONS = {
     "reset": (ButtonAction.RESET, "mdi:restore"),
     **{f"preset_{n}": (getattr(ButtonAction, f"PRESET_{n}"), f"mdi:numeric-{n}-box-outline") for n in range(1, 5)},
 }
-SAVE_BUTTONS = {f"save_preset_{n}": (getattr(ButtonAction, f"SAVE_PRESET_{n}"), "mdi:content-save") for n in range(1, 5)}
+SAVE_BUTTONS = {
+    f"save_preset_{n}": (getattr(ButtonAction, f"SAVE_PRESET_{n}"), "mdi:content-save") for n in range(1, 5)
+}
 
 CONFIG_SCHEMA = cv.Schema(
     {
