@@ -68,6 +68,7 @@ number:
 ```
 
 A complete config is in [`example/kaidi-desk.yaml`](example/kaidi-desk.yaml), which takes the board and every entity from [`example/desk.yaml`](example/desk.yaml).
+It transmits at reduced Wi-Fi power (`output_power: 8.5dB`), which is easier on the desk's 5 V supply; some ESP32-C3 boards can't connect at full power. Raise it if the desk is far from your router.
 It encrypts the Home Assistant connection and Wi-Fi updates with one key, and puts a password on the fallback hotspot. Add `wifi_ssid`, `wifi_password`, `ap_password` and `api_encryption_key` to your `secrets.yaml`; the `openssl rand -base64 32` command makes a key.
 
 ## Entities

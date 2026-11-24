@@ -23,6 +23,7 @@ p, li { color: var(--fg); }
 button { font: inherit; font-weight: 600; color: #fff; background: #12653c; border: 0; border-radius: 10px; padding: 12px 22px; cursor: pointer; }
 button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 a { color: var(--accent); }
+.warning { border-left: 4px solid #d08700; background: var(--card); border-radius: 8px; padding: 12px 16px; }
 </style>
 </head>
 <body>
@@ -30,6 +31,8 @@ a { color: var(--accent); }
 <img src="board.png" alt="The assembled dongle board" width="1800" height="1150">
 <h1>Kaidi Desk Installer</h1>
 <p class="lead">Put the firmware on an assembled esphome-kaidi-desk board and join it to your Wi-Fi. It takes about two minutes.</p>
+
+<p class="warning"><strong>Not yet tested on the assembled board.</strong> Nobody has built one yet. It has been flashed and joined to Wi-Fi on a bare ESP32-C3, with no desk attached.</p>
 
 <div class="card">
 <esp-web-install-button manifest="firmware/manifest.json">
@@ -55,6 +58,7 @@ a { color: var(--accent); }
 <ul>
 <li>Only for the assembled board. The protoboard build uses different pins.</li>
 <li>Home Assistant offers new versions as an update; each one restarts the board, so install it while the desk is still.</li>
+<li>It transmits at reduced Wi-Fi power, which is easier on the desk's 5 V supply, and some ESP32-C3 boards can't connect at full power. Keep it within good range of your router.</li>
 <li>To change Wi-Fi later, come back here with the USB cable.</li>
 </ul>
 <p><a href="https://github.com/clintval/esphome-kaidi-desk">Source and documentation</a></p>

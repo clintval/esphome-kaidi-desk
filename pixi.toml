@@ -23,7 +23,7 @@ hardware = { depends-on = ["fab", { task = "renders", environment = "render" }, 
 check = { cmd = "python scripts/check_hardware.py", description = "Run ERC, DRC, parity, netlist and protoboard checks" }
 
 compile = { cmd = "mkdir -p .build && printf 'wifi_ssid: \"ssid\"\\nwifi_password: \"password1\"\\nap_password: \"password1\"\\napi_encryption_key: \"MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=\"\\n' > .build/secrets.yaml && sed 's#source: github://clintval/esphome-kaidi-desk@main#source: {type: local, path: ../components}#' example/desk.yaml > .build/desk.yaml && sed 's#desk: github://clintval/esphome-kaidi-desk/example/desk.yaml@main#desk: !include desk.yaml#' example/kaidi-desk.yaml > .build/kaidi-desk.yaml && esphome compile .build/kaidi-desk.yaml", description = "Compile the example firmware" }
-site = { cmd = "python scripts/make_site.py {{ version }} .build/site", args = [{ arg = "version", default = "0.1.0" }], description = "Compile the prebuilt firmware and build the browser installer" }
+site = { cmd = "python scripts/make_site.py {{ version }} .build/site", args = [{ arg = "version", default = "0.1.1" }], description = "Compile the prebuilt firmware and build the browser installer" }
 
 [feature.render.tasks]
 renders = { cmd = "python scripts/render_blender.py .build/board.glb hardware/enclosure docs", depends-on = [
