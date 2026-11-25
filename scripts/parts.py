@@ -31,7 +31,7 @@ PARTS = {
     "U2": ("SN74AHCT125DR, SOIC-14", "C155176"),
     "U3": ("B0505S-2WR3 isolated converter, SIP", "C7465195"),
     "U4": ("AP2112K-3.3TRG1, SOT-23-5", "C51118"),
-    "U5 U6": ("SRV05-4, SOT-23-6", "C2985619"),
+    "U5 U6": ("SRV05-4.TCT, SOT-23-6", "C13612"),
     "U7": ("ADUM3160BRWZ, SOIC-16W", "C108501"),
     "U8": ("USBLC6-2SC6, SOT-23-6", "C7519"),
     "U9": ("SN74LVC1G66DBVR, SOT-23-5", "C133643"),
