@@ -32,7 +32,18 @@ with tempfile.TemporaryDirectory() as tmp:
     )
     rows = {row["Ref"]: row for row in csv.DictReader(positions.open())}
 
-JLCPCB_ROTATION = {"U2": -90, "U4": -90, "U7": -90, "U8": -90, "U9": 180, "Q1": 180, "JP1": 90, "JP2": 90}
+JLCPCB_ROTATION = {
+    "U2": -90,
+    "U4": -90,
+    "U5": 180,
+    "U6": 180,
+    "U7": -90,
+    "U8": -90,
+    "U9": 180,
+    "Q1": 180,
+    "JP1": 90,
+    "JP2": 90,
+}
 
 centers = json.loads((ROOT / "hardware/board.json").read_text())["centers"]
 fitted = {ref: lcsc for refs, (_, lcsc) in PARTS.items() for ref in refs.split()}
