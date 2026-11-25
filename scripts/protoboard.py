@@ -19,8 +19,8 @@ PARTS = [
     ("R3", "10k", "B13", "B16", "holds GPIO6 low while the ESP is off and through its boot pull-up"),
     ("R4", "10k", "H14", "H17", "pulls the wake enable low"),
     ("R5", "100k", "I2", "I8", "holds GPIO0 low while the ESP is off"),
-    ("R6", "4.7k", "H5", "H9", "height divider, top"),
-    ("R7", "10k", "J2", "J5", "height divider, bottom"),
+    ("R6", "100k", "H5", "H9", "height divider, top"),
+    ("R7", "150k", "J2", "J5", "height divider, bottom"),
     ("C1", "100nF", "J15", "J17", "decouples the 74AHCT125"),
 ]
 
